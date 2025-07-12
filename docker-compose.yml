@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Development frontend
   citizen-portal:
@@ -15,9 +13,6 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:8000/api/v1
-    networks:
-      - civicstream-network
 
-networks:
-  civicstream-network:
-    external: true
+volumes: {}
+networks: {}
