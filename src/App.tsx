@@ -5,6 +5,8 @@ import { AuthPage } from './pages/AuthPage';
 import { Dashboard } from './pages/Dashboard';
 import { PublicWorkflowCatalog } from './pages/PublicWorkflowCatalog';
 import { WorkflowDetail } from './pages/WorkflowDetail';
+import { WorkflowStartPage } from './pages/WorkflowStartPage';
+import { TrackingPage } from './pages/TrackingPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import './App.css';
 
@@ -18,6 +20,8 @@ function App() {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/services" element={<PublicWorkflowCatalog />} />
             <Route path="/services/:id" element={<WorkflowDetail />} />
+            <Route path="/start/:workflowId" element={<WorkflowStartPage />} />
+            <Route path="/track/:instanceId" element={<TrackingPage />} />
             
             {/* Protected routes */}
             <Route 

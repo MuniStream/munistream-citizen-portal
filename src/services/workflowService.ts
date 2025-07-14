@@ -1,4 +1,5 @@
 import type { WorkflowDefinition, WorkflowCategory, WorkflowSearchParams } from '../types/workflow';
+import { addLocaleToParams } from '../utils/locale';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -11,6 +12,8 @@ class WorkflowService {
     if (params?.category) searchParams.append('category', params.category);
     if (params?.sortBy) searchParams.append('sort_by', params.sortBy);
     if (params?.sortOrder) searchParams.append('sort_order', params.sortOrder);
+    
+    addLocaleToParams(searchParams);
 
     const response = await fetch(`${API_BASE_URL}/public/workflows?${searchParams}`, {
       method: 'GET',
@@ -28,7 +31,10 @@ class WorkflowService {
 
   // Get workflow by ID (public)
   async getWorkflowById(id: string): Promise<WorkflowDefinition> {
-    const response = await fetch(`${API_BASE_URL}/public/workflows/${id}`, {
+    const searchParams = new URLSearchParams();
+    addLocaleToParams(searchParams);
+    
+    const response = await fetch(`${API_BASE_URL}/public/workflows/${id}?${searchParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +50,10 @@ class WorkflowService {
 
   // Get workflow categories (public)
   async getWorkflowCategories(): Promise<WorkflowCategory[]> {
-    const response = await fetch(`${API_BASE_URL}/public/workflow-categories`, {
+    const searchParams = new URLSearchParams();
+    addLocaleToParams(searchParams);
+    
+    const response = await fetch(`${API_BASE_URL}/public/workflow-categories?${searchParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -60,7 +69,10 @@ class WorkflowService {
 
   // Get featured/popular workflows (public)
   async getFeaturedWorkflows(): Promise<WorkflowDefinition[]> {
-    const response = await fetch(`${API_BASE_URL}/public/workflows/featured`, {
+    const searchParams = new URLSearchParams();
+    addLocaleToParams(searchParams);
+    
+    const response = await fetch(`${API_BASE_URL}/public/workflows/featured?${searchParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -73,6 +85,139 @@ class WorkflowService {
 
     return response.json();
   }
+
+  // Start a new workflow instance (public)
+  async startWorkflow(workflowId: string, initialData?: Record<string, any>): Promise<WorkflowInstance> {
+    const searchParams = new URLSearchParams();
+    addLocaleToParams(searchParams);
+    
+    const response = await fetch(`${API_BASE_URL}/public/workflows/${workflowId}/start?${searchParams}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(initialData || {}),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to start workflow');
+    }
+
+    return response.json();
+  }
+
+  // Track workflow instance progress (public)
+  async trackWorkflowInstance(instanceId: string): Promise<WorkflowInstanceProgress> {
+    const searchParams = new URLSearchParams();
+    addLocaleToParams(searchParams);
+    
+    const response = await fetch(`${API_BASE_URL}/public/track/${instanceId}?${searchParams}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to track workflow instance');
+    }
+
+    return response.json();
+  }
+
+  // Submit citizen data for a workflow step (public)
+  async submitCitizenData(instanceId: string, formData: FormData): Promise<DataSubmissionResponse> {
+    const searchParams = new URLSearchParams();
+    addLocaleToParams(searchParams);
+    
+    const response = await fetch(`${API_BASE_URL}/public/instances/${instanceId}/submit-data?${searchParams}`, {
+      method: 'POST',
+      body: formData, // FormData handles multipart/form-data automatically
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to submit data');
+    }
+
+    return response.json();
+  }
+}
+
+// Types for workflow instances
+export interface WorkflowInstance {
+  instance_id: string;
+  workflow_id: string;
+  workflow_name: string;
+  citizen_tracking_id: string;
+  status: string;
+  created_at: string;
+  next_step?: string;
+  tracking_url: string;
+  message: string;
+}
+
+export interface WorkflowInstanceProgress {
+  instance_id: string;
+  workflow_id: string;
+  workflow_name: string;
+  status: string;
+  progress_percentage: number;
+  current_step?: string;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  total_steps: number;
+  completed_steps: number;
+  step_progress: StepProgress[];
+  requires_input: boolean;
+  input_form: InputForm;
+  estimated_completion?: string;
+  message: string;
+}
+
+export interface StepProgress {
+  step_id: string;
+  name: string;
+  description: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  started_at?: string;
+  completed_at?: string;
+  requires_citizen_input?: boolean;
+  input_form?: InputForm;
+}
+
+export interface InputForm {
+  title?: string;
+  description?: string;
+  fields?: FormField[];
+}
+
+export interface FormField {
+  id: string;
+  name: string;
+  label: string;
+  type: 'text' | 'email' | 'phone' | 'date' | 'number' | 'select' | 'textarea' | 'file';
+  required: boolean;
+  placeholder?: string;
+  options?: string[];
+  validation?: {
+    pattern?: string;
+    minLength?: number;
+    maxLength?: number;
+    min?: number;
+    max?: number;
+  };
+  helpText?: string;
+}
+
+export interface DataSubmissionResponse {
+  success: boolean;
+  message: string;
+  next_action: string;
+  locale: string;
 }
 
 export const workflowService = new WorkflowService();

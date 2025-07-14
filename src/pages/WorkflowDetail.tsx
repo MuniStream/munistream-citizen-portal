@@ -32,11 +32,8 @@ export const WorkflowDetail: React.FC = () => {
   };
 
   const handleStartApplication = () => {
-    if (isAuthenticated) {
-      navigate(`/apply/${id}`);
-    } else {
-      navigate('/auth', { state: { from: `/apply/${id}` } });
-    }
+    // Navigate to public workflow start page (no auth required)
+    navigate(`/start/${id}`);
   };
 
   if (isLoading) {
@@ -122,14 +119,12 @@ export const WorkflowDetail: React.FC = () => {
                 onClick={handleStartApplication}
                 disabled={!workflow.isActive}
               >
-                {isAuthenticated ? 'Start Application' : 'Sign In to Apply'}
+                Start Application
               </button>
               
-              {!isAuthenticated && (
-                <p className="auth-note">
-                  <Link to="/auth">Create an account</Link> to start your application
-                </p>
-              )}
+              <p className="auth-note">
+                No account required • Get instant tracking ID
+              </p>
             </div>
           </section>
 

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { workflowService } from '../services/workflowService';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import type { WorkflowDefinition, WorkflowCategory, WorkflowSearchParams } from '../types/workflow';
 
 export const PublicWorkflowCatalog: React.FC = () => {
+  const { t } = useTranslation();
   const [workflows, setWorkflows] = useState<WorkflowDefinition[]>([]);
   const [categories, setCategories] = useState<WorkflowCategory[]>([]);
   const [featuredWorkflows, setFeaturedWorkflows] = useState<WorkflowDefinition[]>([]);
