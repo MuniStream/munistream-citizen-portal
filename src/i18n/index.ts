@@ -21,7 +21,7 @@ i18n
     detection: {
       order: ['querystring', 'localStorage', 'navigator', 'htmlTag'],
       lookupQuerystring: 'lang',
-      lookupLocalStorage: 'civicstream-language',
+      lookupLocalStorage: 'munistream-language',
       caches: ['localStorage']
     }
   });

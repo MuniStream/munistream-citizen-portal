@@ -214,7 +214,7 @@ export const WorkflowStartPage: React.FC = () => {
               <div className="help-card">
                 <h4>📧 Email Support</h4>
                 <p>Send your questions via email</p>
-                <span className="email">support@civicstream.gov</span>
+                <span className="email">support@munistream.com</span>
               </div>
               <div className="help-card">
                 <h4>💬 Live Chat</h4>

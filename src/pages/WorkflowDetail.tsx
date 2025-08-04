@@ -184,7 +184,7 @@ export const WorkflowDetail: React.FC = () => {
               <div className="help-card">
                 <h4>📧 Email Support</h4>
                 <p>Send us your questions via email</p>
-                <span className="email">support@civicstream.gov</span>
+                <span className="email">support@munistream.com</span>
               </div>
               <div className="help-card">
                 <h4>❓ FAQ</h4>

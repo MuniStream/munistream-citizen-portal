@@ -1,4 +1,4 @@
-# CivicStream Citizen Portal
+# MuniStream Citizen Portal
 
 Public-facing portal where citizens can initiate and track workflow instances for government services.
 
@@ -58,7 +58,7 @@ The Citizen Portal is the primary interface for citizens to:
 
 ## Architecture
 
-This portal connects to the CivicStream backend API and provides:
+This portal connects to the MuniStream backend API and provides:
 - Public-facing UI (no admin features)
 - Citizen-centric workflows
 - Simplified interface for non-technical users
@@ -85,7 +85,7 @@ npm run build
 
 ```
 VITE_API_URL=http://localhost:8000/api/v1
-VITE_APP_NAME=CivicStream
+VITE_APP_NAME=MuniStream
 VITE_ENVIRONMENT=development
 ```
 
@@ -96,13 +96,13 @@ VITE_ENVIRONMENT=development
 docker-compose up
 
 # Production build
-docker build -t civicstream-citizen-portal .
+docker build -t munistream-citizen-portal .
 ```
 
 ## Related Repositories
 
-- [Backend API](https://github.com/paw-ml/civicstream-workflow)
-- [Admin Portal](https://github.com/paw-ml/civicstream-admin-frontend)
+- [Backend API](https://github.com/MuniStream/munistream-workflow)
+- [Admin Portal](https://github.com/MuniStream/munistream-admin-frontend)
 
 ## License
 
