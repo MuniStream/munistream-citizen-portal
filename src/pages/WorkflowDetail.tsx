@@ -65,7 +65,7 @@ export const WorkflowDetail: React.FC = () => {
         <div className="container">
           <div className="header-content">
             <Link to="/services" className="logo-link">
-              <h1 className="logo">CivicStream</h1>
+              <h1 className="logo">MuniStream</h1>
               <span className="tagline">Government Services</span>
             </Link>
             <div className="header-actions">

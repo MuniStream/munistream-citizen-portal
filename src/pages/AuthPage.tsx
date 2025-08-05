@@ -39,7 +39,7 @@ export const AuthPage: React.FC = () => {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <h1 className="logo">CivicStream</h1>
+          <h1 className="logo">MuniStream</h1>
           <p className="tagline">Citizen Portal</p>
         </div>
 
@@ -68,7 +68,7 @@ export const AuthPage: React.FC = () => {
         </div>
 
         <div className="auth-footer">
-          <p>&copy; 2025 CivicStream - Government Services Platform</p>
+          <p>&copy; 2025 MuniStream - Government Services Platform</p>
         </div>
       </div>
     </div>

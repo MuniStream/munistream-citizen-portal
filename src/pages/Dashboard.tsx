@@ -18,7 +18,7 @@ export const Dashboard: React.FC = () => {
         <div className="container">
           <div className="header-content">
             <div className="logo-section">
-              <h1 className="logo">CivicStream</h1>
+              <h1 className="logo">MuniStream</h1>
               <p className="tagline">Citizen Portal</p>
             </div>
             

@@ -41,7 +41,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   return (
     <div className="auth-form">
       <h2>Sign In</h2>
-      <p>Access your CivicStream account</p>
+      <p>Access your MuniStream account</p>
 
       {error && (
         <div className="error-message">

@@ -92,7 +92,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   return (
     <div className="auth-form">
       <h2>Create Account</h2>
-      <p>Join CivicStream to access government services</p>
+      <p>Join MuniStream to access government services</p>
 
       {error && (
         <div className="error-message">

@@ -61,7 +61,7 @@
     "help_text": "Si tienes preguntas sobre tu solicitud o necesitas asistencia, nuestro equipo de soporte está aquí para ayudar."
   },
   "auth": {
-    "title": "Portal Ciudadano CivicStream",
+    "title": "Portal Ciudadano MuniStream",
     "subtitle": "Accede a servicios gubernamentales en línea",
     "login": "Iniciar Sesión",
     "register": "Crear Cuenta",
@@ -244,14 +244,14 @@
     "documentDeleted": "Documento eliminado exitosamente"
   },
   "footer": {
-    "about": "Acerca de CivicStream",
+    "about": "Acerca de MuniStream",
     "privacy": "Política de Privacidad",
     "terms": "Términos de Servicio",
     "support": "Soporte",
     "contact": "Contáctanos",
     "accessibility": "Accesibilidad",
     "languages": "Idiomas",
-    "copyright": "© 2024 CivicStream. Todos los derechos reservados."
+    "copyright": "© 2024 MuniStream. Todos los derechos reservados."
   },
   "errors": {
     "genericError": "Ocurrió un error. Inténtelo nuevamente.",

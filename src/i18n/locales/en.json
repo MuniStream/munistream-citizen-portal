@@ -61,7 +61,7 @@
     "help_text": "If you have questions about your application or need assistance, our support team is here to help."
   },
   "auth": {
-    "title": "CivicStream Citizen Portal",
+    "title": "MuniStream Citizen Portal",
     "subtitle": "Access government services online",
     "login": "Sign In",
     "register": "Create Account",
@@ -244,14 +244,14 @@
     "documentDeleted": "Document deleted successfully"
   },
   "footer": {
-    "about": "About CivicStream",
+    "about": "About MuniStream",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "support": "Support",
     "contact": "Contact Us",
     "accessibility": "Accessibility",
     "languages": "Languages",
-    "copyright": "© 2024 CivicStream. All rights reserved."
+    "copyright": "© 2024 MuniStream. All rights reserved."
   },
   "errors": {
     "genericError": "An error occurred. Please try again.",
