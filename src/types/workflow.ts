@@ -25,6 +25,9 @@ export interface WorkflowCategory {
   name: string;
   description: string;
   icon?: string;
+  color?: string;
+  category_type?: string;
+  is_featured?: boolean;
   workflowCount: number;
 }
 

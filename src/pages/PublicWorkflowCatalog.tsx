@@ -5,6 +5,39 @@ import { workflowService } from '../services/workflowService';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import type { WorkflowDefinition, WorkflowCategory, WorkflowSearchParams } from '../types/workflow';
 
+// Función para obtener iconos de categorías
+const getCategoryIcon = (iconOrType?: string): string => {
+  const iconMap: Record<string, string> = {
+    // Icons específicos
+    'edit': '✏️',
+    'lock': '🔒',
+    'x-circle': '❌',
+    'award': '🏆',
+    'home': '🏠',
+    'arrow-right': '➡️',
+    'calculator': '🧮',
+    'document': '📄',
+    'link': '🔗',
+    // Category types
+    'rpp': '📋',
+    'catastro': '🏠',
+    'vinculado': '🔗'
+  };
+  
+  return iconMap[iconOrType || ''] || '📋';
+};
+
+// Función para obtener etiquetas de tipos de categoría
+const getCategoryTypeLabel = (categoryType?: string): string => {
+  const typeLabels: Record<string, string> = {
+    'rpp': 'RPP',
+    'catastro': 'Catastro',  
+    'vinculado': 'Vinculado'
+  };
+  
+  return typeLabels[categoryType || ''] || 'General';
+};
+
 export const PublicWorkflowCatalog: React.FC = () => {
   const { t } = useTranslation();
   const [workflows, setWorkflows] = useState<WorkflowDefinition[]>([]);
@@ -89,9 +122,50 @@ export const PublicWorkflowCatalog: React.FC = () => {
         <div className="container">
           {/* Hero Section */}
           <section className="hero-section">
-            <h2>Browse Government Services</h2>
-            <p>Discover and learn about available government services and processes</p>
+            <h2>Trámites PUENTE Catastral</h2>
+            <p>Servicios integrados del Catastro y Registro Público de la Propiedad</p>
           </section>
+
+          {/* Featured Categories */}
+          {!searchParams.query && !searchParams.category && categories.length > 0 && (
+            <section className="featured-categories">
+              <h3>Categorías de Trámites</h3>
+              <div className="categories-grid">
+                {categories
+                  .sort((a, b) => {
+                    // Priorizar categorías destacadas
+                    if (a.is_featured && !b.is_featured) return -1;
+                    if (!a.is_featured && b.is_featured) return 1;
+                    return a.name.localeCompare(b.name);
+                  })
+                  .map(category => (
+                    <button
+                      key={category.id}
+                      className={`category-card ${category.is_featured ? 'featured' : ''}`}
+                      onClick={() => handleCategoryFilter(category.id)}
+                      style={{ 
+                        '--category-color': category.color || '#6b7280'
+                      } as React.CSSProperties & { '--category-color': string }}
+                    >
+                      <div className="category-header">
+                        <span className="category-icon-large">
+                          {getCategoryIcon(category.icon || category.category_type)}
+                        </span>
+                        {category.is_featured && <span className="featured-star">⭐</span>}
+                      </div>
+                      <div className="category-info">
+                        <h4 className="category-title">{category.name}</h4>
+                        <p className="category-description">{category.description}</p>
+                        <div className="category-meta">
+                          <span className="workflow-count">{category.workflowCount} trámites</span>
+                          <span className="category-type">{getCategoryTypeLabel(category.category_type)}</span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+              </div>
+            </section>
+          )}
 
           {/* Search and Filters */}
           <section className="search-section">
@@ -129,15 +203,26 @@ export const PublicWorkflowCatalog: React.FC = () => {
                 className={`category-btn ${!searchParams.category ? 'active' : ''}`}
                 onClick={() => handleCategoryFilter('')}
               >
-                All Categories
+                🏛️ Todas las Categorías
               </button>
               {categories.map(category => (
                 <button
                   key={category.id}
                   className={`category-btn ${searchParams.category === category.id ? 'active' : ''}`}
                   onClick={() => handleCategoryFilter(category.id)}
+                  style={{ 
+                    borderColor: category.color || '#6b7280',
+                    '--category-color': category.color || '#6b7280'
+                  } as React.CSSProperties & { '--category-color': string }}
                 >
-                  {category.name} ({category.workflowCount})
+                  <span className="category-icon">
+                    {getCategoryIcon(category.icon || category.category_type)}
+                  </span>
+                  <span className="category-text">
+                    <span className="category-name">{category.name}</span>
+                    <span className="category-count">({category.workflowCount})</span>
+                    {category.is_featured && <span className="featured-badge">★</span>}
+                  </span>
                 </button>
               ))}
             </div>
