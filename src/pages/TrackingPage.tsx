@@ -50,7 +50,7 @@ export const TrackingPage: React.FC = () => {
       });
     } else {
       navigator.clipboard.writeText(url);
-      alert('Tracking link copied to clipboard!');
+      alert(t('workflow.tracking_link_copied'));
     }
   };
 
@@ -125,9 +125,9 @@ export const TrackingPage: React.FC = () => {
     return (
       <div className="workflow-detail">
         <div className="error-state">
-          <h2>Invalid Tracking ID</h2>
+          <h2>{t('workflow.invalid_tracking_id')}</h2>
           <p>The tracking ID provided is not valid.</p>
-          <Link to="/services" className="btn-primary">Browse Services</Link>
+          <Link to="/services" className="btn-primary">{t('workflows.title')}</Link>
         </div>
       </div>
     );
@@ -138,7 +138,7 @@ export const TrackingPage: React.FC = () => {
       <div className="workflow-detail">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>Loading application progress...</p>
+          <p>{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -150,7 +150,7 @@ export const TrackingPage: React.FC = () => {
         <div className="error-state">
           <h2>Tracking Error</h2>
           <p>{error}</p>
-          <button onClick={handleRefresh} className="btn-primary">Try Again</button>
+          <button onClick={handleRefresh} className="btn-primary">{t('common.retry')}</button>
         </div>
       </div>
     );
@@ -162,7 +162,7 @@ export const TrackingPage: React.FC = () => {
         <div className="error-state">
           <h2>Application Not Found</h2>
           <p>No application found with this tracking ID.</p>
-          <Link to="/services" className="btn-primary">Browse Services</Link>
+          <Link to="/services" className="btn-primary">{t('workflows.title')}</Link>
         </div>
       </div>
     );
@@ -176,11 +176,11 @@ export const TrackingPage: React.FC = () => {
           <div className="header-content">
             <Link to="/services" className="logo-link">
               <h1 className="logo">MuniStream</h1>
-              <span className="tagline">Government Services</span>
+              <span className="tagline">{t('workflows.title')}</span>
             </Link>
             <div className="header-actions">
               <LanguageSwitcher variant="compact" />
-              <button onClick={handleShare} className="btn-secondary">📤 Share</button>
+              <button onClick={handleShare} className="btn-secondary">📤 {t('common.share')}</button>
             </div>
           </div>
         </div>
@@ -190,37 +190,37 @@ export const TrackingPage: React.FC = () => {
         <div className="container">
           {/* Breadcrumb */}
           <nav className="breadcrumb">
-            <Link to="/services">Services</Link>
+            <Link to="/services">{t('workflows.title')}</Link>
             <span>›</span>
-            <span>Track Application</span>
+            <span>{t('workflow.track_application')}</span>
           </nav>
 
           {/* Application Status Header */}
           <section className="service-header">
             <div className="service-info">
-              <span className="category-badge">Tracking ID: {instanceId.slice(0, 8)}...</span>
+              <span className="category-badge">{t('workflow.instance_id')}: {instanceId.slice(0, 8)}...</span>
               <h2>📊 {progress.workflow_name}</h2>
               <p className="description">
-                Your application is currently <strong style={{ color: getStatusColor(progress.status) }}>
-                  {progress.status}
+                {t('workflow.application_status_message')} <strong style={{ color: getStatusColor(progress.status) }}>
+                  {t(`status.${progress.status}`)}
                 </strong>. 
                 {progress.progress_percentage === 100 
-                  ? ' Congratulations! Your application has been completed.' 
-                  : ` You are ${progress.progress_percentage.toFixed(0)}% through the process.`
+                  ? t('workflow.congratulations_completed')
+                  : t('workflow.progress_percentage_message', { percentage: progress.progress_percentage.toFixed(0) })
                 }
               </p>
               
               <div className="service-meta">
                 <div className="meta-item">
-                  <span className="label">Progress:</span>
-                  <span className="value">{progress.completed_steps} of {progress.total_steps} steps</span>
+                  <span className="label">{t('workflow.progress')}:</span>
+                  <span className="value">{progress.completed_steps} of {progress.total_steps} {t('common.steps')}</span>
                 </div>
                 <div className="meta-item">
-                  <span className="label">Started:</span>
+                  <span className="label">{t('workflow.started')}:</span>
                   <span className="value">{new Date(progress.created_at).toLocaleDateString()}</span>
                 </div>
                 <div className="meta-item">
-                  <span className="label">Last Update:</span>
+                  <span className="label">{t('workflow.last_updated')}:</span>
                   <span className="value">{lastUpdated.toLocaleTimeString()}</span>
                 </div>
               </div>
@@ -232,18 +232,18 @@ export const TrackingPage: React.FC = () => {
                 onClick={handleRefresh}
                 disabled={isLoading}
               >
-                {isLoading ? 'Refreshing...' : '🔄 Refresh Status'}
+                {isLoading ? t('common.loading') : `🔄 ${t('common.refresh')}`}
               </button>
               
               <p className="auth-note">
-                Auto-refreshes every 30 seconds • Share this link to track progress
+                {t('workflow.auto_refresh_message')} • {t('workflow.share_tracking_text')}
               </p>
             </div>
           </section>
 
           {/* Progress Bar */}
           <section className="requirements-section">
-            <h3>📈 Overall Progress</h3>
+            <h3>📈 {t('workflow.progress')}</h3>
             <div className="progress-container" style={{ marginBottom: '1rem' }}>
               <div className="progress-bar" style={{
                 width: '100%',
@@ -270,15 +270,15 @@ export const TrackingPage: React.FC = () => {
                 fontSize: '0.9rem',
                 color: '#666'
               }}>
-                <span>Started</span>
-                <span>{progress.progress_percentage.toFixed(1)}% Complete</span>
-                <span>Finished</span>
+                <span>{t('workflow.started')}</span>
+                <span>{progress.progress_percentage.toFixed(1)}% {t('workflow.complete')}</span>
+                <span>{t('workflow.finished')}</span>
               </div>
             </div>
           </section>
 
           {/* Data Collection Section - Prominent Position */}
-          {progress.requires_input && progress.input_form && progress.input_form.fields && (
+          {progress.requires_input && progress.input_form && progress.input_form.sections && (
             <section className="requirements-section" style={{
               backgroundColor: '#fff3cd',
               border: '2px solid #ffc107',
@@ -287,12 +287,12 @@ export const TrackingPage: React.FC = () => {
               marginBottom: '2rem',
               boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
             }}>
-              <h3 style={{ color: '#856404', marginBottom: '1rem' }}>🚨 Action Required</h3>
+              <h3 style={{ color: '#856404', marginBottom: '1rem' }}>🚨 {t('workflow.action_required')}</h3>
               {submissionSuccess ? (
                 <div className="success-message">
-                  <h4>✅ Data Submitted Successfully</h4>
+                  <h4>✅ {t('workflow.data_submitted_successfully')}</h4>
                   <p>{submissionSuccess}</p>
-                  <p>Your application will continue processing. Please check back for updates.</p>
+                  <p>{t('workflow.application_continue_message')}</p>
                 </div>
               ) : (
                 <>
@@ -305,18 +305,18 @@ export const TrackingPage: React.FC = () => {
                   }}>
                     <span className="check">📋</span>
                     <div>
-                      <strong style={{ color: '#856404' }}>Information Required</strong>
-                      <p>Please provide the required information below to continue your application.</p>
+                      <strong style={{ color: '#856404' }}>{t('workflow.information_required')}</strong>
+                      <p>{t('workflow.provide_information_message')}</p>
                     </div>
                   </div>
                   
                   <DataCollectionForm
-                    title={progress.input_form.title || "Provide Required Information"}
-                    description={progress.input_form.description || "Please fill out the form below to continue your application."}
-                    fields={progress.input_form.fields}
+                    title={progress.input_form.title || t('workflow.provide_required_info_title')}
+                    description={progress.input_form.description || t('workflow.provide_required_info_desc')}
+                    fields={progress.input_form.sections.flatMap((section: any) => section.fields)}
                     onSubmit={handleDataSubmission}
                     isSubmitting={isSubmittingData}
-                    submitButtonText="Submit Information"
+                    submitButtonText={t('common.submit_information')}
                   />
                 </>
               )}
@@ -325,7 +325,7 @@ export const TrackingPage: React.FC = () => {
 
           {/* Step Progress */}
           <section className="steps-section">
-            <h3>🔄 Step-by-Step Progress</h3>
+            <h3>🔄 {t('workflow.step_progress')}</h3>
             <div className="steps-timeline">
               {progress.step_progress.map((step, index) => (
                 <div key={step.step_id} className="step-item">
@@ -357,13 +357,13 @@ export const TrackingPage: React.FC = () => {
                       
                       {step.started_at && (
                         <span style={{ fontSize: '0.9rem', color: '#666' }}>
-                          ⏰ Started: {new Date(step.started_at).toLocaleString()}
+                          ⏰ {t('workflow.started')}: {new Date(step.started_at).toLocaleString()}
                         </span>
                       )}
                       
                       {step.completed_at && (
                         <span style={{ fontSize: '0.9rem', color: '#666' }}>
-                          ✅ Completed: {new Date(step.completed_at).toLocaleString()}
+                          ✅ {t('workflow.completed')}: {new Date(step.completed_at).toLocaleString()}
                         </span>
                       )}
                     </div>
@@ -377,12 +377,12 @@ export const TrackingPage: React.FC = () => {
           {/* Current Status */}
           {progress.current_step && !progress.requires_input && (
             <section className="requirements-section">
-              <h3>🎯 Current Step</h3>
+              <h3>🎯 {t('workflow.current_step')}</h3>
               <div className="requirement-item">
                 <span className="check">▶️</span>
                 <div>
-                  <strong>Now Processing: {progress.current_step}</strong>
-                  <p>Your application is currently being processed at this step. Please check back later for updates.</p>
+                  <strong>{t('workflow.now_processing')}: {progress.current_step}</strong>
+                  <p>{t('workflow.application_processing_message')}</p>
                 </div>
               </div>
             </section>
@@ -390,25 +390,25 @@ export const TrackingPage: React.FC = () => {
 
           {/* Help Section */}
           <section className="help-section">
-            <h3>❓ Need Help?</h3>
+            <h3>❓ {t('workflow.need_help')}</h3>
             <div className="help-grid">
               <div className="help-card">
-                <h4>📞 Call Support</h4>
-                <p>Questions about your application?</p>
+                <h4>📞 {t('common.contact_support')}</h4>
+                <p>{t('workflow.questions_about_application')}</p>
                 <span className="phone">(555) 123-4567</span>
                 <p style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
-                  Reference ID: {instanceId.slice(0, 8)}
+                  {t('workflow.reference_id')}: {instanceId.slice(0, 8)}
                 </p>
               </div>
               <div className="help-card">
-                <h4>📧 Email Updates</h4>
-                <p>Get progress notifications</p>
-                <button className="btn-secondary">Subscribe</button>
+                <h4>📧 {t('workflow.email_updates')}</h4>
+                <p>{t('workflow.get_progress_notifications')}</p>
+                <button className="btn-secondary">{t('workflow.subscribe')}</button>
               </div>
               <div className="help-card">
-                <h4>📱 Share Progress</h4>
-                <p>Share this tracking link</p>
-                <button onClick={handleShare} className="btn-secondary">📤 Share Link</button>
+                <h4>📱 {t('workflow.share_progress')}</h4>
+                <p>{t('workflow.share_tracking_link')}</p>
+                <button onClick={handleShare} className="btn-secondary">📤 {t('common.share')}</button>
               </div>
             </div>
           </section>
