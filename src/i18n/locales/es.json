@@ -9,6 +9,7 @@
     "back": "Atrás",
     "next": "Siguiente",
     "submit": "Enviar",
+    "submit_information": "Enviar Información",
     "close": "Cerrar",
     "search": "Buscar",
     "filter": "Filtrar",
@@ -33,7 +34,9 @@
     "failed": "Fallido",
     "running": "Ejecutándose",
     "paused": "Pausado",
-    "cancelled": "Cancelado"
+    "cancelled": "Cancelado",
+    "awaiting_input": "Esperando Información",
+    "pending_validation": "Pendiente de Validación"
   },
   "workflow": {
     "start_title": "Iniciar Nueva Solicitud",
@@ -58,7 +61,30 @@
     "share_tracking_text": "Rastrear el progreso de esta solicitud",
     "invalid_tracking_id": "ID de seguimiento inválido proporcionado",
     "need_help": "¿Necesitas Ayuda?",
-    "help_text": "Si tienes preguntas sobre tu solicitud o necesitas asistencia, nuestro equipo de soporte está aquí para ayudar."
+    "help_text": "Si tienes preguntas sobre tu solicitud o necesitas asistencia, nuestro equipo de soporte está aquí para ayudar.",
+    "action_required": "Acción Requerida",
+    "information_required": "Información Requerida",
+    "provide_information_message": "Por favor proporciona la información requerida a continuación para continuar con tu solicitud.",
+    "auto_refresh_message": "Se actualiza automáticamente cada 30 segundos",
+    "data_submitted_successfully": "Datos Enviados Exitosamente",
+    "application_continue_message": "Tu solicitud continuará procesando. Por favor revisa más tarde para actualizaciones.",
+    "provide_required_info_title": "Proporcionar Información Requerida",
+    "provide_required_info_desc": "Por favor completa el formulario a continuación para continuar con tu solicitud.",
+    "current_step": "Paso Actual",
+    "now_processing": "Procesando Ahora",
+    "application_processing_message": "Tu solicitud está siendo procesada en este paso. Por favor revisa más tarde para actualizaciones.",
+    "questions_about_application": "¿Preguntas sobre tu solicitud?",
+    "reference_id": "ID de Referencia",
+    "email_updates": "Actualizaciones por Email",
+    "get_progress_notifications": "Recibe notificaciones de progreso",
+    "share_progress": "Compartir Progreso",
+    "share_tracking_link": "Comparte este enlace de seguimiento",
+    "subscribe": "Suscribirse",
+    "finished": "Finalizado",
+    "tracking_link_copied": "¡Enlace de seguimiento copiado al portapapeles!",
+    "application_status_message": "Tu solicitud actualmente está",
+    "congratulations_completed": "¡Felicitaciones! Tu solicitud ha sido completada.",
+    "progress_percentage_message": "Estás al {{percentage}}% del proceso."
   },
   "auth": {
     "title": "Portal Ciudadano MuniStream",
@@ -113,6 +139,7 @@
     "subtitle": "Explore y solicite servicios gubernamentales en línea",
     "categories": "Categorías",
     "allServices": "Todos los Servicios",
+    "allCategories": "Todas las Categorías",
     "popular": "Servicios Populares",
     "recent": "Agregados Recientemente",
     "searchPlaceholder": "Buscar servicios...",
@@ -137,7 +164,17 @@
     "applicationFee": "Tarifa de Solicitud",
     "processingTime": "Tiempo de Procesamiento",
     "eligibility": "Elegibilidad",
-    "howToApply": "Cómo Solicitar"
+    "howToApply": "Cómo Solicitar",
+    "puente_title": "Trámites PUENTE Catastral",
+    "puente_subtitle": "Servicios integrados del Catastro y Registro Público de la Propiedad",
+    "categoriesOfServices": "Categorías de Trámites",
+    "workflows_count": "{count} trámites",
+    "searchResults": "Resultados de Búsqueda",
+    "clearFilters": "Limpiar Filtros",
+    "sortBy": "Ordenar por",
+    "sortByName": "Nombre",
+    "sortByDuration": "Duración",
+    "sortByPopularity": "Popularidad"
   },
   "applications": {
     "title": "Mis Solicitudes",
@@ -274,5 +311,30 @@
     "pattern": "Formato inválido",
     "numeric": "Debe ser un número",
     "positive": "Debe ser un número positivo"
+  },
+  "categories": {
+    "rpp": "RPP",
+    "catastro": "Catastro", 
+    "vinculado": "Vinculado",
+    "rpp_inscripciones": "Inscripciones",
+    "rpp_gravamenes": "Gravámenes",
+    "rpp_cancelaciones": "Cancelaciones",
+    "rpp_certificados": "Certificados RPP",
+    "catastro_registro": "Registro",
+    "catastro_traslados": "Traslados",
+    "catastro_valuacion": "Valuación",
+    "catastro_certificados": "Certificados Catastrales",
+    "vinculados": "Trámites Vinculados",
+    "category_descriptions": {
+      "rpp_inscripciones": "Trámites de inscripción en el Registro Público de la Propiedad",
+      "rpp_gravamenes": "Trámites relacionados con gravámenes y limitaciones de dominio",
+      "rpp_cancelaciones": "Cancelación de inscripciones y gravámenes",
+      "rpp_certificados": "Emisión de certificados registrales",
+      "catastro_registro": "Registro de predios y cambios de propietario",
+      "catastro_traslados": "Traslados de dominio y cambios de titularidad",
+      "catastro_valuacion": "Avalúos y actualizaciones de valores catastrales",
+      "catastro_certificados": "Certificados de valor catastral y predial",
+      "vinculados": "Procesos que actualizan RPP y Catastro simultáneamente"
+    }
   }
 }

@@ -9,6 +9,7 @@
     "back": "Back",
     "next": "Next",
     "submit": "Submit",
+    "submit_information": "Submit Information",
     "close": "Close",
     "search": "Search",
     "filter": "Filter",
@@ -33,7 +34,9 @@
     "failed": "Failed",
     "running": "Running",
     "paused": "Paused",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "awaiting_input": "Awaiting Input",
+    "pending_validation": "Pending Validation"
   },
   "workflow": {
     "start_title": "Start New Application",
@@ -58,7 +61,30 @@
     "share_tracking_text": "Track this application progress",
     "invalid_tracking_id": "Invalid tracking ID provided",
     "need_help": "Need Help?",
-    "help_text": "If you have questions about your application or need assistance, our support team is here to help."
+    "help_text": "If you have questions about your application or need assistance, our support team is here to help.",
+    "action_required": "Action Required",
+    "information_required": "Information Required",
+    "provide_information_message": "Please provide the required information below to continue your application.",
+    "auto_refresh_message": "Auto-refreshes every 30 seconds",
+    "data_submitted_successfully": "Data Submitted Successfully",
+    "application_continue_message": "Your application will continue processing. Please check back for updates.",
+    "provide_required_info_title": "Provide Required Information",
+    "provide_required_info_desc": "Please fill out the form below to continue your application.",
+    "current_step": "Current Step",
+    "now_processing": "Now Processing",
+    "application_processing_message": "Your application is currently being processed at this step. Please check back later for updates.",
+    "questions_about_application": "Questions about your application?",
+    "reference_id": "Reference ID",
+    "email_updates": "Email Updates",
+    "get_progress_notifications": "Get progress notifications",
+    "share_progress": "Share Progress",
+    "share_tracking_link": "Share this tracking link",
+    "subscribe": "Subscribe",
+    "finished": "Finished",
+    "tracking_link_copied": "Tracking link copied to clipboard!",
+    "application_status_message": "Your application is currently",
+    "congratulations_completed": "Congratulations! Your application has been completed.",
+    "progress_percentage_message": "You are {{percentage}}% through the process."
   },
   "auth": {
     "title": "MuniStream Citizen Portal",
@@ -113,6 +139,7 @@
     "subtitle": "Browse and apply for government services online",
     "categories": "Categories",
     "allServices": "All Services",
+    "allCategories": "All Categories",
     "popular": "Popular Services",
     "recent": "Recently Added",
     "searchPlaceholder": "Search for services...",
@@ -137,7 +164,17 @@
     "applicationFee": "Application Fee",
     "processingTime": "Processing Time",
     "eligibility": "Eligibility",
-    "howToApply": "How to Apply"
+    "howToApply": "How to Apply",
+    "puente_title": "PUENTE Cadastral Services",
+    "puente_subtitle": "Integrated services for Cadastre and Public Property Registry",
+    "categoriesOfServices": "Service Categories",
+    "workflows_count": "{count} services",
+    "searchResults": "Search Results",
+    "clearFilters": "Clear Filters",
+    "sortBy": "Sort by",
+    "sortByName": "Name",
+    "sortByDuration": "Duration",
+    "sortByPopularity": "Popularity"
   },
   "applications": {
     "title": "My Applications",
@@ -274,5 +311,30 @@
     "pattern": "Invalid format",
     "numeric": "Must be a number",
     "positive": "Must be a positive number"
+  },
+  "categories": {
+    "rpp": "PPR",
+    "catastro": "Cadastre", 
+    "vinculado": "Linked",
+    "rpp_inscripciones": "Registrations",
+    "rpp_gravamenes": "Liens",
+    "rpp_cancelaciones": "Cancellations",
+    "rpp_certificados": "PPR Certificates",
+    "catastro_registro": "Registry",
+    "catastro_traslados": "Transfers",
+    "catastro_valuacion": "Valuation",
+    "catastro_certificados": "Cadastral Certificates",
+    "vinculados": "Linked Services",
+    "category_descriptions": {
+      "rpp_inscripciones": "Registration procedures for the Public Property Registry",
+      "rpp_gravamenes": "Procedures related to liens and domain limitations",
+      "rpp_cancelaciones": "Cancellation of registrations and liens",
+      "rpp_certificados": "Issuance of registry certificates",
+      "catastro_registro": "Property registration and owner changes",
+      "catastro_traslados": "Domain transfers and ownership changes",
+      "catastro_valuacion": "Appraisals and cadastral value updates",
+      "catastro_certificados": "Cadastral and property value certificates",
+      "vinculados": "Processes that update PPR and Cadastre simultaneously"
+    }
   }
 }
