@@ -58,7 +58,7 @@ export const WorkflowStartPage: React.FC = () => {
       <div className="workflow-detail">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>Loading application details...</p>
+          <p>{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -70,7 +70,7 @@ export const WorkflowStartPage: React.FC = () => {
         <div className="error-state">
           <h2>Application Not Found</h2>
           <p>{error || 'The requested application could not be found.'}</p>
-          <Link to="/services" className="btn-primary">Browse Services</Link>
+          <Link to="/services" className="btn-primary">{t('workflows.title')}</Link>
         </div>
       </div>
     );
@@ -84,11 +84,11 @@ export const WorkflowStartPage: React.FC = () => {
           <div className="header-content">
             <Link to="/services" className="logo-link">
               <h1 className="logo">MuniStream</h1>
-              <span className="tagline">Government Services</span>
+              <span className="tagline">{t('workflows.title')}</span>
             </Link>
             <div className="header-actions">
               <LanguageSwitcher variant="compact" />
-              <Link to="/auth" className="btn-secondary">Sign In</Link>
+              <Link to="/auth" className="btn-secondary">{t('auth.login')}</Link>
             </div>
           </div>
         </div>
@@ -98,18 +98,18 @@ export const WorkflowStartPage: React.FC = () => {
         <div className="container">
           {/* Breadcrumb */}
           <nav className="breadcrumb">
-            <Link to="/services">Services</Link>
+            <Link to="/services">{t('workflows.title')}</Link>
             <span>›</span>
             <Link to={`/services/${workflow.id}`}>{workflow.name}</Link>
             <span>›</span>
-            <span>Start Application</span>
+            <span>{t('workflows.startApplication')}</span>
           </nav>
 
           {/* Application Start Header */}
           <section className="service-header">
             <div className="service-info">
               <span className="category-badge">{workflow.category}</span>
-              <h2>Start: {workflow.name}</h2>
+              <h2>{t('workflow.start_title')}: {workflow.name}</h2>
               <p className="description">
                 You're about to start your application for {workflow.name.toLowerCase()}. 
                 Review the requirements below and click "Start Application" when ready.
@@ -122,11 +122,11 @@ export const WorkflowStartPage: React.FC = () => {
                 onClick={() => setShowConfirmDialog(true)}
                 disabled={!workflow.isActive || isStarting}
               >
-                {isStarting ? 'Starting...' : 'Start Application'}
+                {isStarting ? t('workflow.starting') : t('workflows.startApplication')}
               </button>
               
               <p className="auth-note">
-                No account required • Instant tracking ID • Takes {workflow.estimatedDuration}
+                {t('auth.noAccount')} • Instant tracking ID • Takes {workflow.estimatedDuration}
               </p>
             </div>
           </section>
@@ -162,7 +162,7 @@ export const WorkflowStartPage: React.FC = () => {
           {/* Requirements */}
           {workflow.requirements.length > 0 && (
             <section className="requirements-section">
-              <h3>✅ Required Documents & Information</h3>
+              <h3>✅ {t('workflows.documentsRequired')}</h3>
               <div className="requirements-list">
                 {workflow.requirements.map((requirement, index) => (
                   <div key={index} className="requirement-item">
@@ -176,7 +176,7 @@ export const WorkflowStartPage: React.FC = () => {
 
           {/* Process Preview */}
           <section className="steps-section">
-            <h3>🔄 Application Process ({workflow.steps.length} steps)</h3>
+            <h3>🔄 {t('workflows.process')} ({workflow.steps.length} {t('common.steps')})</h3>
             <div className="steps-timeline">
               {workflow.steps.slice(0, 6).map((step, index) => (
                 <div key={step.id} className="step-item">
@@ -194,7 +194,7 @@ export const WorkflowStartPage: React.FC = () => {
                 <div className="step-item">
                   <div className="step-number">...</div>
                   <div className="step-content">
-                    <h4>And {workflow.steps.length - 6} more steps</h4>
+                    <h4>{t('workflow.and_more_steps', { count: workflow.steps.length - 6 })}</h4>
                     <p>Complete process details will be shown during your application.</p>
                   </div>
                 </div>
@@ -204,15 +204,15 @@ export const WorkflowStartPage: React.FC = () => {
 
           {/* Help Section */}
           <section className="help-section">
-            <h3>❓ Need Help?</h3>
+            <h3>❓ {t('workflow.need_help')}</h3>
             <div className="help-grid">
               <div className="help-card">
-                <h4>📞 Phone Support</h4>
+                <h4>📞 {t('common.contact_support')}</h4>
                 <p>Call for immediate assistance</p>
                 <span className="phone">(555) 123-4567</span>
               </div>
               <div className="help-card">
-                <h4>📧 Email Support</h4>
+                <h4>📧 Email {t('navigation.support')}</h4>
                 <p>Send your questions via email</p>
                 <span className="email">support@munistream.com</span>
               </div>
@@ -237,15 +237,15 @@ export const WorkflowStartPage: React.FC = () => {
             </p>
             <div className="dialog-meta">
               <div className="meta-item">
-                <span className="label">Process:</span>
-                <span className="value">{workflow.steps.length} steps</span>
+                <span className="label">{t('workflows.process')}:</span>
+                <span className="value">{workflow.steps.length} {t('common.steps')}</span>
               </div>
               <div className="meta-item">
-                <span className="label">Duration:</span>
+                <span className="label">{t('workflows.estimatedTime')}:</span>
                 <span className="value">{workflow.estimatedDuration}</span>
               </div>
               <div className="meta-item">
-                <span className="label">Status:</span>
+                <span className="label">{t('applications.status')}:</span>
                 <span className="value">✅ Ready to start</span>
               </div>
             </div>
@@ -259,14 +259,14 @@ export const WorkflowStartPage: React.FC = () => {
                 onClick={() => setShowConfirmDialog(false)}
                 disabled={isStarting}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button 
                 className="btn-primary" 
                 onClick={handleStartWorkflow}
                 disabled={isStarting}
               >
-                {isStarting ? 'Starting...' : 'Start Application'}
+                {isStarting ? t('workflow.starting') : t('workflows.startApplication')}
               </button>
             </div>
           </div>

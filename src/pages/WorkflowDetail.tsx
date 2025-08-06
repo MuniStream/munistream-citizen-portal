@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { workflowService } from '../services/workflowService';
 import { useAuth } from '../contexts/AuthContext';
 import type { WorkflowDefinition } from '../types/workflow';
@@ -8,6 +9,7 @@ export const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const [workflow, setWorkflow] = useState<WorkflowDefinition | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export const WorkflowDetail: React.FC = () => {
       <div className="workflow-detail">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>Loading service details...</p>
+          <p>{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -51,9 +53,9 @@ export const WorkflowDetail: React.FC = () => {
     return (
       <div className="workflow-detail">
         <div className="error-state">
-          <h2>Service Not Found</h2>
-          <p>{error || 'The requested service could not be found.'}</p>
-          <Link to="/services" className="btn-primary">Browse Services</Link>
+          <h2>{t('errors.notFound')}</h2>
+          <p>{error || t('errors.genericError')}</p>
+          <Link to="/services" className="btn-primary">{t('workflows.title')}</Link>
         </div>
       </div>
     );
@@ -66,13 +68,13 @@ export const WorkflowDetail: React.FC = () => {
           <div className="header-content">
             <Link to="/services" className="logo-link">
               <h1 className="logo">MuniStream</h1>
-              <span className="tagline">Government Services</span>
+              <span className="tagline">{t('workflows.title')}</span>
             </Link>
             <div className="header-actions">
               {isAuthenticated ? (
-                <Link to="/dashboard" className="btn-secondary">Dashboard</Link>
+                <Link to="/dashboard" className="btn-secondary">{t('dashboard.title')}</Link>
               ) : (
-                <Link to="/auth" className="btn-secondary">Sign In</Link>
+                <Link to="/auth" className="btn-secondary">{t('auth.login')}</Link>
               )}
             </div>
           </div>
@@ -83,7 +85,7 @@ export const WorkflowDetail: React.FC = () => {
         <div className="container">
           {/* Breadcrumb */}
           <nav className="breadcrumb">
-            <Link to="/services">Services</Link>
+            <Link to="/services">{t('workflows.title')}</Link>
             <span>›</span>
             <span>{workflow.name}</span>
           </nav>
@@ -97,15 +99,15 @@ export const WorkflowDetail: React.FC = () => {
               
               <div className="service-meta">
                 <div className="meta-item">
-                  <span className="label">Duration:</span>
+                  <span className="label">{t('workflows.estimatedTime')}:</span>
                   <span className="value">📅 {workflow.estimatedDuration}</span>
                 </div>
                 <div className="meta-item">
                   <span className="label">Steps:</span>
-                  <span className="value">📋 {workflow.steps.length} steps</span>
+                  <span className="value">📋 {workflow.steps.length} {t('common.steps')}</span>
                 </div>
                 <div className="meta-item">
-                  <span className="label">Status:</span>
+                  <span className="label">{t('applications.status')}:</span>
                   <span className={`status ${workflow.isActive ? 'active' : 'inactive'}`}>
                     {workflow.isActive ? '✅ Available' : '⏸️ Temporarily Unavailable'}
                   </span>
@@ -119,11 +121,11 @@ export const WorkflowDetail: React.FC = () => {
                 onClick={handleStartApplication}
                 disabled={!workflow.isActive}
               >
-                Start Application
+                {t('workflows.startApplication')}
               </button>
               
               <p className="auth-note">
-                No account required • Get instant tracking ID
+                {t('auth.noAccount')} • Get instant tracking ID
               </p>
             </div>
           </section>
@@ -131,7 +133,7 @@ export const WorkflowDetail: React.FC = () => {
           {/* Requirements */}
           {workflow.requirements.length > 0 && (
             <section className="requirements-section">
-              <h3>Requirements</h3>
+              <h3>{t('workflows.requirements')}</h3>
               <div className="requirements-list">
                 {workflow.requirements.map((requirement, index) => (
                   <div key={index} className="requirement-item">
@@ -145,7 +147,7 @@ export const WorkflowDetail: React.FC = () => {
 
           {/* Process Steps */}
           <section className="steps-section">
-            <h3>Process Overview</h3>
+            <h3>{t('workflows.process')}</h3>
             <div className="steps-timeline">
               {workflow.steps.map((step, index) => (
                 <div key={step.id} className="step-item">
@@ -158,7 +160,7 @@ export const WorkflowDetail: React.FC = () => {
                     )}
                     {step.requirements && step.requirements.length > 0 && (
                       <div className="step-requirements">
-                        <strong>Required:</strong>
+                        <strong>{t('forms.required')}:</strong>
                         <ul>
                           {step.requirements.map((req, reqIndex) => (
                             <li key={reqIndex}>{req}</li>
@@ -174,22 +176,22 @@ export const WorkflowDetail: React.FC = () => {
 
           {/* Help Section */}
           <section className="help-section">
-            <h3>Need Help?</h3>
+            <h3>{t('workflow.need_help')}</h3>
             <div className="help-grid">
               <div className="help-card">
-                <h4>📞 Contact Support</h4>
+                <h4>📞 {t('common.contact_support')}</h4>
                 <p>Call our support line for assistance</p>
                 <span className="phone">(555) 123-4567</span>
               </div>
               <div className="help-card">
-                <h4>📧 Email Support</h4>
+                <h4>📧 Email {t('navigation.support')}</h4>
                 <p>Send us your questions via email</p>
                 <span className="email">support@munistream.com</span>
               </div>
               <div className="help-card">
-                <h4>❓ FAQ</h4>
+                <h4>❓ {t('common.faq')}</h4>
                 <p>Find answers to common questions</p>
-                <Link to="/help" className="help-link">View FAQ →</Link>
+                <Link to="/help" className="help-link">{t('common.faq')} →</Link>
               </div>
             </div>
           </section>

@@ -28,14 +28,11 @@ const getCategoryIcon = (iconOrType?: string): string => {
 };
 
 // Función para obtener etiquetas de tipos de categoría
-const getCategoryTypeLabel = (categoryType?: string): string => {
-  const typeLabels: Record<string, string> = {
-    'rpp': 'RPP',
-    'catastro': 'Catastro',  
-    'vinculado': 'Vinculado'
-  };
-  
-  return typeLabels[categoryType || ''] || 'General';
+const getCategoryTypeLabel = (categoryType?: string, t: any): string => {
+  if (categoryType) {
+    return t(`categories.${categoryType}`);
+  }
+  return 'General';
 };
 
 export const PublicWorkflowCatalog: React.FC = () => {
@@ -96,7 +93,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
       <div className="public-catalog">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>Loading services...</p>
+          <p>{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -109,10 +106,10 @@ export const PublicWorkflowCatalog: React.FC = () => {
           <div className="header-content">
             <Link to="/" className="logo-link">
               <h1 className="logo">MuniStream</h1>
-              <span className="tagline">Government Services</span>
+              <span className="tagline">{t('workflows.title')}</span>
             </Link>
             <div className="header-actions">
-              <Link to="/auth" className="btn-secondary">Sign In</Link>
+              <Link to="/auth" className="btn-secondary">{t('auth.login')}</Link>
             </div>
           </div>
         </div>
@@ -122,14 +119,14 @@ export const PublicWorkflowCatalog: React.FC = () => {
         <div className="container">
           {/* Hero Section */}
           <section className="hero-section">
-            <h2>Trámites PUENTE Catastral</h2>
-            <p>Servicios integrados del Catastro y Registro Público de la Propiedad</p>
+            <h2>{t('workflows.puente_title')}</h2>
+            <p>{t('workflows.puente_subtitle')}</p>
           </section>
 
           {/* Featured Categories */}
           {!searchParams.query && !searchParams.category && categories.length > 0 && (
             <section className="featured-categories">
-              <h3>Categorías de Trámites</h3>
+              <h3>{t('workflows.categoriesOfServices')}</h3>
               <div className="categories-grid">
                 {categories
                   .sort((a, b) => {
@@ -157,8 +154,8 @@ export const PublicWorkflowCatalog: React.FC = () => {
                         <h4 className="category-title">{category.name}</h4>
                         <p className="category-description">{category.description}</p>
                         <div className="category-meta">
-                          <span className="workflow-count">{category.workflowCount} trámites</span>
-                          <span className="category-type">{getCategoryTypeLabel(category.category_type)}</span>
+                          <span className="workflow-count">{t('workflows.workflows_count', { count: category.workflowCount })}</span>
+                          <span className="category-type">{getCategoryTypeLabel(category.category_type, t)}</span>
                         </div>
                       </div>
                     </button>
@@ -173,7 +170,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
               <div className="search-input">
                 <input
                   type="text"
-                  placeholder="Search services..."
+                  placeholder={t('workflows.searchPlaceholder')}
                   value={searchParams.query || ''}
                   onChange={(e) => handleSearch(e.target.value)}
                 />
@@ -181,18 +178,18 @@ export const PublicWorkflowCatalog: React.FC = () => {
               </div>
               
               <div className="sort-controls">
-                <label>Sort by:</label>
+                <label>{t('workflows.sortBy')}:</label>
                 <button 
                   className={`sort-btn ${searchParams.sortBy === 'name' ? 'active' : ''}`}
                   onClick={() => handleSort('name')}
                 >
-                  Name {searchParams.sortBy === 'name' && (searchParams.sortOrder === 'asc' ? '↑' : '↓')}
+                  {t('workflows.sortByName')} {searchParams.sortBy === 'name' && (searchParams.sortOrder === 'asc' ? '↑' : '↓')}
                 </button>
                 <button 
                   className={`sort-btn ${searchParams.sortBy === 'duration' ? 'active' : ''}`}
                   onClick={() => handleSort('duration')}
                 >
-                  Duration {searchParams.sortBy === 'duration' && (searchParams.sortOrder === 'asc' ? '↑' : '↓')}
+                  {t('workflows.sortByDuration')} {searchParams.sortBy === 'duration' && (searchParams.sortOrder === 'asc' ? '↑' : '↓')}
                 </button>
               </div>
             </div>
@@ -203,7 +200,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
                 className={`category-btn ${!searchParams.category ? 'active' : ''}`}
                 onClick={() => handleCategoryFilter('')}
               >
-                🏛️ Todas las Categorías
+                🏛️ {t('workflows.allCategories')}
               </button>
               {categories.map(category => (
                 <button
@@ -237,7 +234,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
           {/* Featured Services (when no search/filter) */}
           {!searchParams.query && !searchParams.category && featuredWorkflows.length > 0 && (
             <section className="featured-section">
-              <h3>Popular Services</h3>
+              <h3>{t('workflows.popular')}</h3>
               <div className="workflow-grid">
                 {featuredWorkflows.map(workflow => (
                   <WorkflowCard key={workflow.id} workflow={workflow} />
@@ -249,19 +246,19 @@ export const PublicWorkflowCatalog: React.FC = () => {
           {/* All Services */}
           <section className="services-section">
             <h3>
-              {searchParams.query || searchParams.category ? 'Search Results' : 'All Services'}
+              {searchParams.query || searchParams.category ? t('workflows.searchResults') : t('workflows.allServices')}
               <span className="count">({workflows.length})</span>
             </h3>
             
             {workflows.length === 0 ? (
               <div className="no-results">
-                <p>No services found matching your criteria.</p>
+                <p>{t('workflows.noResults')}</p>
                 {(searchParams.query || searchParams.category) && (
                   <button 
                     onClick={() => setSearchParams({})}
                     className="btn-secondary"
                   >
-                    Clear Filters
+                    {t('workflows.clearFilters')}
                   </button>
                 )}
               </div>
@@ -284,6 +281,7 @@ interface WorkflowCardProps {
 }
 
 const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
+  const { t } = useTranslation();
   return (
     <Link to={`/services/${workflow.id}`} className="workflow-card">
       <div className="card-header">
@@ -296,12 +294,12 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
         
         <div className="card-meta">
           <span className="duration">📅 {workflow.estimatedDuration}</span>
-          <span className="steps">📋 {workflow.steps.length} steps</span>
+          <span className="steps">📋 {workflow.steps.length} {t('common.steps')}</span>
         </div>
         
         {workflow.requirements.length > 0 && (
           <div className="requirements">
-            <strong>Requirements:</strong>
+            <strong>{t('workflows.requirements')}:</strong>
             <ul>
               {workflow.requirements.slice(0, 2).map((req, index) => (
                 <li key={index}>{req}</li>
@@ -315,7 +313,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
       </div>
       
       <div className="card-footer">
-        <span className="cta">Learn More →</span>
+        <span className="cta">{t('workflows.learnMore')} →</span>
       </div>
     </Link>
   );
