@@ -1,11 +1,13 @@
 export interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  isEmailVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
+  full_name: string;
+  phone?: string;
+  document_number?: string;
+  status: string;
+  email_verified: boolean;
+  created_at: string;
+  last_login_at: string | null;
 }
 
 export interface LoginRequest {
@@ -16,14 +18,16 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
+  full_name: string;
+  phone?: string;
+  document_number?: string;
 }
 
 export interface AuthResponse {
-  user: User;
-  accessToken: string;
-  refreshToken: string;
+  customer: User;
+  access_token: string;
+  token_type: string;
+  message: string;
 }
 
 export interface PasswordResetRequest {

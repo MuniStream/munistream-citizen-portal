@@ -336,5 +336,57 @@
       "catastro_certificados": "Certificados de valor catastral y predial",
       "vinculados": "Procesos que actualizan RPP y Catastro simultáneamente"
     }
+  },
+  "my_entities": {
+    "title": "Mis Entidades",
+    "description": "Gestione sus propiedades, negocios y otras entidades registradas",
+    "all_types": "Todos los tipos",
+    "no_entities": "No tiene entidades registradas",
+    "no_entities_desc": "Comience un nuevo trámite para registrar su primera entidad",
+    "start_workflow": "Iniciar Trámite",
+    "verified": "Verificado",
+    "relationships": "relaciones",
+    "start_process": "Iniciar Proceso",
+    "available_workflows": "procesos disponibles",
+    "select_workflow": "Seleccione un Proceso",
+    "for_entity": "Para la entidad",
+    "view_details": "Ver Detalles"
+  },
+  "entity": {
+    "detail": "Detalle de Entidad",
+    "information": "Información de la Entidad",
+    "created_at": "Creado",
+    "updated_at": "Actualizado",
+    "relationships": "Relaciones",
+    "available_workflows": "Procesos Disponibles",
+    "no_workflows_available": "No hay procesos disponibles para esta entidad",
+    "start_workflow": "Iniciar Proceso",
+    "recent_workflows": "Procesos Recientes",
+    "workflow": "Proceso",
+    "status": "Estado",
+    "started": "Iniciado",
+    "completed": "Completado",
+    "actions": "Acciones",
+    "view_progress": "Ver Progreso",
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "pending": "Pendiente",
+      "suspended": "Suspendido"
+    },
+    "documents": "Documentos",
+    "no_documents": "No hay documentos asociados a esta entidad",
+    "document": {
+      "type": "Tipo",
+      "issued_by": "Emisor",
+      "issued_date": "Fecha de Emisión",
+      "expiry_date": "Fecha de Vencimiento",
+      "expired": "Vencido",
+      "verified": "Verificado",
+      "pending": "Pendiente",
+      "rejected": "Rechazado",
+      "view": "Ver",
+      "download": "Descargar"
+    }
   }
 }

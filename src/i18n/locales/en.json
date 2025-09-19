@@ -336,5 +336,57 @@
       "catastro_certificados": "Cadastral and property value certificates",
       "vinculados": "Processes that update PPR and Cadastre simultaneously"
     }
+  },
+  "my_entities": {
+    "title": "My Entities",
+    "description": "Manage your properties, businesses and other registered entities",
+    "all_types": "All types",
+    "no_entities": "You have no registered entities",
+    "no_entities_desc": "Start a new process to register your first entity",
+    "start_workflow": "Start Process",
+    "verified": "Verified",
+    "relationships": "relationships",
+    "start_process": "Start Process",
+    "available_workflows": "available processes",
+    "select_workflow": "Select a Process",
+    "for_entity": "For entity",
+    "view_details": "View Details"
+  },
+  "entity": {
+    "detail": "Entity Detail",
+    "information": "Entity Information",
+    "created_at": "Created",
+    "updated_at": "Updated",
+    "relationships": "Relationships",
+    "available_workflows": "Available Processes",
+    "no_workflows_available": "No processes available for this entity",
+    "start_workflow": "Start Process",
+    "recent_workflows": "Recent Processes",
+    "workflow": "Process",
+    "status": "Status",
+    "started": "Started",
+    "completed": "Completed",
+    "actions": "Actions",
+    "view_progress": "View Progress",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "suspended": "Suspended"
+    },
+    "documents": "Documents",
+    "no_documents": "No documents associated with this entity",
+    "document": {
+      "type": "Type",
+      "issued_by": "Issuer",
+      "issued_date": "Issue Date",
+      "expiry_date": "Expiry Date",
+      "expired": "Expired",
+      "verified": "Verified",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "view": "View",
+      "download": "Download"
+    }
   }
 }

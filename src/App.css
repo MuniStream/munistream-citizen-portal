@@ -190,6 +190,40 @@ html {
   color: white;
 }
 
+/* Header specific button styles */
+.header-actions .btn-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-actions .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Language switcher in header */
+.header-actions .MuiFormControl-root {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.header-actions .MuiSelect-select {
+  color: white !important;
+  padding: 0.5rem 1rem !important;
+}
+
+.header-actions .MuiSvgIcon-root {
+  color: white !important;
+}
+
 /* Status Section */
 .status {
   margin-bottom: 3rem;
@@ -412,6 +446,34 @@ html {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 2rem;
+  min-height: 60px;
+}
+
+/* Header actions container */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: nowrap;
+}
+
+/* Ensure all header buttons are visible */
+.header-actions > * {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Logo link styling */
+.logo-link {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-link:hover {
+  opacity: 0.9;
 }
 
 .logo-section .logo {
@@ -536,10 +598,65 @@ html {
   justify-content: center;
 }
 
+/* Authentication menu styles */
+.auth-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.auth-menu .user-email {
+  color: white;
+  font-size: 0.9rem;
+  opacity: 0.95;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 0.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+  margin-right: 0.5rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
     padding: 0 1rem;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 0;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  
+  .auth-menu {
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    width: auto;
+  }
+  
+  .auth-menu .user-email {
+    max-width: 120px;
+    font-size: 0.85rem;
+    padding-right: 0.5rem;
+  }
+  
+  .header-actions .btn-secondary {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
   }
   
   .hero h2 {
@@ -1572,6 +1689,61 @@ html {
   padding: 1.5rem;
 }
 
+/* Form Section Styles - Entity Separation */
+.form-section {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.form-section:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-color: #2c5aa0;
+}
+
+.form-section:last-child {
+  margin-bottom: 1rem;
+}
+
+.section-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c5aa0;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-title::before {
+  content: '📋';
+  font-size: 1.2rem;
+}
+
+.section-description {
+  color: #666;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.section-fields {
+  background: white;
+  padding: 1.25rem;
+  border-radius: 6px;
+  border: 1px solid #f0f0f0;
+}
+
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -1765,5 +1937,312 @@ html {
 
   .file-upload-display {
     padding: 1.5rem 1rem;
+  }
+}
+
+/* Unified Workflow Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.modal-content.large {
+  max-width: 800px;
+}
+
+.modal-header {
+  background: #2c5aa0;
+  color: white;
+  padding: 1.5rem 2rem;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+/* Workflow Info Section */
+.workflow-info-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.workflow-summary {
+  margin-bottom: 1.5rem;
+}
+
+.workflow-summary h4 {
+  color: #2c5aa0;
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1.4rem;
+}
+
+.workflow-summary .description {
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.workflow-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.requirements-preview {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.requirements-preview strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.requirements-preview ul {
+  margin: 0;
+  padding-left: 1rem;
+  color: #666;
+}
+
+/* Authentication/Start Section */
+.workflow-start-section {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.authenticated-start {
+  text-align: center;
+}
+
+.auth-status {
+  background: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #c3e6cb;
+}
+
+.start-note {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.auth-required {
+  
+}
+
+.auth-intro h5 {
+  color: #2c5aa0;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.auth-intro p {
+  color: #666;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #e1e5e9;
+}
+
+.tab-btn {
+  flex: 1;
+  background: #e1e5e9;
+  border: none;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.tab-btn:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.tab-btn:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.tab-btn.active {
+  background: #2c5aa0;
+  color: white;
+}
+
+.tab-btn:hover:not(.active) {
+  background: #d0d4d8;
+}
+
+.unified-auth-form {
+  
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #e1e5e9;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #2c5aa0;
+}
+
+.form-group input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.form-actions {
+  margin-top: 1.5rem;
+}
+
+.btn-primary.large {
+  width: 100%;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #2c5aa0;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+}
+
+.link-btn:hover {
+  color: #1e3f73;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 1rem;
+  }
+  
+  .modal-content {
+    max-height: 95vh;
+  }
+  
+  .modal-header {
+    padding: 1rem 1.5rem;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .workflow-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .auth-tabs {
+    flex-direction: column;
+  }
+  
+  .tab-btn:first-child {
+    border-radius: 8px 8px 0 0;
+  }
+  
+  .tab-btn:last-child {
+    border-radius: 0 0 8px 8px;
   }
 }

@@ -7,6 +7,8 @@ import { PublicWorkflowCatalog } from './pages/PublicWorkflowCatalog';
 import { WorkflowDetail } from './pages/WorkflowDetail';
 import { WorkflowStartPage } from './pages/WorkflowStartPage';
 import { TrackingPage } from './pages/TrackingPage';
+import { MyEntitiesPage } from './pages/MyEntitiesPage';
+import { EntityDetailPage } from './pages/EntityDetailPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import './App.css';
 
@@ -29,6 +31,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/my-entities" 
+              element={
+                <ProtectedRoute>
+                  <MyEntitiesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/entity/:entityId" 
+              element={
+                <ProtectedRoute>
+                  <EntityDetailPage />
                 </ProtectedRoute>
               } 
             />

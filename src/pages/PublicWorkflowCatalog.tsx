@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService } from '../services/workflowService';
+import { authService } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import type { WorkflowDefinition, WorkflowCategory, WorkflowSearchParams } from '../types/workflow';
 
@@ -37,6 +39,7 @@ const getCategoryTypeLabel = (categoryType?: string, t: any): string => {
 
 export const PublicWorkflowCatalog: React.FC = () => {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
   const [workflows, setWorkflows] = useState<WorkflowDefinition[]>([]);
   const [categories, setCategories] = useState<WorkflowCategory[]>([]);
   const [featuredWorkflows, setFeaturedWorkflows] = useState<WorkflowDefinition[]>([]);
@@ -88,6 +91,8 @@ export const PublicWorkflowCatalog: React.FC = () => {
     }));
   };
 
+
+
   if (isLoading) {
     return (
       <div className="public-catalog">
@@ -109,7 +114,25 @@ export const PublicWorkflowCatalog: React.FC = () => {
               <span className="tagline">{t('workflows.title')}</span>
             </Link>
             <div className="header-actions">
-              <Link to="/auth" className="btn-secondary">{t('auth.login')}</Link>
+              <LanguageSwitcher variant="compact" />
+              {isAuthenticated ? (
+                <>
+                  <Link to="/my-entities" className="btn-secondary">
+                    📂 {t('my_entities.title')}
+                  </Link>
+                  <div className="auth-menu">
+                    <span className="user-email">{authService.getStoredUser()?.email}</span>
+                    <button 
+                      onClick={() => authService.logout()} 
+                      className="btn-secondary"
+                    >
+                      {t('auth.logout')}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <Link to="/auth" className="btn-secondary">{t('auth.login')}</Link>
+              )}
             </div>
           </div>
         </div>
@@ -123,46 +146,6 @@ export const PublicWorkflowCatalog: React.FC = () => {
             <p>{t('workflows.puente_subtitle')}</p>
           </section>
 
-          {/* Featured Categories */}
-          {!searchParams.query && !searchParams.category && categories.length > 0 && (
-            <section className="featured-categories">
-              <h3>{t('workflows.categoriesOfServices')}</h3>
-              <div className="categories-grid">
-                {categories
-                  .sort((a, b) => {
-                    // Priorizar categorías destacadas
-                    if (a.is_featured && !b.is_featured) return -1;
-                    if (!a.is_featured && b.is_featured) return 1;
-                    return a.name.localeCompare(b.name);
-                  })
-                  .map(category => (
-                    <button
-                      key={category.id}
-                      className={`category-card ${category.is_featured ? 'featured' : ''}`}
-                      onClick={() => handleCategoryFilter(category.id)}
-                      style={{ 
-                        '--category-color': category.color || '#6b7280'
-                      } as React.CSSProperties & { '--category-color': string }}
-                    >
-                      <div className="category-header">
-                        <span className="category-icon-large">
-                          {getCategoryIcon(category.icon || category.category_type)}
-                        </span>
-                        {category.is_featured && <span className="featured-star">⭐</span>}
-                      </div>
-                      <div className="category-info">
-                        <h4 className="category-title">{category.name}</h4>
-                        <p className="category-description">{category.description}</p>
-                        <div className="category-meta">
-                          <span className="workflow-count">{t('workflows.workflows_count', { count: category.workflowCount })}</span>
-                          <span className="category-type">{getCategoryTypeLabel(category.category_type, t)}</span>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-              </div>
-            </section>
-          )}
 
           {/* Search and Filters */}
           <section className="search-section">
@@ -217,7 +200,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
                   </span>
                   <span className="category-text">
                     <span className="category-name">{category.name}</span>
-                    <span className="category-count">({category.workflowCount})</span>
+                    <span className="category-count">({category.count})</span>
                     {category.is_featured && <span className="featured-badge">★</span>}
                   </span>
                 </button>

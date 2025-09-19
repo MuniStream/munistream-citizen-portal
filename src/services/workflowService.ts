@@ -26,7 +26,8 @@ class WorkflowService {
       throw new Error('Failed to fetch workflows');
     }
 
-    return response.json();
+    const data = await response.json();
+    return data.workflows || [];
   }
 
   // Get workflow by ID (public)
@@ -53,7 +54,7 @@ class WorkflowService {
     const searchParams = new URLSearchParams();
     addLocaleToParams(searchParams);
     
-    const response = await fetch(`${API_BASE_URL}/public/workflow-categories?${searchParams}`, {
+    const response = await fetch(`${API_BASE_URL}/public/workflows/categories?${searchParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -64,7 +65,8 @@ class WorkflowService {
       throw new Error('Failed to fetch workflow categories');
     }
 
-    return response.json();
+    const data = await response.json();
+    return data.categories || [];
   }
 
   // Get featured/popular workflows (public)
@@ -83,23 +85,36 @@ class WorkflowService {
       throw new Error('Failed to fetch featured workflows');
     }
 
-    return response.json();
+    const data = await response.json();
+    return data.featured || [];
   }
 
-  // Start a new workflow instance (public)
+  // Start a new workflow instance (requires authentication)
   async startWorkflow(workflowId: string, initialData?: Record<string, any>): Promise<WorkflowInstance> {
     const searchParams = new URLSearchParams();
     addLocaleToParams(searchParams);
+    
+    // Get valid token
+    const { authService } = await import('./authService');
+    const token = await authService.getValidToken();
+    if (!token) {
+      throw new Error('Authentication required to start workflows. Please register or login first.');
+    }
     
     const response = await fetch(`${API_BASE_URL}/public/workflows/${workflowId}/start?${searchParams}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(initialData || {}),
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        authService.logout();
+        throw new Error('Session expired. Please login again.');
+      }
       const error = await response.json();
       throw new Error(error.detail || 'Failed to start workflow');
     }
@@ -107,19 +122,31 @@ class WorkflowService {
     return response.json();
   }
 
-  // Track workflow instance progress (public)
+  // Track workflow instance progress (requires authentication)
   async trackWorkflowInstance(instanceId: string): Promise<WorkflowInstanceProgress> {
     const searchParams = new URLSearchParams();
     addLocaleToParams(searchParams);
+    
+    // Get valid token
+    const { authService } = await import('./authService');
+    const token = await authService.getValidToken();
+    if (!token) {
+      throw new Error('Authentication required to track workflows. Please login first.');
+    }
     
     const response = await fetch(`${API_BASE_URL}/public/track/${instanceId}?${searchParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        authService.logout();
+        throw new Error('Session expired. Please login again.');
+      }
       const error = await response.json();
       throw new Error(error.detail || 'Failed to track workflow instance');
     }
@@ -127,19 +154,57 @@ class WorkflowService {
     return response.json();
   }
 
-  // Submit citizen data for a workflow step (public)
+  // Submit citizen data for a workflow step (requires authentication)
   async submitCitizenData(instanceId: string, formData: FormData): Promise<DataSubmissionResponse> {
     const searchParams = new URLSearchParams();
     addLocaleToParams(searchParams);
     
+    // Get valid token
+    const { authService } = await import('./authService');
+    const token = await authService.getValidToken();
+    if (!token) {
+      throw new Error('Authentication required to submit data. Please login first.');
+    }
+    
     const response = await fetch(`${API_BASE_URL}/public/instances/${instanceId}/submit-data?${searchParams}`, {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // Note: Don't set Content-Type when sending FormData, browser will set it with boundary
+      },
       body: formData, // FormData handles multipart/form-data automatically
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        authService.logout();
+        throw new Error('Session expired. Please login again.');
+      }
       const error = await response.json();
       throw new Error(error.detail || 'Failed to submit data');
+    }
+
+    return response.json();
+  }
+
+  // Get customer's workflow instances (requires authentication)
+  async getCustomerWorkflows(): Promise<CustomerWorkflowsResponse> {
+    const token = localStorage.getItem('customer_token');
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+    
+    const response = await fetch(`${API_BASE_URL}/public/auth/my-workflows`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to fetch customer workflows');
     }
 
     return response.json();
@@ -151,7 +216,8 @@ export interface WorkflowInstance {
   instance_id: string;
   workflow_id: string;
   workflow_name: string;
-  citizen_tracking_id: string;
+  customer_tracking_id: string;
+  is_authenticated: boolean;
   status: string;
   created_at: string;
   next_step?: string;
@@ -218,6 +284,25 @@ export interface DataSubmissionResponse {
   message: string;
   next_action: string;
   locale: string;
+}
+
+export interface CustomerWorkflowsResponse {
+  customer_id: string;
+  total_workflows: number;
+  workflows: CustomerWorkflowInstance[];
+}
+
+export interface CustomerWorkflowInstance {
+  instance_id: string;
+  workflow_id: string;
+  workflow_name: string;
+  status: string;
+  progress_percentage: number;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  current_step?: string;
+  tracking_url: string;
 }
 
 export const workflowService = new WorkflowService();

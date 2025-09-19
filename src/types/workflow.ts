@@ -6,9 +6,10 @@ export interface WorkflowDefinition {
   estimatedDuration: string;
   requirements: string[];
   steps: WorkflowStep[];
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  isActive?: boolean;  // Legacy field
+  available?: boolean;  // New field from backend
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface WorkflowStep {

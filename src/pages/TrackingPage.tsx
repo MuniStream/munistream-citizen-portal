@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowInstanceProgress, type DataSubmissionResponse } from '../services/workflowService';
+import { authService } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { DataCollectionForm, type FormField } from '../components/DataCollectionForm';
 
@@ -9,6 +11,7 @@ export const TrackingPage: React.FC = () => {
   const { instanceId } = useParams<{ instanceId: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
   
   const [progress, setProgress] = useState<WorkflowInstanceProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,19 +43,6 @@ export const TrackingPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [instanceId]);
 
-  const handleShare = () => {
-    const url = window.location.href;
-    if (navigator.share) {
-      navigator.share({
-        title: 'Track Application Progress',
-        text: `Track my ${progress?.workflow_name || 'application'} progress`,
-        url: url,
-      });
-    } else {
-      navigator.clipboard.writeText(url);
-      alert(t('workflow.tracking_link_copied'));
-    }
-  };
 
   const handleRefresh = () => {
     setIsLoading(true);
@@ -64,6 +54,8 @@ export const TrackingPage: React.FC = () => {
       case 'completed': return '#28a745';
       case 'failed': return '#dc3545';
       case 'running': return '#2c5aa0';
+      case 'in_progress': return '#2c5aa0';
+      case 'waiting': return '#ffc107';
       case 'paused': return '#ffc107';
       default: return '#6c757d';
     }
@@ -73,7 +65,10 @@ export const TrackingPage: React.FC = () => {
     switch (status) {
       case 'completed': return '✅';
       case 'in_progress': return '🔄';
+      case 'running': return '🔄';
+      case 'waiting': return '⏸️';
       case 'failed': return '❌';
+      case 'pending': return '⏳';
       default: return '⏳';
     }
   };
@@ -180,7 +175,17 @@ export const TrackingPage: React.FC = () => {
             </Link>
             <div className="header-actions">
               <LanguageSwitcher variant="compact" />
-              <button onClick={handleShare} className="btn-secondary">📤 {t('common.share')}</button>
+              {isAuthenticated ? (
+                <div className="auth-menu">
+                  <span className="user-email">{authService.getStoredUser()?.email}</span>
+                  <button 
+                    onClick={() => authService.logout()} 
+                    className="btn-secondary"
+                  >
+                    {t('auth.logout')}
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -236,7 +241,7 @@ export const TrackingPage: React.FC = () => {
               </button>
               
               <p className="auth-note">
-                {t('workflow.auto_refresh_message')} • {t('workflow.share_tracking_text')}
+                {t('workflow.auto_refresh_message')}
               </p>
             </div>
           </section>
@@ -278,7 +283,7 @@ export const TrackingPage: React.FC = () => {
           </section>
 
           {/* Data Collection Section - Prominent Position */}
-          {progress.requires_input && progress.input_form && progress.input_form.sections && (
+          {progress.requires_input && progress.input_form && (progress.input_form.sections || progress.input_form.fields) && (
             <section className="requirements-section" style={{
               backgroundColor: '#fff3cd',
               border: '2px solid #ffc107',
@@ -313,7 +318,21 @@ export const TrackingPage: React.FC = () => {
                   <DataCollectionForm
                     title={progress.input_form.title || t('workflow.provide_required_info_title')}
                     description={progress.input_form.description || t('workflow.provide_required_info_desc')}
-                    fields={progress.input_form.sections.flatMap((section: any) => section.fields)}
+                    sections={progress.input_form.sections}
+                    fields={progress.input_form.fields?.map((field: any) => ({
+                      id: field.name,
+                      name: field.name,
+                      label: field.label || field.name.charAt(0).toUpperCase() + field.name.slice(1),
+                      type: field.type,
+                      required: field.required,
+                      placeholder: field.placeholder,
+                      options: field.options ? (
+                        // Handle both string arrays and object arrays
+                        typeof field.options[0] === 'string' 
+                          ? field.options 
+                          : field.options.map((opt: any) => opt.value || opt)
+                      ) : undefined
+                    }))}
                     onSubmit={handleDataSubmission}
                     isSubmitting={isSubmittingData}
                     submitButtonText={t('common.submit_information')}
@@ -404,11 +423,6 @@ export const TrackingPage: React.FC = () => {
                 <h4>📧 {t('workflow.email_updates')}</h4>
                 <p>{t('workflow.get_progress_notifications')}</p>
                 <button className="btn-secondary">{t('workflow.subscribe')}</button>
-              </div>
-              <div className="help-card">
-                <h4>📱 {t('workflow.share_progress')}</h4>
-                <p>{t('workflow.share_tracking_link')}</p>
-                <button onClick={handleShare} className="btn-secondary">📤 {t('common.share')}</button>
               </div>
             </div>
           </section>

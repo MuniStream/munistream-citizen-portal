@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService } from '../services/workflowService';
+import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import type { WorkflowDefinition } from '../types/workflow';
 
@@ -13,6 +14,7 @@ export const WorkflowDetail: React.FC = () => {
   const [workflow, setWorkflow] = useState<WorkflowDefinition | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showStartModal, setShowStartModal] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -34,8 +36,8 @@ export const WorkflowDetail: React.FC = () => {
   };
 
   const handleStartApplication = () => {
-    // Navigate to public workflow start page (no auth required)
-    navigate(`/start/${id}`);
+    // Show unified modal instead of navigating
+    setShowStartModal(true);
   };
 
   if (isLoading) {
@@ -72,7 +74,15 @@ export const WorkflowDetail: React.FC = () => {
             </Link>
             <div className="header-actions">
               {isAuthenticated ? (
-                <Link to="/dashboard" className="btn-secondary">{t('dashboard.title')}</Link>
+                <div className="auth-menu">
+                  <span className="user-email">{authService.getStoredUser()?.email}</span>
+                  <button 
+                    onClick={() => authService.logout()} 
+                    className="btn-secondary"
+                  >
+                    {t('auth.logout')}
+                  </button>
+                </div>
               ) : (
                 <Link to="/auth" className="btn-secondary">{t('auth.login')}</Link>
               )}
@@ -108,8 +118,8 @@ export const WorkflowDetail: React.FC = () => {
                 </div>
                 <div className="meta-item">
                   <span className="label">{t('applications.status')}:</span>
-                  <span className={`status ${workflow.isActive ? 'active' : 'inactive'}`}>
-                    {workflow.isActive ? '✅ Available' : '⏸️ Temporarily Unavailable'}
+                  <span className={`status ${(workflow.available ?? workflow.isActive) ? 'active' : 'inactive'}`}>
+                    {(workflow.available ?? workflow.isActive) ? '✅ Available' : '⏸️ Temporarily Unavailable'}
                   </span>
                 </div>
               </div>
@@ -119,7 +129,7 @@ export const WorkflowDetail: React.FC = () => {
               <button 
                 className="btn-primary large"
                 onClick={handleStartApplication}
-                disabled={!workflow.isActive}
+                disabled={!(workflow.available ?? workflow.isActive)}
               >
                 {t('workflows.startApplication')}
               </button>
@@ -197,6 +207,181 @@ export const WorkflowDetail: React.FC = () => {
           </section>
         </div>
       </main>
+
+      {/* Unified Workflow Start Modal */}
+      {showStartModal && workflow && (
+        <UnifiedWorkflowModal
+          workflow={workflow}
+          onClose={() => setShowStartModal(false)}
+          onWorkflowStarted={(instanceId) => {
+            setShowStartModal(false);
+            navigate(`/track/${instanceId}`);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+interface UnifiedWorkflowModalProps {
+  workflow: WorkflowDefinition;
+  onClose: () => void;
+  onWorkflowStarted: (instanceId: string) => void;
+}
+
+const UnifiedWorkflowModal: React.FC<UnifiedWorkflowModalProps> = ({ workflow, onClose, onWorkflowStarted }) => {
+  const { t } = useTranslation();
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    full_name: '',
+    phone: '',
+    document_number: ''
+  });
+  
+  const isAuthenticated = authService.isAuthenticated();
+
+  const handleStartWorkflow = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // If user is not authenticated, authenticate first
+      if (!isAuthenticated) {
+        if (authMode === 'login') {
+          await authService.login({
+            email: formData.email,
+            password: formData.password
+          });
+        } else {
+          await authService.register({
+            email: formData.email,
+            password: formData.password,
+            full_name: formData.full_name,
+            phone: formData.phone,
+            document_number: formData.document_number
+          });
+        }
+      }
+      
+      // Start workflow immediately after authentication (or if already authenticated)
+      const instance = await workflowService.startWorkflow(workflow.id);
+      onWorkflowStarted(instance.instance_id);
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start workflow');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content unified-workflow-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>Iniciar Trámite</h3>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+
+        <div className="modal-body">
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
+          {isAuthenticated ? (
+            <div className="authenticated-start">
+              <p>¿Listo para comenzar tu trámite?</p>
+              <button 
+                className="btn-primary large"
+                onClick={() => handleStartWorkflow()}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? '🔄 Iniciando...' : '🚀 Iniciar Trámite'}
+              </button>
+            </div>
+          ) : (
+            <div className="auth-required">
+              <p>Necesitas una cuenta para continuar</p>
+
+              <div className="auth-tabs">
+                <button 
+                  className={`tab-btn ${authMode === 'login' ? 'active' : ''}`}
+                  onClick={() => setAuthMode('login')}
+                  disabled={isSubmitting}
+                >
+                  Iniciar Sesión
+                </button>
+                <button 
+                  className={`tab-btn ${authMode === 'register' ? 'active' : ''}`}
+                  onClick={() => setAuthMode('register')}
+                  disabled={isSubmitting}
+                >
+                  Registrarse
+                </button>
+              </div>
+
+              <form onSubmit={handleStartWorkflow} className="unified-auth-form">
+                <div className="form-group">
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleChange('email', e.target.value)}
+                    required
+                    disabled={isSubmitting}
+                    placeholder="Email"
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => handleChange('password', e.target.value)}
+                    required
+                    disabled={isSubmitting}
+                    placeholder="Contraseña"
+                  />
+                </div>
+
+                {authMode === 'register' && (
+                  <div className="form-group">
+                    <input
+                      type="text"
+                      value={formData.full_name}
+                      onChange={(e) => handleChange('full_name', e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                      placeholder="Nombre completo"
+                    />
+                  </div>
+                )}
+
+                <button 
+                  type="submit" 
+                  className="btn-primary large"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting 
+                    ? '🔄 Procesando...' 
+                    : authMode === 'login' 
+                      ? 'Iniciar Sesión y Comenzar'
+                      : 'Registrarse y Comenzar'
+                  }
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

@@ -10,14 +10,15 @@ import type {
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 class AuthService {
+  private tokenExpiryTimer: NodeJS.Timeout | null = null;
+
   // Login
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/public/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include', // Include cookies for httpOnly tokens
       body: JSON.stringify(credentials),
     });
 
@@ -26,17 +27,25 @@ class AuthService {
       throw new Error(error.detail || 'Login failed');
     }
 
-    return response.json();
+    const data = await response.json();
+    
+    // Store token and user data
+    if (data.access_token) {
+      localStorage.setItem('customer_token', data.access_token);
+      localStorage.setItem('customer_user', JSON.stringify(data.customer));
+      this.setupTokenExpiry(data.access_token);
+    }
+
+    return data;
   }
 
   // Register
   async register(userData: RegisterRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/public/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include',
       body: JSON.stringify(userData),
     });
 
@@ -45,107 +54,142 @@ class AuthService {
       throw new Error(error.detail || 'Registration failed');
     }
 
-    return response.json();
+    const data = await response.json();
+    
+    // Store token and user data
+    if (data.access_token) {
+      localStorage.setItem('customer_token', data.access_token);
+      localStorage.setItem('customer_user', JSON.stringify(data.customer));
+      this.setupTokenExpiry(data.access_token);
+    }
+
+    return data;
   }
 
   // Logout
   async logout(): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      throw new Error('Logout failed');
+    // Clear timer
+    if (this.tokenExpiryTimer) {
+      clearTimeout(this.tokenExpiryTimer);
+      this.tokenExpiryTimer = null;
     }
+    
+    // Remove all stored data
+    localStorage.removeItem('customer_token');
+    localStorage.removeItem('customer_user');
+    
+    // Redirect to home page
+    window.location.href = '/';
   }
 
   // Get current user profile
   async getCurrentUser(): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    const token = await this.getValidToken();
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    
+    const response = await fetch(`${API_BASE_URL}/public/auth/me`, {
       method: 'GET',
-      credentials: 'include',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        // Token expired or invalid
+        this.logout();
+        throw new Error('Session expired. Please login again.');
+      }
       throw new Error('Failed to get user profile');
     }
 
     return response.json();
   }
 
-  // Refresh token
-  async refreshToken(): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      throw new Error('Token refresh failed');
+  // Check if user is authenticated
+  isAuthenticated(): boolean {
+    const token = localStorage.getItem('customer_token');
+    if (!token) return false;
+    
+    // Check if token is expired
+    if (this.isTokenExpired(token)) {
+      this.logout();
+      return false;
     }
-
-    return response.json();
+    
+    return true;
   }
 
-  // Request password reset
-  async requestPasswordReset(data: PasswordResetRequest): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/auth/password-reset`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Password reset request failed');
+  // Get stored token if valid, otherwise logout
+  async getValidToken(): Promise<string | null> {
+    const token = localStorage.getItem('customer_token');
+    if (!token) return null;
+    
+    if (this.isTokenExpired(token)) {
+      this.logout();
+      return null;
     }
+    
+    return token;
   }
 
-  // Confirm password reset
-  async confirmPasswordReset(data: PasswordResetConfirm): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/auth/password-reset/confirm`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Password reset failed');
-    }
+  // Get stored token (without validation)
+  getToken(): string | null {
+    return localStorage.getItem('customer_token');
   }
 
-  // Verify email
-  async verifyEmail(token: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/auth/verify-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ token }),
-    });
+  // Get stored user data
+  getStoredUser(): User | null {
+    const userData = localStorage.getItem('customer_user');
+    return userData ? JSON.parse(userData) : null;
+  }
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Email verification failed');
+  // Check if token is expired
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      return payload.exp < currentTime;
+    } catch {
+      return true; // If can't decode, consider expired
     }
   }
 
-  // Resend email verification
-  async resendEmailVerification(): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/auth/verify-email/resend`, {
-      method: 'POST',
-      credentials: 'include',
-    });
+  // Setup auto-logout when token expires
+  private setupTokenExpiry(token: string): void {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiryTime = payload.exp * 1000; // Convert to milliseconds
+      const currentTime = Date.now();
+      const timeUntilExpiry = expiryTime - currentTime;
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to resend verification email');
+      // Clear existing timer
+      if (this.tokenExpiryTimer) {
+        clearTimeout(this.tokenExpiryTimer);
+      }
+
+      // Set new timer (logout 30 seconds before expiry)
+      if (timeUntilExpiry > 30000) {
+        this.tokenExpiryTimer = setTimeout(() => {
+          alert('Your session will expire soon. Please save your work.');
+          // Auto-logout after warning
+          setTimeout(() => {
+            this.logout();
+          }, 30000);
+        }, timeUntilExpiry - 30000);
+      }
+    } catch (error) {
+      console.error('Error setting up token expiry:', error);
+    }
+  }
+
+  // Handle API errors globally
+  handleApiError(response: Response): void {
+    if (response.status === 401) {
+      this.logout();
+      throw new Error('Session expired. Please login again.');
     }
   }
 }

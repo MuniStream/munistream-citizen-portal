@@ -1,0 +1,518 @@
+.entity-detail-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e8f4f8 0%, #f8f9fa 100%);
+}
+
+.detail-header {
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.detail-main {
+  padding: 2rem 0;
+}
+
+/* Entity Header Section */
+.entity-header-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.entity-header-info {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.entity-icon-large {
+  font-size: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  background: #f0f7ff;
+  border-radius: 12px;
+}
+
+.entity-title-info {
+  flex: 1;
+}
+
+.entity-title-info h2 {
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+  color: #2c5aa0;
+}
+
+.entity-meta-badges {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.entity-type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #e8f4f8;
+  color: #2c5aa0;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.verified-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #d4edda;
+  color: #155724;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.entity-id {
+  color: #666;
+  font-size: 0.9rem;
+  font-family: monospace;
+  margin: 0;
+}
+
+/* Entity Data Section */
+.entity-data-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.entity-data-section h3 {
+  margin-bottom: 1.5rem;
+  color: #2c5aa0;
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.data-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.data-item label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+  text-transform: capitalize;
+}
+
+.data-item span {
+  font-size: 1rem;
+  color: #333;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  word-break: break-word;
+}
+
+.entity-timestamps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+  margin-top: 2rem;
+}
+
+.timestamp-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timestamp-label {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Workflows Section */
+.workflows-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.workflows-section h3 {
+  margin-bottom: 1.5rem;
+  color: #2c5aa0;
+}
+
+.workflows-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.workflow-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.2s;
+  background: #fafafa;
+}
+
+.workflow-card:hover {
+  border-color: #2c5aa0;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.workflow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.workflow-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.workflow-category {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: #e8f4f8;
+  color: #2c5aa0;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.workflow-description {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.workflow-duration {
+  display: inline-block;
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.btn-primary.full-width {
+  width: 100%;
+}
+
+.no-workflows {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+/* Instances Section */
+.instances-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.instances-section h3 {
+  margin-bottom: 1.5rem;
+  color: #2c5aa0;
+}
+
+.instances-table {
+  overflow-x: auto;
+}
+
+.instances-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.instances-table th {
+  text-align: left;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  color: #495057;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.instances-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.instances-table tr:hover {
+  background: #f8f9fa;
+}
+
+.status-icon {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.btn-link {
+  color: #2c5aa0;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.btn-link:hover {
+  color: #1e3a6f;
+  text-decoration: underline;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 4rem;
+  background: white;
+  border-radius: 12px;
+  margin: 2rem auto;
+  max-width: 400px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #2c5aa0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 12px;
+  margin: 2rem auto;
+  max-width: 500px;
+}
+
+.error-state p {
+  color: #dc3545;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+/* Documents Section */
+.documents-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.documents-section h3 {
+  margin-bottom: 1.5rem;
+  color: #2c5aa0;
+}
+
+.loading-documents {
+  text-align: center;
+  padding: 2rem;
+}
+
+.spinner.small {
+  width: 30px;
+  height: 30px;
+  border-width: 3px;
+}
+
+.no-documents {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.documents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.document-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: #fafafa;
+  transition: all 0.2s;
+}
+
+.document-card:hover {
+  border-color: #2c5aa0;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.document-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.document-icon {
+  font-size: 2rem;
+  margin-right: 1rem;
+}
+
+.document-info {
+  flex: 1;
+}
+
+.document-info h4 {
+  margin: 0 0 0.25rem 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.document-number {
+  margin: 0;
+  color: #666;
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
+.doc-status-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.doc-status-badge.expired {
+  background-color: #dc3545;
+}
+
+.document-details {
+  padding: 1rem 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 1rem;
+}
+
+.document-meta-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.document-meta-item:last-child {
+  margin-bottom: 0;
+}
+
+.document-meta-item label {
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.document-meta-item span {
+  color: #333;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.expired-text {
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.document-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.document-actions .btn-secondary.small {
+  flex: 1;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .entity-header-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .entity-icon-large {
+    margin: 0 auto;
+  }
+  
+  .entity-meta-badges {
+    justify-content: center;
+  }
+  
+  .data-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .workflows-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .entity-timestamps {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .instances-table {
+    font-size: 0.85rem;
+  }
+  
+  .instances-table th,
+  .instances-table td {
+    padding: 0.5rem;
+  }
+}
