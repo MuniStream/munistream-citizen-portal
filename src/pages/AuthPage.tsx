@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LoginForm } from '../components/auth/LoginForm';
-import { RegisterForm } from '../components/auth/RegisterForm';
-import { PasswordResetForm } from '../components/auth/PasswordResetForm';
-
-type AuthMode = 'login' | 'register' | 'reset';
 
 export const AuthPage: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
-  const [mode, setMode] = useState<AuthMode>('login');
+  const { isAuthenticated, isLoading, login, register } = useAuth();
 
   // Show loading spinner while checking auth status
   if (isLoading) {
@@ -30,9 +24,14 @@ export const AuthPage: React.FC = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const handleAuthSuccess = () => {
-    // The redirect will happen automatically due to the Navigate above
-    // when isAuthenticated becomes true
+  const handleLogin = () => {
+    // Redirect to Keycloak login
+    login();
+  };
+
+  const handleRegister = () => {
+    // Redirect to Keycloak registration
+    register();
   };
 
   return (
@@ -44,27 +43,37 @@ export const AuthPage: React.FC = () => {
         </div>
 
         <div className="auth-content">
-          {mode === 'login' && (
-            <LoginForm
-              onSuccess={handleAuthSuccess}
-              onSwitchToRegister={() => setMode('register')}
-              onSwitchToPasswordReset={() => setMode('reset')}
-            />
-          )}
+          <div className="auth-card">
+            <h2>Welcome to MuniStream</h2>
+            <p className="description">
+              Access government services and manage your applications with secure authentication powered by Keycloak.
+            </p>
 
-          {mode === 'register' && (
-            <RegisterForm
-              onSuccess={handleAuthSuccess}
-              onSwitchToLogin={() => setMode('login')}
-            />
-          )}
+            <div className="auth-buttons">
+              <button
+                className="btn btn-primary"
+                onClick={handleLogin}
+              >
+                Sign In
+              </button>
 
-          {mode === 'reset' && (
-            <PasswordResetForm
-              onSuccess={() => setMode('login')}
-              onSwitchToLogin={() => setMode('login')}
-            />
-          )}
+              <button
+                className="btn btn-secondary"
+                onClick={handleRegister}
+              >
+                Register New Account
+              </button>
+            </div>
+
+            <div className="auth-info">
+              <p className="info-text">
+                You will be redirected to our secure authentication portal
+              </p>
+              <p className="info-text small">
+                Your data is protected with enterprise-grade security
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="auth-footer">

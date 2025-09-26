@@ -94,11 +94,12 @@ class WorkflowService {
     const searchParams = new URLSearchParams();
     addLocaleToParams(searchParams);
     
-    // Get valid token
-    const { authService } = await import('./authService');
-    const token = await authService.getValidToken();
+    // Get Keycloak token
+    const keycloakService = (await import('./keycloak')).default;
+    const token = keycloakService.getToken();
+    console.log('[WorkflowService] Token available:', !!token);
     if (!token) {
-      throw new Error('Authentication required to start workflows. Please register or login first.');
+      throw new Error('Authentication required to start workflows. Please login first.');
     }
     
     const response = await fetch(`${API_BASE_URL}/public/workflows/${workflowId}/start?${searchParams}`, {
@@ -112,7 +113,7 @@ class WorkflowService {
 
     if (!response.ok) {
       if (response.status === 401) {
-        authService.logout();
+        // Token expired, Keycloak will handle re-authentication
         throw new Error('Session expired. Please login again.');
       }
       const error = await response.json();
@@ -122,29 +123,22 @@ class WorkflowService {
     return response.json();
   }
 
-  // Track workflow instance progress (requires authentication)
+  // Track workflow instance progress (public - no auth required)
   async trackWorkflowInstance(instanceId: string): Promise<WorkflowInstanceProgress> {
     const searchParams = new URLSearchParams();
     addLocaleToParams(searchParams);
-    
-    // Get valid token
-    const { authService } = await import('./authService');
-    const token = await authService.getValidToken();
-    if (!token) {
-      throw new Error('Authentication required to track workflows. Please login first.');
-    }
-    
+
+    // Tracking is public - no authentication required
     const response = await fetch(`${API_BASE_URL}/public/track/${instanceId}?${searchParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
     });
 
     if (!response.ok) {
       if (response.status === 401) {
-        authService.logout();
+        // Token expired, Keycloak will handle re-authentication
         throw new Error('Session expired. Please login again.');
       }
       const error = await response.json();
@@ -160,8 +154,8 @@ class WorkflowService {
     addLocaleToParams(searchParams);
     
     // Get valid token
-    const { authService } = await import('./authService');
-    const token = await authService.getValidToken();
+    const keycloakService = (await import('./keycloak')).default;
+    const token = keycloakService.getToken();
     if (!token) {
       throw new Error('Authentication required to submit data. Please login first.');
     }
@@ -177,7 +171,7 @@ class WorkflowService {
 
     if (!response.ok) {
       if (response.status === 401) {
-        authService.logout();
+        // Token expired, Keycloak will handle re-authentication
         throw new Error('Session expired. Please login again.');
       }
       const error = await response.json();
@@ -189,7 +183,8 @@ class WorkflowService {
 
   // Get customer's workflow instances (requires authentication)
   async getCustomerWorkflows(): Promise<CustomerWorkflowsResponse> {
-    const token = localStorage.getItem('customer_token');
+    const keycloakService = (await import('./keycloak')).default;
+    const token = keycloakService.getToken();
     if (!token) {
       throw new Error('Authentication required');
     }

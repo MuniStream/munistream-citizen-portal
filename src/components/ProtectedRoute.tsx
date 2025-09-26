@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import keycloakService from '../services/keycloak';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -26,13 +27,19 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Redirect to auth page if not authenticated
+  // Redirect to Keycloak login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      keycloakService.login();
+    }
+  }, [isLoading, isAuthenticated]);
+
   if (!isAuthenticated) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return null; // Will redirect to Keycloak
   }
 
   // Check email verification if required
-  if (requireEmailVerification && user && !user.isEmailVerified) {
+  if (requireEmailVerification && user && !user.emailVerified) {
     return <Navigate to="/verify-email" replace />;
   }
 

@@ -1,164 +1,223 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import type { AuthState, User, LoginRequest, RegisterRequest } from '../types/auth';
-import { authService } from '../services/authService';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
+import keycloakService from '../services/keycloak';
+
+// Citizen user interface
+export interface User {
+  id: string;
+  email: string;
+  username: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  document_type?: string;
+  document_number?: string;
+  address?: string;
+  municipality?: string;
+  curp?: string; // Mexican citizen ID
+  locale: 'es' | 'en';
+  emailVerified: boolean;
+  roles: string[];
+  verified: boolean;
+  created_at: string;
+  lastLogin?: string;
+}
+
+export interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+}
 
 interface AuthContextType extends AuthState {
-  login: (credentials: LoginRequest) => Promise<void>;
-  register: (userData: RegisterRequest) => Promise<void>;
+  login: () => Promise<void>;
+  register: () => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
+  updateUser: (user: User) => void;
+  hasRole: (role: string) => boolean;
+  hasAnyRole: (roles: string[]) => boolean;
+  refreshToken: () => Promise<boolean>;
+  accountManagement: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Auth reducer
-type AuthAction =
-  | { type: 'AUTH_START' }
-  | { type: 'AUTH_SUCCESS'; payload: User }
-  | { type: 'AUTH_FAILURE'; payload: string }
-  | { type: 'AUTH_LOGOUT' }
-  | { type: 'CLEAR_ERROR' };
-
-const authReducer = (state: AuthState, action: AuthAction): AuthState => {
-  switch (action.type) {
-    case 'AUTH_START':
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
-    case 'AUTH_SUCCESS':
-      return {
-        ...state,
-        user: action.payload,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      };
-    case 'AUTH_FAILURE':
-      return {
-        ...state,
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: action.payload,
-      };
-    case 'AUTH_LOGOUT':
-      return {
-        ...state,
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: null,
-      };
-    case 'CLEAR_ERROR':
-      return {
-        ...state,
-        error: null,
-      };
-    default:
-      return state;
-  }
-};
-
-const initialState: AuthState = {
-  user: null,
-  isAuthenticated: false,
-  isLoading: true, // Start with loading to check existing session
-  error: null,
-};
-
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
-
-  // Check for existing session on mount
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        dispatch({ type: 'AUTH_START' });
-        const user = await authService.getCurrentUser();
-        dispatch({ type: 'AUTH_SUCCESS', payload: user });
-      } catch (error) {
-        // If getCurrentUser fails, try to refresh token
-        try {
-          const authResponse = await authService.refreshToken();
-          dispatch({ type: 'AUTH_SUCCESS', payload: authResponse.user });
-        } catch (refreshError) {
-          // Both failed, user is not authenticated
-          dispatch({ type: 'AUTH_LOGOUT' });
-        }
-      }
-    };
-
-    checkAuthStatus();
-  }, []);
-
-  const login = async (credentials: LoginRequest) => {
-    try {
-      dispatch({ type: 'AUTH_START' });
-      const authResponse = await authService.login(credentials);
-      dispatch({ type: 'AUTH_SUCCESS', payload: authResponse.user });
-    } catch (error) {
-      dispatch({ 
-        type: 'AUTH_FAILURE', 
-        payload: error instanceof Error ? error.message : 'Login failed' 
-      });
-      throw error;
-    }
-  };
-
-  const register = async (userData: RegisterRequest) => {
-    try {
-      dispatch({ type: 'AUTH_START' });
-      const authResponse = await authService.register(userData);
-      dispatch({ type: 'AUTH_SUCCESS', payload: authResponse.user });
-    } catch (error) {
-      dispatch({ 
-        type: 'AUTH_FAILURE', 
-        payload: error instanceof Error ? error.message : 'Registration failed' 
-      });
-      throw error;
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await authService.logout();
-    } catch (error) {
-      // Even if logout API call fails, clear local state
-      console.error('Logout error:', error);
-    } finally {
-      dispatch({ type: 'AUTH_LOGOUT' });
-    }
-  };
-
-  const clearError = () => {
-    dispatch({ type: 'CLEAR_ERROR' });
-  };
-
-  const value: AuthContextType = {
-    ...state,
-    login,
-    register,
-    logout,
-    clearError,
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
 };
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const initRef = useRef(false);
+
+  // Initialize Keycloak and set user
+  useEffect(() => {
+    // Prevent double initialization in React StrictMode
+    if (initRef.current) return;
+    initRef.current = true;
+
+    const initAuth = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const authenticated = await keycloakService.init();
+
+        if (authenticated) {
+          const userInfo = keycloakService.getUserInfo();
+
+          if (userInfo && userInfo.id) {
+            // Create citizen user object compatible with existing interface
+            const citizenUser: User = {
+              id: userInfo.id,
+              email: userInfo.email || '',
+              username: userInfo.username || userInfo.email || '',
+              name: userInfo.name || `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() || userInfo.username,
+              firstName: userInfo.firstName,
+              lastName: userInfo.lastName,
+              phone: userInfo.phone,
+              document_type: userInfo.document_type,
+              document_number: userInfo.document_number,
+              address: userInfo.address,
+              municipality: userInfo.municipality,
+              curp: userInfo.curp,
+              locale: userInfo.locale || 'es',
+              emailVerified: userInfo.emailVerified || false,
+              roles: userInfo.roles || [],
+              verified: userInfo.emailVerified || false,
+              created_at: new Date().toISOString(),
+              lastLogin: new Date().toISOString(),
+            };
+
+            setUser(citizenUser);
+
+            // Load additional profile data if needed
+            try {
+              const profile = await keycloakService.loadUserProfile();
+              if (profile) {
+                setUser(prev => ({
+                  ...prev!,
+                  firstName: profile.firstName || prev!.firstName,
+                  lastName: profile.lastName || prev!.lastName,
+                  name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || prev!.name,
+                  email: profile.email || prev!.email,
+                  emailVerified: profile.emailVerified || prev!.emailVerified,
+                  verified: profile.emailVerified || prev!.verified,
+                }));
+              }
+            } catch (error) {
+              console.error('Failed to load user profile:', error);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        setError('Failed to initialize authentication');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
+  }, []); // Empty dependency array - run once
+
+  // Login function
+  const login = async (): Promise<void> => {
+    setError(null);
+    await keycloakService.login();
+    // This will redirect to Keycloak, so the promise won't resolve
+  };
+
+  // Register function for citizen self-registration
+  const register = async (): Promise<void> => {
+    setError(null);
+    await keycloakService.register();
+    // This will redirect to Keycloak registration page
+  };
+
+  // Logout function
+  const logout = async (): Promise<void> => {
+    setUser(null);
+    await keycloakService.logout();
+    // This will redirect to Keycloak logout
+  };
+
+  // Clear error
+  const clearError = (): void => {
+    setError(null);
+  };
+
+  // Update user function
+  const updateUser = (updatedUser: User): void => {
+    setUser(updatedUser);
+  };
+
+  // Check if user has a specific role
+  const hasRole = (role: string): boolean => {
+    return user?.roles?.includes(role) || false;
+  };
+
+  // Check if user has any of the specified roles
+  const hasAnyRole = (roles: string[]): boolean => {
+    if (!user?.roles) return false;
+    return roles.some(role => user.roles.includes(role));
+  };
+
+  // Refresh token
+  const refreshToken = async (): Promise<boolean> => {
+    try {
+      return await keycloakService.refreshToken();
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      setError('Session refresh failed');
+      return false;
+    }
+  };
+
+  // Account management - redirect to Keycloak account console
+  const accountManagement = async (): Promise<void> => {
+    await keycloakService.accountManagement();
+  };
+
+  // Compute isAuthenticated
+  const isAuthenticated = React.useMemo(
+    () => keycloakService.isAuthenticated() && !!user,
+    [user]
+  );
+
+  // Create context value
+  const value = React.useMemo(
+    () => ({
+      user,
+      isLoading,
+      isAuthenticated,
+      error,
+      login,
+      register,
+      logout,
+      clearError,
+      updateUser,
+      hasRole,
+      hasAnyRole,
+      refreshToken,
+      accountManagement,
+    }),
+    [user, isLoading, isAuthenticated, error]
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export default AuthContext;

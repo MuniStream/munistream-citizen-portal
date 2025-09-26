@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowDefinition, type WorkflowInstance } from '../services/workflowService';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import keycloakService from '../services/keycloak';
 
 export const WorkflowStartPage: React.FC = () => {
   const { workflowId } = useParams<{ workflowId: string }>();
@@ -88,7 +89,7 @@ export const WorkflowStartPage: React.FC = () => {
             </Link>
             <div className="header-actions">
               <LanguageSwitcher variant="compact" />
-              <Link to="/auth" className="btn-secondary">{t('auth.login')}</Link>
+              <button onClick={() => keycloakService.login()} className="btn-secondary">{t('auth.login')}</button>
             </div>
           </div>
         </div>

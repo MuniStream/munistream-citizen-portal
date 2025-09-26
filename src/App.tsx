@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { AuthPage } from './pages/AuthPage';
 import { Dashboard } from './pages/Dashboard';
 import { PublicWorkflowCatalog } from './pages/PublicWorkflowCatalog';
 import { WorkflowDetail } from './pages/WorkflowDetail';
@@ -19,7 +18,6 @@ function App() {
         <div className="app">
           <Routes>
             {/* Public routes */}
-            <Route path="/auth" element={<AuthPage />} />
             <Route path="/services" element={<PublicWorkflowCatalog />} />
             <Route path="/services/:id" element={<WorkflowDetail />} />
             <Route path="/start/:workflowId" element={<WorkflowStartPage />} />

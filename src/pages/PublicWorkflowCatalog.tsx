@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService } from '../services/workflowService';
-import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import keycloakService from '../services/keycloak';
 import type { WorkflowDefinition, WorkflowCategory, WorkflowSearchParams } from '../types/workflow';
 
 // Función para obtener iconos de categorías
@@ -39,7 +39,7 @@ const getCategoryTypeLabel = (categoryType?: string, t: any): string => {
 
 export const PublicWorkflowCatalog: React.FC = () => {
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const [workflows, setWorkflows] = useState<WorkflowDefinition[]>([]);
   const [categories, setCategories] = useState<WorkflowCategory[]>([]);
   const [featuredWorkflows, setFeaturedWorkflows] = useState<WorkflowDefinition[]>([]);
@@ -121,9 +121,9 @@ export const PublicWorkflowCatalog: React.FC = () => {
                     📂 {t('my_entities.title')}
                   </Link>
                   <div className="auth-menu">
-                    <span className="user-email">{authService.getStoredUser()?.email}</span>
-                    <button 
-                      onClick={() => authService.logout()} 
+                    <span className="user-email">{user?.email}</span>
+                    <button
+                      onClick={() => logout()}
                       className="btn-secondary"
                     >
                       {t('auth.logout')}
@@ -131,7 +131,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
                   </div>
                 </>
               ) : (
-                <Link to="/auth" className="btn-secondary">{t('auth.login')}</Link>
+                <button onClick={() => keycloakService.login()} className="btn-secondary">{t('auth.login')}</button>
               )}
             </div>
           </div>
