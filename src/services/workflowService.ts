@@ -1,5 +1,6 @@
 import type { WorkflowDefinition, WorkflowCategory, WorkflowSearchParams } from '../types/workflow';
 import { addLocaleToParams } from '../utils/locale';
+import { authService } from './authService';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -123,16 +124,22 @@ class WorkflowService {
     return response.json();
   }
 
-  // Track workflow instance progress (public - no auth required)
+  // Track workflow instance progress - requires authentication
   async trackWorkflowInstance(instanceId: string): Promise<WorkflowInstanceProgress> {
     const searchParams = new URLSearchParams();
     addLocaleToParams(searchParams);
 
-    // Tracking is public - no authentication required
+    // Get authentication token
+    const token = authService.getToken();
+    if (!token) {
+      throw new Error('Authentication required to track workflow');
+    }
+
     const response = await fetch(`${API_BASE_URL}/public/track/${instanceId}?${searchParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
     });
 
