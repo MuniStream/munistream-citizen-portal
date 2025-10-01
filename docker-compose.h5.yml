@@ -1,0 +1,83 @@
+# H5 Multi-tenant Docker Compose for MuniStream Citizen Portal
+# This file defines 3 containers for each client with proper port mapping
+
+services:
+  # Core Client - Base ports
+  citizen-portal-core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: citizen-portal-core
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - CLIENT_NAME=core
+      - VITE_API_URL=http://localhost:8000/api/v1
+      - VITE_KEYCLOAK_URL=http://localhost:9000
+      - VITE_KEYCLOAK_REALM=core
+      - VITE_KEYCLOAK_CLIENT_ID=munistream-citizen-portal
+      - DATABASE_URL=${DATABASE_URL_CORE}
+    networks:
+      - munistream-network
+    restart: unless-stopped
+    labels:
+      - "com.munistream.client=core"
+      - "com.munistream.service=citizen-portal"
+      - "com.munistream.port=3000"
+
+  # Conapesca Client - +1 port increment
+  citizen-portal-conapesca:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: citizen-portal-conapesca
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - CLIENT_NAME=conapesca
+      - VITE_API_URL=http://localhost:8001/api/v1
+      - VITE_KEYCLOAK_URL=http://localhost:9001
+      - VITE_KEYCLOAK_REALM=conapesca
+      - VITE_KEYCLOAK_CLIENT_ID=munistream-citizen-portal
+      - DATABASE_URL=${DATABASE_URL_CONAPESCA}
+    networks:
+      - munistream-network
+    restart: unless-stopped
+    labels:
+      - "com.munistream.client=conapesca"
+      - "com.munistream.service=citizen-portal"
+      - "com.munistream.port=3001"
+
+  # Tesoreriacdmx Client - +2 port increment
+  citizen-portal-teso:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: citizen-portal-teso
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=production
+      - CLIENT_NAME=tesoreriacdmx
+      - VITE_API_URL=http://localhost:8002/api/v1
+      - VITE_KEYCLOAK_URL=http://localhost:9002
+      - VITE_KEYCLOAK_REALM=tesoreriacdmx
+      - VITE_KEYCLOAK_CLIENT_ID=munistream-citizen-portal
+      - DATABASE_URL=${DATABASE_URL_TESO}
+    networks:
+      - munistream-network
+    restart: unless-stopped
+    labels:
+      - "com.munistream.client=tesoreriacdmx"
+      - "com.munistream.service=citizen-portal"
+      - "com.munistream.port=3002"
+
+networks:
+  munistream-network:
+    driver: bridge
+    name: munistream-network

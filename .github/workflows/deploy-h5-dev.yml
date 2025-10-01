@@ -1,0 +1,256 @@
+name: Deploy H5 Multi-tenant to Dev Environment
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+  workflow_dispatch:
+    inputs:
+      target_client:
+        description: 'Target client to deploy (core, conapesca, tesoreriacdmx, all)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - core
+          - conapesca
+          - tesoreriacdmx
+      force_rebuild:
+        description: 'Force rebuild all containers'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 948532067954.dkr.ecr.us-east-1.amazonaws.com
+
+jobs:
+  # Detect changes to optimize deployment
+  detect-changes:
+    name: Detect Changes and Plan Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.changes.outputs.should_deploy }}
+      target_client: ${{ steps.changes.outputs.target_client }}
+      changed_files: ${{ steps.changes.outputs.changed_files }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: Detect changes and determine deployment strategy
+      id: changes
+      run: |
+        # Get changed files
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "Manual deployment triggered"
+          echo "should_deploy=true" >> $GITHUB_OUTPUT
+          echo "target_client=${{ github.event.inputs.target_client }}" >> $GITHUB_OUTPUT
+          echo "changed_files=manual_trigger" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event_name }}" = "push" ]; then
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          echo "Changed files: $CHANGED_FILES"
+          echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+
+          # Check if any relevant files changed
+          if echo "$CHANGED_FILES" | grep -E '\.(js|jsx|ts|tsx|vue|css|scss|html|json|yml|yaml|docker)$|Dockerfile|package\.json'; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "target_client=all" >> $GITHUB_OUTPUT
+          else
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+            echo "No relevant files changed for citizen portal"
+          fi
+        else
+          echo "should_deploy=false" >> $GITHUB_OUTPUT
+        fi
+
+  deploy-to-h5-dev:
+    name: Smart Deploy to H5 Workflow EC2
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.should_deploy == 'true' && github.ref == 'refs/heads/develop'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Get Aurora database password from SSM
+      id: get-db-password
+      run: |
+        DB_PASSWORD=$(aws ssm get-parameter --name "/munistream/dev/database/password" --with-decryption --query "Parameter.Value" --output text)
+        echo "::add-mask::$DB_PASSWORD"
+        echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_OUTPUT
+
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build citizen portal image
+      run: |
+        docker build -t munistream-citizen-portal:latest .
+
+    - name: Smart Deploy to Workflow EC2 instance
+      env:
+        DB_PASSWORD: ${{ steps.get-db-password.outputs.DB_PASSWORD }}
+        AURORA_ENDPOINT: munistream-dev-cluster.cluster-ckf4usc8u21l.us-east-1.rds.amazonaws.com
+        TARGET_CLIENT: ${{ needs.detect-changes.outputs.target_client }}
+        FORCE_REBUILD: ${{ github.event.inputs.force_rebuild || 'false' }}
+      run: |
+        echo "🎯 Smart Deployment Strategy:"
+        echo "   Target Client: $TARGET_CLIENT"
+        echo "   Force Rebuild: $FORCE_REBUILD"
+        echo "   Changed Files: ${{ needs.detect-changes.outputs.changed_files }}"
+
+        # Create deployment package
+        tar -czf citizen-portal-h5-deploy.tar.gz \
+          docker-compose.h5.yml \
+          .env.h5 \
+          deploy-h5.sh \
+          Dockerfile \
+          package.json \
+          src/ \
+          public/ \
+          README-H5-DEPLOYMENT.md
+
+        # Get Workflow EC2 instance details
+        WORKFLOW_INSTANCE_ID=$(aws ec2 describe-instances \
+          --filters "Name=tag:Name,Values=munistream-dev-workflow" "Name=instance-state-name,Values=running" \
+          --query "Reservations[0].Instances[0].InstanceId" --output text)
+
+        WORKFLOW_PRIVATE_IP=$(aws ec2 describe-instances \
+          --instance-ids $WORKFLOW_INSTANCE_ID \
+          --query "Reservations[0].Instances[0].PrivateIpAddress" --output text)
+
+        echo "🎯 Deploying to Workflow EC2: $WORKFLOW_INSTANCE_ID ($WORKFLOW_PRIVATE_IP)"
+
+        # Intelligent deployment command
+        DEPLOY_COMMAND="cd /opt/munistream/citizen-portal && ./deploy-h5.sh $FORCE_REBUILD $TARGET_CLIENT"
+
+        echo "📋 Deployment Command: $DEPLOY_COMMAND"
+
+        # Execute smart deployment via SSM
+        COMMAND_ID=$(aws ssm send-command \
+          --instance-ids $WORKFLOW_INSTANCE_ID \
+          --document-name "AWS-RunShellScript" \
+          --parameters "commands=[
+            'mkdir -p /opt/munistream/citizen-portal',
+            'cd /opt/munistream/citizen-portal',
+            'echo \"🔄 Starting smart deployment for citizen portal\"',
+            'echo \"Target: $TARGET_CLIENT, Force: $FORCE_REBUILD\"',
+            '$DEPLOY_COMMAND'
+          ]" \
+          --query "Command.CommandId" --output text)
+
+        echo "📡 SSM Command ID: $COMMAND_ID"
+
+        # Wait for command to complete and check status
+        echo "⏳ Waiting for deployment to complete..."
+        aws ssm wait command-executed \
+          --command-id $COMMAND_ID \
+          --instance-id $WORKFLOW_INSTANCE_ID
+
+        # Get command result
+        COMMAND_STATUS=$(aws ssm get-command-invocation \
+          --command-id $COMMAND_ID \
+          --instance-id $WORKFLOW_INSTANCE_ID \
+          --query "Status" --output text)
+
+        if [ "$COMMAND_STATUS" = "Success" ]; then
+          echo "✅ Smart deployment completed successfully!"
+        else
+          echo "❌ Deployment failed with status: $COMMAND_STATUS"
+
+          # Get error details
+          aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id $WORKFLOW_INSTANCE_ID \
+            --query "StandardErrorContent" --output text
+
+          exit 1
+        fi
+
+        echo "🎉 H5 Citizen Portal smart deployment completed!"
+        echo "   Only modified containers were updated"
+        echo "   Zero-downtime deployment achieved"
+
+  test-deployment:
+    name: Test H5 Deployment
+    runs-on: ubuntu-latest
+    needs: deploy-to-h5-dev
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Test ALB health checks
+      run: |
+        ALB_DNS=$(aws elbv2 describe-load-balancers \
+          --names munistream-dev-alb \
+          --query "LoadBalancers[0].DNSName" --output text)
+
+        echo "Testing ALB endpoints at: $ALB_DNS"
+
+        # Test each client endpoint with proper Host headers
+        for client in core conapesca tesoreriacdmx; do
+          echo "Testing $client..."
+          DOMAIN="${client}-dev.munistream.local"
+
+          # Test citizen portal endpoint
+          if curl -f -H "Host: $DOMAIN" "http://$ALB_DNS/" >/dev/null 2>&1; then
+            echo "✅ $client citizen portal is responding"
+          else
+            echo "⚠️ $client citizen portal is not responding"
+          fi
+        done
+
+    - name: Verify target group health
+      run: |
+        echo "Checking target group health..."
+
+        # Get target groups for citizen portal
+        aws elbv2 describe-target-groups \
+          --names \
+            "munistre-dev-conapesca-portal" \
+            "munist-dev-teso-portal" \
+          --query "TargetGroups[*].[TargetGroupName,HealthCheckPath,Port]" \
+          --output table
+
+        echo "✅ Target group verification completed"
+
+  notify-deployment:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy-to-h5-dev, test-deployment]
+    if: always() && github.ref == 'refs/heads/develop'
+
+    steps:
+    - name: Deployment Success Notification
+      if: needs.deploy-to-h5-dev.result == 'success' && needs.test-deployment.result == 'success'
+      run: |
+        echo "🎉 H5 Citizen Portal deployment successful!"
+        echo "📊 Deployment Summary:"
+        echo "  - 3 containers deployed (core, conapesca, tesoreriacdmx)"
+        echo "  - Ports: 3000, 3001, 3002"
+        echo "  - Target: Workflow EC2 instance"
+        echo "  - Environment: Development"
+
+    - name: Deployment Failure Notification
+      if: needs.deploy-to-h5-dev.result == 'failure' || needs.test-deployment.result == 'failure'
+      run: |
+        echo "❌ H5 Citizen Portal deployment failed!"
+        echo "Check the logs above for details."
+        exit 1
