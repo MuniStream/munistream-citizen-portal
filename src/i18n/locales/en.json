@@ -1,4 +1,9 @@
 {
+  "app": {
+    "title": "Fisheries Traceability",
+    "subtitle": "Digital services and procedures portal",
+    "organization": "CONAPESCA"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",
@@ -87,7 +92,7 @@
     "progress_percentage_message": "You are {{percentage}}% through the process."
   },
   "auth": {
-    "title": "MuniStream Citizen Portal",
+    "title": "Citizen Portal",
     "subtitle": "Access government services online",
     "login": "Sign In",
     "register": "Create Account",
@@ -165,8 +170,8 @@
     "processingTime": "Processing Time",
     "eligibility": "Eligibility",
     "howToApply": "How to Apply",
-    "puente_title": "PUENTE Cadastral Services",
-    "puente_subtitle": "Integrated services for Cadastre and Public Property Registry",
+    "puente_title": "Fisheries Traceability System",
+    "puente_subtitle": "CONAPESCA digital services and procedures portal",
     "categoriesOfServices": "Service Categories",
     "workflows_count": "{count} services",
     "searchResults": "Search Results",
@@ -281,14 +286,14 @@
     "documentDeleted": "Document deleted successfully"
   },
   "footer": {
-    "about": "About MuniStream",
+    "about": "About the System",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "support": "Support",
     "contact": "Contact Us",
     "accessibility": "Accessibility",
     "languages": "Languages",
-    "copyright": "© 2024 MuniStream. All rights reserved."
+    "copyright": "© 2025 All rights reserved."
   },
   "errors": {
     "genericError": "An error occurred. Please try again.",

@@ -110,7 +110,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
         <div className="container">
           <div className="header-content">
             <Link to="/" className="logo-link">
-              <h1 className="logo">MuniStream</h1>
+              <h1 className="logo">{t('app.title')}</h1>
               <span className="tagline">{t('workflows.title')}</span>
             </Link>
             <div className="header-actions">
@@ -142,8 +142,8 @@ export const PublicWorkflowCatalog: React.FC = () => {
         <div className="container">
           {/* Hero Section */}
           <section className="hero-section">
-            <h2>{t('workflows.puente_title')}</h2>
-            <p>{t('workflows.puente_subtitle')}</p>
+            <h2>{t('app.title')}</h2>
+            <p>{t('app.subtitle')}</p>
           </section>
 
 

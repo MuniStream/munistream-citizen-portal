@@ -1,8 +1,10 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export const AuthPage: React.FC = () => {
+  const { t } = useTranslation();
   const { isAuthenticated, isLoading, login, register } = useAuth();
 
   // Show loading spinner while checking auth status
@@ -38,13 +40,13 @@ export const AuthPage: React.FC = () => {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <h1 className="logo">MuniStream</h1>
-          <p className="tagline">Citizen Portal</p>
+          <h1 className="logo">{t('app.title')}</h1>
+          <p className="tagline">{t('workflows.title')}</p>
         </div>
 
         <div className="auth-content">
           <div className="auth-card">
-            <h2>Welcome to MuniStream</h2>
+            <h2>{t('app.subtitle')}</h2>
             <p className="description">
               Access government services and manage your applications with secure authentication powered by Keycloak.
             </p>
@@ -77,7 +79,7 @@ export const AuthPage: React.FC = () => {
         </div>
 
         <div className="auth-footer">
-          <p>&copy; 2025 MuniStream - Government Services Platform</p>
+          <p>&copy; 2025 {t('app.organization')} - {t('app.title')}</p>
         </div>
       </div>
     </div>

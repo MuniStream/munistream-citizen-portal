@@ -1,7 +1,9 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
 
   const handleLogout = async () => {
@@ -18,8 +20,8 @@ export const Dashboard: React.FC = () => {
         <div className="container">
           <div className="header-content">
             <div className="logo-section">
-              <h1 className="logo">MuniStream</h1>
-              <p className="tagline">Citizen Portal</p>
+              <h1 className="logo">{t('app.title')}</h1>
+              <p className="tagline">{t('workflows.title')}</p>
             </div>
             
             <div className="user-section">
