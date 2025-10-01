@@ -1,4 +1,9 @@
 {
+  "app": {
+    "title": "Trazabilidad Pesquera",
+    "subtitle": "Portal de trámites y servicios digitales",
+    "organization": "CONAPESCA"
+  },
   "common": {
     "loading": "Cargando...",
     "error": "Error",
@@ -87,7 +92,7 @@
     "progress_percentage_message": "Estás al {{percentage}}% del proceso."
   },
   "auth": {
-    "title": "Portal Ciudadano MuniStream",
+    "title": "Portal Ciudadano",
     "subtitle": "Accede a servicios gubernamentales en línea",
     "login": "Iniciar Sesión",
     "register": "Crear Cuenta",
@@ -165,8 +170,6 @@
     "processingTime": "Tiempo de Procesamiento",
     "eligibility": "Elegibilidad",
     "howToApply": "Cómo Solicitar",
-    "puente_title": "Trámites PUENTE Catastral",
-    "puente_subtitle": "Servicios integrados del Catastro y Registro Público de la Propiedad",
     "categoriesOfServices": "Categorías de Trámites",
     "workflows_count": "{count} trámites",
     "searchResults": "Resultados de Búsqueda",
@@ -281,14 +284,14 @@
     "documentDeleted": "Documento eliminado exitosamente"
   },
   "footer": {
-    "about": "Acerca de MuniStream",
+    "about": "Acerca del Sistema",
     "privacy": "Política de Privacidad",
     "terms": "Términos de Servicio",
     "support": "Soporte",
     "contact": "Contáctanos",
     "accessibility": "Accesibilidad",
     "languages": "Idiomas",
-    "copyright": "© 2024 MuniStream. Todos los derechos reservados."
+    "copyright": "© 2025 CONAPESCA. Todos los derechos reservados."
   },
   "errors": {
     "genericError": "Ocurrió un error. Inténtelo nuevamente.",

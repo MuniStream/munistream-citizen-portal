@@ -206,7 +206,7 @@ export const MyEntitiesPage: React.FC = () => {
         <div className="container">
           <div className="header-content">
             <Link to="/" className="logo-link">
-              <h1 className="logo">MuniStream</h1>
+              <h1 className="logo">{t('app.title')}</h1>
               <span className="tagline">{t('my_entities.title')}</span>
             </Link>
             <div className="header-actions">
