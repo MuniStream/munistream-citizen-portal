@@ -137,6 +137,13 @@ class AuthService {
 
   // Get stored token (without validation)
   getToken(): string | null {
+    // First check if we're using Keycloak authentication
+    const keycloakToken = sessionStorage.getItem('kc_token');
+    if (keycloakToken) {
+      return keycloakToken;
+    }
+
+    // Fall back to localStorage for non-Keycloak auth
     return localStorage.getItem('customer_token');
   }
 
