@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const baseAllowedHosts = ['localhost', '127.0.0.1', '.munistream.com']
+const baseAllowedHosts = ['localhost', '127.0.0.1', '.munistream.com', '.paw.mx']
 
 const allowedHosts = Array.from(
   new Set(
