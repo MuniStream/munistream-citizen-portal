@@ -146,10 +146,11 @@ class KeycloakService {
       // Build initialization config
       const config: any = {
         pkceMethod: 'S256',
-        checkLoginIframe: false,
+        checkLoginIframe: false, // Disable iframe check to avoid X-Frame-Options issues
         enableLogging: true,
-        onLoad: 'check-sso', // Always check for existing SSO session
-        silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+        // Changed from 'check-sso' to 'login-required' to avoid iframe issues
+        // We'll handle auth state ourselves with stored tokens
+        onLoad: isCallback ? 'check-sso' : undefined,
       };
 
       // Handle different scenarios
@@ -169,9 +170,21 @@ class KeycloakService {
         // No tokens and no callback - just initialize
       }
 
-      // Initialize Keycloak
+      // Initialize Keycloak with timeout handling
       console.log('[Keycloak] Calling init with config', config);
-      const authenticated = await this.keycloak.init(config);
+
+      // Wrap init in a timeout promise to handle iframe timeout issues
+      const initWithTimeout = Promise.race([
+        this.keycloak.init(config),
+        new Promise<boolean>((resolve) => {
+          setTimeout(() => {
+            console.warn('[Keycloak] Init timeout - assuming not authenticated');
+            resolve(false);
+          }, 5000); // 5 second timeout
+        })
+      ]);
+
+      const authenticated = await initWithTimeout;
       console.log('[Keycloak] Init result:', authenticated);
 
       // Store tokens if authenticated
