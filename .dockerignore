@@ -5,6 +5,7 @@ npm-debug.log
 README.md
 .env
 .env.*
+!.env.docker
 dist
 .vscode
 .idea

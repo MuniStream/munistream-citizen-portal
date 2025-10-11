@@ -3,7 +3,7 @@ export type { WorkflowDefinition } from '../types/workflow';
 import { addLocaleToParams } from '../utils/locale';
 import { authService } from './authService';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_API_BASE_URL}`;
 
 class WorkflowService {
   // Get all public workflows (no auth required)

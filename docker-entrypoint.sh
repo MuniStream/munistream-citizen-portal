@@ -15,6 +15,7 @@ replace_env_vars() {
             # Replace placeholders with actual environment variable values
             # Use sed to replace in-place
             sed -i "s|__VITE_API_URL__|${VITE_API_URL}|g" "$file"
+            sed -i "s|__VITE_API_BASE_URL__|${VITE_API_BASE_URL}|g" "$file"
             sed -i "s|__VITE_KEYCLOAK_URL__|${VITE_KEYCLOAK_URL}|g" "$file"
             sed -i "s|__VITE_KEYCLOAK_REALM__|${VITE_KEYCLOAK_REALM}|g" "$file"
             sed -i "s|__VITE_KEYCLOAK_CLIENT_ID__|${VITE_KEYCLOAK_CLIENT_ID:-munistream-citizen}|g" "$file"
