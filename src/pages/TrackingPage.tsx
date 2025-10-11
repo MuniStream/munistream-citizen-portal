@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { workflowService, type WorkflowInstanceProgress, type DataSubmissionResponse } from '../services/workflowService';
+import { workflowService, type WorkflowInstanceProgress } from '../services/workflowService';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
-import { DataCollectionForm, type FormField } from '../components/DataCollectionForm';
+import { DataCollectionForm } from '../components/DataCollectionForm';
 
 export const TrackingPage: React.FC = () => {
   const { instanceId } = useParams<{ instanceId: string }>();
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   
@@ -283,7 +282,7 @@ export const TrackingPage: React.FC = () => {
           </section>
 
           {/* Data Collection Section - Prominent Position */}
-          {progress.requires_input && progress.input_form && (progress.input_form.sections || progress.input_form.fields) && (
+          {progress.requires_input && progress.input_form && ((progress.input_form as any).sections || (progress.input_form as any).fields) && (
             <section className="requirements-section" style={{
               backgroundColor: '#fff3cd',
               border: '2px solid #ffc107',
@@ -318,7 +317,7 @@ export const TrackingPage: React.FC = () => {
                   <DataCollectionForm
                     title={progress.input_form.title || t('workflow.provide_required_info_title')}
                     description={progress.input_form.description || t('workflow.provide_required_info_desc')}
-                    sections={progress.input_form.sections}
+                    sections={(progress.input_form as any).sections}
                     fields={progress.input_form.fields?.map((field: any) => ({
                       id: field.name,
                       name: field.name,
@@ -346,7 +345,7 @@ export const TrackingPage: React.FC = () => {
           <section className="steps-section">
             <h3>🔄 {t('workflow.step_progress')}</h3>
             <div className="steps-timeline">
-              {progress.step_progress.map((step, index) => (
+              {progress.step_progress.map((step) => (
                 <div key={step.step_id} className="step-item">
                   <div 
                     className="step-number" 

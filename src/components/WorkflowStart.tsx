@@ -71,7 +71,7 @@ export const WorkflowStart: React.FC<WorkflowStartProps> = ({
       </DialogTitle>
 
       <DialogContent>
-        <Box space={3}>
+        <Box sx={{ '& > *': { mb: 3 } }}>
           {/* Workflow Overview */}
           <Box>
             <Typography variant="h6" gutterBottom>

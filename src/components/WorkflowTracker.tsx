@@ -6,10 +6,6 @@ import {
   Typography,
   Box,
   LinearProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Chip,
   Alert,
   Button,
@@ -57,8 +53,8 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
       const progressData = await workflowService.trackWorkflowInstance(instanceId);
       setProgress(progressData);
       setLastUpdated(new Date());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch progress');
+    } catch (err: any) {
+      setError(err?.message || 'Failed to fetch progress');
     } finally {
       setLoading(false);
     }
@@ -222,7 +218,7 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
           </Typography>
           
           <Stepper orientation="vertical">
-            {progress.step_progress.map((step, index) => (
+            {progress.step_progress.map((step) => (
               <Step key={step.step_id} active={step.status === 'in_progress'} completed={step.status === 'completed'}>
                 <StepLabel 
                   icon={getStepIcon(step.status)}
@@ -277,7 +273,7 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
         <Box mt={3}>
           <Alert severity="info" sx={{ mt: 2 }}>
             <Typography variant="body2">
-              {progress.message}
+              {(progress as any).message || 'Processing...'}
             </Typography>
           </Alert>
           

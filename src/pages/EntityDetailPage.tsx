@@ -53,12 +53,12 @@ interface RecentInstance {
   completed_at?: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const EntityDetailPage: React.FC = () => {
   const { entityId } = useParams<{ entityId: string }>();
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
   
   const [entityDetail, setEntityDetail] = useState<EntityDetail | null>(null);
@@ -70,7 +70,7 @@ export const EntityDetailPage: React.FC = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login');
+      login();
       return;
     }
     
@@ -85,7 +85,7 @@ export const EntityDetailPage: React.FC = () => {
       setIsLoading(true);
       const token = await authService.getValidToken();
       if (!token) {
-        navigate('/login');
+        login();
         return;
       }
 
@@ -145,7 +145,7 @@ export const EntityDetailPage: React.FC = () => {
       setStartingWorkflow(workflowId);
       const token = await authService.getValidToken();
       if (!token) {
-        navigate('/login');
+        login();
         return;
       }
 

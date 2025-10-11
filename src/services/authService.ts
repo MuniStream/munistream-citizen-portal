@@ -2,12 +2,10 @@ import type {
   AuthResponse,
   LoginRequest,
   RegisterRequest,
-  PasswordResetRequest,
-  PasswordResetConfirm,
   User
 } from '../types/auth';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 class AuthService {
   private tokenExpiryTimer: NodeJS.Timeout | null = null;

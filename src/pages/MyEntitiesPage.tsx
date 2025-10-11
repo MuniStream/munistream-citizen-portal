@@ -35,11 +35,11 @@ interface EntityType {
   color?: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const MyEntitiesPage: React.FC = () => {
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
   
   const [entities, setEntities] = useState<Entity[]>([]);
@@ -47,12 +47,12 @@ export const MyEntitiesPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>('');
-  const [selectedEntity, setSelectedEntity] = useState<Entity | null>(null);
+  const [selectedEntity] = useState<Entity | null>(null);
   const [showWorkflowModal, setShowWorkflowModal] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login');
+      login();
       return;
     }
     
@@ -65,7 +65,7 @@ export const MyEntitiesPage: React.FC = () => {
       setIsLoading(true);
       const token = await authService.getValidToken();
       if (!token) {
-        navigate('/login');
+        login();
         return;
       }
 
@@ -111,7 +111,7 @@ export const MyEntitiesPage: React.FC = () => {
     try {
       const token = await authService.getValidToken();
       if (!token) {
-        navigate('/login');
+        login();
         return;
       }
 

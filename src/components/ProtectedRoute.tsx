@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import keycloakService from '../services/keycloak';
 
@@ -13,7 +13,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireEmailVerification = false 
 }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
-  const location = useLocation();
 
   // Show loading spinner while checking auth status
   if (isLoading) {

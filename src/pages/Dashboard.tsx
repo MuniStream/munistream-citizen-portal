@@ -30,7 +30,7 @@ export const Dashboard: React.FC = () => {
                   {user?.firstName} {user?.lastName}
                 </span>
                 <span className="user-email">{user?.email}</span>
-                {!user?.isEmailVerified && (
+                {!user?.emailVerified && (
                   <span className="verification-warning">
                     Email not verified
                   </span>

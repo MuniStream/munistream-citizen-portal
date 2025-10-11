@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { workflowService, type WorkflowDefinition, type WorkflowInstance } from '../services/workflowService';
+import { workflowService, type WorkflowDefinition } from '../services/workflowService';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import keycloakService from '../services/keycloak';
 
@@ -165,7 +165,7 @@ export const WorkflowStartPage: React.FC = () => {
             <section className="requirements-section">
               <h3>✅ {t('workflows.documentsRequired')}</h3>
               <div className="requirements-list">
-                {workflow.requirements.map((requirement, index) => (
+                {workflow.requirements.map((requirement: any, index: number) => (
                   <div key={index} className="requirement-item">
                     <span className="check">✓</span>
                     <span>{requirement}</span>
@@ -179,7 +179,7 @@ export const WorkflowStartPage: React.FC = () => {
           <section className="steps-section">
             <h3>🔄 {t('workflows.process')} ({workflow.steps.length} {t('common.steps')})</h3>
             <div className="steps-timeline">
-              {workflow.steps.slice(0, 6).map((step, index) => (
+              {workflow.steps.slice(0, 6).map((step: any, index: number) => (
                 <div key={step.id} className="step-item">
                   <div className="step-number">{index + 1}</div>
                   <div className="step-content">

@@ -236,7 +236,6 @@ interface UnifiedWorkflowModalProps {
 }
 
 const UnifiedWorkflowModal: React.FC<UnifiedWorkflowModalProps> = ({ workflow, onClose, onWorkflowStarted }) => {
-  const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

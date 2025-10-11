@@ -1,5 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useCallback } from 'react';
 import { entityService } from '../services/entityService';
 
 // Simple debounce function without external dependencies
@@ -65,12 +64,11 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
   isSubmitting = false,
   submitButtonText = 'Submit Information'
 }) => {
-  const { t } = useTranslation();
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>({});
-  const [autoCompleteLoading, setAutoCompleteLoading] = useState<Record<string, boolean>>({});
   const [suggestions, setSuggestions] = useState<Record<string, any>>({});
+  const [, setAutoCompleteLoading] = useState<Record<string, boolean>>({});
   
   // Get all fields either from sections or direct fields prop
   const allFields = React.useMemo(() => {
@@ -95,7 +93,7 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
         return;
       }
 
-      setAutoCompleteLoading(prev => ({ ...prev, [fieldId]: true }));
+      setAutoCompleteLoading((prev: any) => ({ ...prev, [fieldId]: true }));
 
       try {
         // Get current data for this section
@@ -143,7 +141,7 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
         console.error('Auto-complete error:', error);
         // Don't show errors for auto-complete failures
       } finally {
-        setAutoCompleteLoading(prev => ({ ...prev, [fieldId]: false }));
+        setAutoCompleteLoading((prev: any) => ({ ...prev, [fieldId]: false }));
       }
     }, 800), // 800ms delay
     [formData, sections, entityService]

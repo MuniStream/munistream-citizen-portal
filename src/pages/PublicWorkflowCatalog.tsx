@@ -5,6 +5,7 @@ import { workflowService } from '../services/workflowService';
 import { useAuth } from '../contexts/AuthContext';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import keycloakService from '../services/keycloak';
+import { TenantBranding } from '../components/TenantBranding';
 import type { WorkflowDefinition, WorkflowCategory, WorkflowSearchParams } from '../types/workflow';
 
 // Función para obtener iconos de categorías
@@ -29,13 +30,6 @@ const getCategoryIcon = (iconOrType?: string): string => {
   return iconMap[iconOrType || ''] || '📋';
 };
 
-// Función para obtener etiquetas de tipos de categoría
-const getCategoryTypeLabel = (categoryType?: string, t: any): string => {
-  if (categoryType) {
-    return t(`categories.${categoryType}`);
-  }
-  return 'General';
-};
 
 export const PublicWorkflowCatalog: React.FC = () => {
   const { t } = useTranslation();
@@ -110,7 +104,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
         <div className="container">
           <div className="header-content">
             <Link to="/" className="logo-link">
-              <h1 className="logo">{t('app.title')}</h1>
+              <h1 className="logo"><TenantBranding type="title" /></h1>
               <span className="tagline">{t('workflows.title')}</span>
             </Link>
             <div className="header-actions">
@@ -142,7 +136,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
         <div className="container">
           {/* Hero Section */}
           <section className="hero-section">
-            <h2>{t('app.title')}</h2>
+            <h2><TenantBranding type="title" /></h2>
             <p>{t('app.subtitle')}</p>
           </section>
 
@@ -200,7 +194,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
                   </span>
                   <span className="category-text">
                     <span className="category-name">{category.name}</span>
-                    <span className="category-count">({category.count})</span>
+                    <span className="category-count">({(category as any).count || 0})</span>
                     {category.is_featured && <span className="featured-badge">★</span>}
                   </span>
                 </button>
