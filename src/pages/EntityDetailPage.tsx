@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { Header } from '../components/Header';
 import { authService } from '../services/authService';
 import './EntityDetailPage.css';
 
@@ -83,7 +83,7 @@ export const EntityDetailPage: React.FC = () => {
   const fetchEntityDetail = async () => {
     try {
       setIsLoading(true);
-      const token = await authService.getValidToken();
+      const token = authService.getToken();
       if (!token) {
         login();
         return;
@@ -115,7 +115,7 @@ export const EntityDetailPage: React.FC = () => {
   const fetchEntityDocuments = async () => {
     try {
       setLoadingDocuments(true);
-      const token = await authService.getValidToken();
+      const token = authService.getToken();
       if (!token) {
         return;
       }
@@ -143,7 +143,7 @@ export const EntityDetailPage: React.FC = () => {
   const startWorkflow = async (workflowId: string) => {
     try {
       setStartingWorkflow(workflowId);
-      const token = await authService.getValidToken();
+      const token = authService.getToken();
       if (!token) {
         login();
         return;
@@ -290,35 +290,12 @@ export const EntityDetailPage: React.FC = () => {
 
   return (
     <div className="entity-detail-page">
-      {/* Header */}
-      <header className="detail-header">
-        <div className="container">
-          <div className="header-content">
-            <Link to="/" className="logo-link">
-              <h1 className="logo">{t('app.title')}</h1>
-              <span className="tagline">{t('entity.detail')}</span>
-            </Link>
-            <div className="header-actions">
-              <LanguageSwitcher variant="compact" />
-              <Link to="/my-entities" className="btn-secondary">
-                ← {t('my_entities.title')}
-              </Link>
-              <Link to="/services" className="btn-secondary">
-                📋 {t('workflows.title')}
-              </Link>
-              <div className="auth-menu">
-                <span className="user-email">{authService.getStoredUser()?.email}</span>
-                <button 
-                  onClick={() => authService.logout()} 
-                  className="btn-secondary"
-                >
-                  {t('auth.logout')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        variant="detail"
+        showBackLink={true}
+        backLinkTo="/my-entities"
+        backLinkText={t('my_entities.title')}
+      />
 
       <main className="detail-main">
         <div className="container">

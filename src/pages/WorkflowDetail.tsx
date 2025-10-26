@@ -3,13 +3,14 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService } from '../services/workflowService';
 import { useAuth } from '../contexts/AuthContext';
+import { Header } from '../components/Header';
 import keycloakService from '../services/keycloak';
 import type { WorkflowDefinition } from '../types/workflow';
 
 export const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { t } = useTranslation();
   const [workflow, setWorkflow] = useState<WorkflowDefinition | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,31 +72,12 @@ export const WorkflowDetail: React.FC = () => {
 
   return (
     <div className="workflow-detail">
-      <header className="detail-header">
-        <div className="container">
-          <div className="header-content">
-            <Link to="/services" className="logo-link">
-              <h1 className="logo">{t('app.title')}</h1>
-              <span className="tagline">{t('workflows.title')}</span>
-            </Link>
-            <div className="header-actions">
-              {isAuthenticated ? (
-                <div className="auth-menu">
-                  <span className="user-email">{user?.email}</span>
-                  <button
-                    onClick={() => logout()} 
-                    className="btn-secondary"
-                  >
-                    {t('auth.logout')}
-                  </button>
-                </div>
-              ) : (
-                <button onClick={() => keycloakService.login()} className="btn-secondary">{t('auth.login')}</button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        variant="detail"
+        showBackLink={true}
+        backLinkTo="/services"
+        backLinkText={t('workflows.title')}
+      />
 
       <main className="detail-main">
         <div className="container">

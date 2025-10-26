@@ -1,51 +1,13 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useTranslation } from 'react-i18next';
+import { Header } from '../components/Header';
 
 export const Dashboard: React.FC = () => {
-  const { t } = useTranslation();
-  const { user, logout } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
+  const { user } = useAuth();
 
   return (
     <div className="dashboard">
-      <header className="dashboard-header">
-        <div className="container">
-          <div className="header-content">
-            <div className="logo-section">
-              <h1 className="logo">{t('app.title')}</h1>
-              <p className="tagline">{t('workflows.title')}</p>
-            </div>
-            
-            <div className="user-section">
-              <div className="user-info">
-                <span className="user-name">
-                  {user?.firstName} {user?.lastName}
-                </span>
-                <span className="user-email">{user?.email}</span>
-                {!user?.emailVerified && (
-                  <span className="verification-warning">
-                    Email not verified
-                  </span>
-                )}
-              </div>
-              <button 
-                className="btn-secondary"
-                onClick={handleLogout}
-              >
-                Sign Out
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header variant="default" />
 
       <main className="dashboard-main">
         <div className="container">

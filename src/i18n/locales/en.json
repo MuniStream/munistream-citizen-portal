@@ -1,8 +1,8 @@
 {
   "app": {
-    "title": "Fisheries Traceability",
+    "title": "PLACEHOLDER_TITLE",
     "subtitle": "Digital services and procedures portal",
-    "organization": "CONAPESCA"
+    "organization": "PLACEHOLDER_ORG"
   },
   "common": {
     "loading": "Loading...",
@@ -170,7 +170,6 @@
     "processingTime": "Processing Time",
     "eligibility": "Eligibility",
     "howToApply": "How to Apply",
-    "puente_title": "Fisheries Traceability System",
     "puente_subtitle": "CONAPESCA digital services and procedures portal",
     "categoriesOfServices": "Service Categories",
     "workflows_count": "{count} services",

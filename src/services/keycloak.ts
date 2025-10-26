@@ -174,10 +174,14 @@ class KeycloakService {
       console.log('[Keycloak] Calling init with config', config);
 
       // Wrap init in a timeout promise to handle iframe timeout issues
+      let timeoutId: NodeJS.Timeout;
       const initWithTimeout = Promise.race([
-        this.keycloak.init(config),
+        this.keycloak.init(config).then(result => {
+          clearTimeout(timeoutId);
+          return result;
+        }),
         new Promise<boolean>((resolve) => {
-          setTimeout(() => {
+          timeoutId = setTimeout(() => {
             console.warn('[Keycloak] Init timeout - assuming not authenticated');
             resolve(false);
           }, 5000); // 5 second timeout
@@ -294,7 +298,7 @@ class KeycloakService {
     if (this.keycloak) {
       console.log('[Keycloak.login] Redirecting to Keycloak login');
       await this.keycloak.login({
-        redirectUri: window.location.origin + '/services',
+        redirectUri: window.location.origin + window.location.pathname,
         locale: 'es', // Default to Spanish for citizens
       });
     }

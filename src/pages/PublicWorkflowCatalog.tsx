@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import {
+  Box,
+  Typography,
+  CircularProgress
+} from '@mui/material';
 import { workflowService } from '../services/workflowService';
-import { useAuth } from '../contexts/AuthContext';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
-import keycloakService from '../services/keycloak';
+import { Header } from '../components/Header';
 import { TenantBranding } from '../components/TenantBranding';
 import type { WorkflowDefinition, WorkflowCategory, WorkflowSearchParams } from '../types/workflow';
 
@@ -33,7 +36,6 @@ const getCategoryIcon = (iconOrType?: string): string => {
 
 export const PublicWorkflowCatalog: React.FC = () => {
   const { t } = useTranslation();
-  const { isAuthenticated, user, logout } = useAuth();
   const [workflows, setWorkflows] = useState<WorkflowDefinition[]>([]);
   const [categories, setCategories] = useState<WorkflowCategory[]>([]);
   const [featuredWorkflows, setFeaturedWorkflows] = useState<WorkflowDefinition[]>([]);
@@ -89,48 +91,18 @@ export const PublicWorkflowCatalog: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="public-catalog">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>{t('common.loading')}</p>
-        </div>
-      </div>
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress color="primary" />
+          <Typography sx={{ mt: 2 }}>{t('common.loading')}</Typography>
+        </Box>
+      </Box>
     );
   }
 
   return (
     <div className="public-catalog">
-      <header className="catalog-header">
-        <div className="container">
-          <div className="header-content">
-            <Link to="/" className="logo-link">
-              <h1 className="logo"><TenantBranding type="title" /></h1>
-              <span className="tagline">{t('workflows.title')}</span>
-            </Link>
-            <div className="header-actions">
-              <LanguageSwitcher variant="compact" />
-              {isAuthenticated ? (
-                <>
-                  <Link to="/my-entities" className="btn-secondary">
-                    📂 {t('my_entities.title')}
-                  </Link>
-                  <div className="auth-menu">
-                    <span className="user-email">{user?.email}</span>
-                    <button
-                      onClick={() => logout()}
-                      className="btn-secondary"
-                    >
-                      {t('auth.logout')}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <button onClick={() => keycloakService.login()} className="btn-secondary">{t('auth.login')}</button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header variant="catalog" />
 
       <main className="catalog-main">
         <div className="container">

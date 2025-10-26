@@ -1,8 +1,8 @@
 {
   "app": {
-    "title": "Trazabilidad Pesquera",
+    "title": "PLACEHOLDER_TITLE",
     "subtitle": "Portal de trámites y servicios digitales",
-    "organization": "CONAPESCA"
+    "organization": "PLACEHOLDER_ORG"
   },
   "common": {
     "loading": "Cargando...",

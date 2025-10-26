@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowDefinition } from '../services/workflowService';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
-import keycloakService from '../services/keycloak';
+import { Header } from '../components/Header';
 
 export const WorkflowStartPage: React.FC = () => {
   const { workflowId } = useParams<{ workflowId: string }>();
@@ -79,21 +78,12 @@ export const WorkflowStartPage: React.FC = () => {
 
   return (
     <div className="workflow-detail">
-      {/* Header */}
-      <header className="detail-header">
-        <div className="container">
-          <div className="header-content">
-            <Link to="/services" className="logo-link">
-              <h1 className="logo">{t('app.title')}</h1>
-              <span className="tagline">{t('workflows.title')}</span>
-            </Link>
-            <div className="header-actions">
-              <LanguageSwitcher variant="compact" />
-              <button onClick={() => keycloakService.login()} className="btn-secondary">{t('auth.login')}</button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        variant="detail"
+        showBackLink={true}
+        backLinkTo="/services"
+        backLinkText={t('workflows.title')}
+      />
 
       <main className="detail-main">
         <div className="container">

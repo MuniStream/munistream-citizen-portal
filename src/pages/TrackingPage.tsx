@@ -2,15 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowInstanceProgress } from '../services/workflowService';
-import { authService } from '../services/authService';
-import { useAuth } from '../contexts/AuthContext';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { Header } from '../components/Header';
 import { DataCollectionForm } from '../components/DataCollectionForm';
 
 export const TrackingPage: React.FC = () => {
   const { instanceId } = useParams<{ instanceId: string }>();
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
   
   const [progress, setProgress] = useState<WorkflowInstanceProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -164,31 +161,12 @@ export const TrackingPage: React.FC = () => {
 
   return (
     <div className="workflow-detail">
-      {/* Header */}
-      <header className="detail-header">
-        <div className="container">
-          <div className="header-content">
-            <Link to="/services" className="logo-link">
-              <h1 className="logo">{t('app.title')}</h1>
-              <span className="tagline">{t('workflows.title')}</span>
-            </Link>
-            <div className="header-actions">
-              <LanguageSwitcher variant="compact" />
-              {isAuthenticated ? (
-                <div className="auth-menu">
-                  <span className="user-email">{authService.getStoredUser()?.email}</span>
-                  <button 
-                    onClick={() => authService.logout()} 
-                    className="btn-secondary"
-                  >
-                    {t('auth.logout')}
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        variant="detail"
+        showBackLink={true}
+        backLinkTo="/services"
+        backLinkText={t('workflows.title')}
+      />
 
       <main className="detail-main">
         <div className="container">

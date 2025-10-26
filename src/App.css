@@ -74,7 +74,7 @@ html {
 
 /* Header */
 .header {
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
   padding: 1rem 0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -105,7 +105,7 @@ html {
 
 .hero h2 {
   font-size: 2.5rem;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 1rem;
 }
 
@@ -121,7 +121,7 @@ html {
 
 .services h3 {
   font-size: 1.8rem;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 2rem;
   text-align: center;
 }
@@ -148,7 +148,7 @@ html {
 }
 
 .service-card h4 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 1rem;
   font-size: 1.3rem;
 }
@@ -160,7 +160,7 @@ html {
 
 /* Buttons */
 .btn-primary {
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
   border: none;
   padding: 0.8rem 1.5rem;
@@ -176,8 +176,8 @@ html {
 
 .btn-secondary {
   background: transparent;
-  color: #2c5aa0;
-  border: 2px solid #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
+  border: 2px solid var(--primary-color, #2c5aa0);
   padding: 0.8rem 1.5rem;
   border-radius: 4px;
   font-size: 1rem;
@@ -186,7 +186,7 @@ html {
 }
 
 .btn-secondary:hover {
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
 }
 
@@ -231,7 +231,7 @@ html {
 
 .status h3 {
   font-size: 1.8rem;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 2rem;
   text-align: center;
 }
@@ -270,7 +270,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #2c5aa0 0%, #1e3f73 100%);
+  background: linear-gradient(135deg, var(--primary-color, #2c5aa0) 0%, var(--primary-dark, #1e3f73) 100%);
   padding: 2rem;
 }
 
@@ -284,7 +284,7 @@ html {
 }
 
 .auth-header {
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
   padding: 2rem;
   text-align: center;
@@ -306,7 +306,7 @@ html {
 }
 
 .auth-form h2 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin: 0 0 0.5rem 0;
   font-size: 1.8rem;
 }
@@ -345,7 +345,7 @@ html {
 
 .form-group input:focus {
   outline: none;
-  border-color: #2c5aa0;
+  border-color: var(--primary-color, #2c5aa0);
 }
 
 .form-group input:disabled {
@@ -404,7 +404,7 @@ html {
 .link-button {
   background: none;
   border: none;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   text-decoration: underline;
   cursor: pointer;
   font-size: inherit;
@@ -436,7 +436,7 @@ html {
 }
 
 .dashboard-header {
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
   padding: 1rem 0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -526,7 +526,7 @@ html {
 }
 
 .welcome-section h2 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 0.5rem;
 }
 
@@ -540,7 +540,7 @@ html {
 
 .my-applications h3 {
   font-size: 1.8rem;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 2rem;
 }
 
@@ -580,7 +580,7 @@ html {
   width: 40px;
   height: 40px;
   border: 4px solid #e1e5e9;
-  border-top: 4px solid #2c5aa0;
+  border-top: 4px solid var(--primary-color, #2c5aa0);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -715,7 +715,7 @@ html {
 }
 
 .catalog-header {
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
   padding: 1rem 0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -769,7 +769,7 @@ html {
 
 .hero-section h2 {
   font-size: 2.5rem;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 1rem;
 }
 
@@ -853,7 +853,7 @@ html {
 
 .search-input input:focus {
   outline: none;
-  border-color: #2c5aa0;
+  border-color: var(--primary-color, #2c5aa0);
 }
 
 .search-btn {
@@ -892,9 +892,9 @@ html {
 }
 
 .sort-btn.active {
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
-  border-color: #2c5aa0;
+  border-color: var(--primary-color, #2c5aa0);
 }
 
 /* Featured Categories */
@@ -904,7 +904,7 @@ html {
 
 .featured-categories h3 {
   font-size: 1.8rem;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 2rem;
   text-align: center;
 }
@@ -1106,14 +1106,14 @@ html {
 
 .featured-section h3 {
   font-size: 1.8rem;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 2rem;
 }
 
 /* Services Section */
 .services-section h3 {
   font-size: 1.8rem;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 2rem;
   display: flex;
   align-items: center;
@@ -1193,7 +1193,7 @@ html {
 }
 
 .card-header h4 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin: 0;
   font-size: 1.3rem;
   flex: 1;
@@ -1249,7 +1249,7 @@ html {
 }
 
 .cta {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   font-weight: 500;
 }
 
@@ -1272,7 +1272,7 @@ html {
 }
 
 .detail-header {
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
   padding: 1rem 0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -1292,7 +1292,7 @@ html {
 }
 
 .breadcrumb a {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   text-decoration: none;
 }
 
@@ -1327,7 +1327,7 @@ html {
 }
 
 .service-header h2 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin: 1rem 0;
   font-size: 2.2rem;
 }
@@ -1385,7 +1385,7 @@ html {
 }
 
 .auth-note a {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   text-decoration: none;
 }
 
@@ -1403,7 +1403,7 @@ html {
 }
 
 .requirements-section h3 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
 }
@@ -1438,7 +1438,7 @@ html {
 }
 
 .steps-section h3 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
 }
@@ -1467,7 +1467,7 @@ html {
 .step-number {
   width: 40px;
   height: 40px;
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -1484,7 +1484,7 @@ html {
 }
 
 .step-content h4 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 0.5rem;
 }
 
@@ -1528,7 +1528,7 @@ html {
 }
 
 .help-section h3 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
 }
@@ -1547,7 +1547,7 @@ html {
 }
 
 .help-card h4 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 1rem;
 }
 
@@ -1557,12 +1557,12 @@ html {
 }
 
 .phone, .email {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   font-weight: 500;
 }
 
 .help-link {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   text-decoration: none;
   font-weight: 500;
 }
@@ -1578,7 +1578,7 @@ html {
 }
 
 .error-state h2 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin-bottom: 1rem;
 }
 
@@ -1613,7 +1613,7 @@ html {
 }
 
 .dialog-content h3 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin: 0 0 1rem 0;
   font-size: 1.5rem;
 }
@@ -1674,7 +1674,7 @@ html {
 }
 
 .form-header h3 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin: 0 0 0.5rem 0;
   font-size: 1.3rem;
 }
@@ -1702,7 +1702,7 @@ html {
 
 .form-section:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-color: #2c5aa0;
+  border-color: var(--primary-color, #2c5aa0);
 }
 
 .form-section:last-child {
@@ -1718,7 +1718,7 @@ html {
 .section-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin: 0 0 0.5rem 0;
   display: flex;
   align-items: center;
@@ -1772,7 +1772,7 @@ html {
 
 .form-input:focus {
   outline: none;
-  border-color: #2c5aa0;
+  border-color: var(--primary-color, #2c5aa0);
 }
 
 .form-input:disabled {
@@ -1817,7 +1817,7 @@ html {
 }
 
 .file-upload-display:hover {
-  border-color: #2c5aa0;
+  border-color: var(--primary-color, #2c5aa0);
   background: #f8f9fa;
 }
 
@@ -1826,7 +1826,7 @@ html {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   font-weight: 500;
 }
 
@@ -1971,7 +1971,7 @@ html {
 }
 
 .modal-header {
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
   padding: 1.5rem 2rem;
   border-radius: 12px 12px 0 0;
@@ -2022,7 +2022,7 @@ html {
 }
 
 .workflow-summary h4 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin: 1rem 0 0.5rem 0;
   font-size: 1.4rem;
 }
@@ -2091,7 +2091,7 @@ html {
 }
 
 .auth-intro h5 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
 }
@@ -2130,7 +2130,7 @@ html {
 }
 
 .tab-btn.active {
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
 }
 
@@ -2173,7 +2173,7 @@ html {
 
 .form-group input:focus {
   outline: none;
-  border-color: #2c5aa0;
+  border-color: var(--primary-color, #2c5aa0);
 }
 
 .form-group input:disabled {
@@ -2195,7 +2195,7 @@ html {
 .link-btn {
   background: none;
   border: none;
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   text-decoration: underline;
   cursor: pointer;
   font-size: inherit;

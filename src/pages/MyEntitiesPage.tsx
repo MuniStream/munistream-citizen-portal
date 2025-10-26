@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { Header } from '../components/Header';
 import { authService } from '../services/authService';
 import './MyEntitiesPage.css';
 
@@ -51,19 +51,14 @@ export const MyEntitiesPage: React.FC = () => {
   const [showWorkflowModal, setShowWorkflowModal] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      login();
-      return;
-    }
-    
     fetchEntities();
     fetchEntityTypes();
-  }, [isAuthenticated, selectedType]);
+  }, [selectedType]);
 
   const fetchEntities = async () => {
     try {
       setIsLoading(true);
-      const token = await authService.getValidToken();
+      const token = authService.getToken();
       if (!token) {
         login();
         return;
@@ -109,7 +104,7 @@ export const MyEntitiesPage: React.FC = () => {
 
   const startWorkflow = async (entity: Entity, workflowId: string) => {
     try {
-      const token = await authService.getValidToken();
+      const token = authService.getToken();
       if (!token) {
         login();
         return;
@@ -201,32 +196,10 @@ export const MyEntitiesPage: React.FC = () => {
 
   return (
     <div className="my-entities-page">
-      {/* Header */}
-      <header className="entities-header">
-        <div className="container">
-          <div className="header-content">
-            <Link to="/" className="logo-link">
-              <h1 className="logo">{t('app.title')}</h1>
-              <span className="tagline">{t('my_entities.title')}</span>
-            </Link>
-            <div className="header-actions">
-              <LanguageSwitcher variant="compact" />
-              <Link to="/services" className="btn-secondary">
-                📋 {t('workflows.title')}
-              </Link>
-              <div className="auth-menu">
-                <span className="user-email">{authService.getStoredUser()?.email}</span>
-                <button 
-                  onClick={() => authService.logout()} 
-                  className="btn-secondary"
-                >
-                  {t('auth.logout')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        variant="default"
+        showBackLink={false}
+      />
 
       <main className="entities-main">
         <div className="container">

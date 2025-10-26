@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { CustomThemeProvider } from './contexts/ThemeContext';
 import { Dashboard } from './pages/Dashboard';
 import { PublicWorkflowCatalog } from './pages/PublicWorkflowCatalog';
 import { WorkflowDetail } from './pages/WorkflowDetail';
@@ -12,10 +13,11 @@ import './App.css';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="app">
-          <Routes>
+    <CustomThemeProvider>
+      <AuthProvider>
+        <Router>
+          <div className="app">
+            <Routes>
             {/* Public routes */}
             <Route path="/services" element={<PublicWorkflowCatalog />} />
             <Route path="/services/:id" element={<WorkflowDetail />} />
@@ -57,6 +59,7 @@ function App() {
         </div>
       </Router>
     </AuthProvider>
+  </CustomThemeProvider>
   );
 }
 

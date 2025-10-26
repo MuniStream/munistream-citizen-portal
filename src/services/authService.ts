@@ -82,7 +82,7 @@ class AuthService {
 
   // Get current user profile
   async getCurrentUser(): Promise<User> {
-    const token = await this.getValidToken();
+    const token = this.getToken();
     if (!token) {
       throw new Error('No authentication token found');
     }
@@ -118,19 +118,6 @@ class AuthService {
     }
     
     return true;
-  }
-
-  // Get stored token if valid, otherwise logout
-  async getValidToken(): Promise<string | null> {
-    const token = localStorage.getItem('customer_token');
-    if (!token) return null;
-    
-    if (this.isTokenExpired(token)) {
-      this.logout();
-      return null;
-    }
-    
-    return token;
   }
 
   // Get stored token (without validation)
