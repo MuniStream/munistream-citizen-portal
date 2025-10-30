@@ -9,28 +9,29 @@ import {
 import { workflowService } from '../services/workflowService';
 import { Header } from '../components/Header';
 import { TenantBranding } from '../components/TenantBranding';
+import { WorkflowCard } from '../components/WorkflowCard';
 import type { WorkflowDefinition, WorkflowCategory, WorkflowSearchParams } from '../types/workflow';
 
 // Función para obtener iconos de categorías
 const getCategoryIcon = (iconOrType?: string): string => {
   const iconMap: Record<string, string> = {
     // Icons específicos
-    'edit': '✏️',
-    'lock': '🔒',
-    'x-circle': '❌',
-    'award': '🏆',
-    'home': '🏠',
-    'arrow-right': '➡️',
-    'calculator': '🧮',
-    'document': '📄',
-    'link': '🔗',
+    'edit': '•',
+    'lock': '•',
+    'x-circle': '•',
+    'award': '•',
+    'home': '•',
+    'arrow-right': '•',
+    'calculator': '•',
+    'document': '•',
+    'link': '•',
     // Category types
-    'rpp': '📋',
-    'catastro': '🏠',
-    'vinculado': '🔗'
+    'rpp': '•',
+    'catastro': '•',
+    'vinculado': '•'
   };
-  
-  return iconMap[iconOrType || ''] || '📋';
+
+  return iconMap[iconOrType || ''] || '•';
 };
 
 
@@ -38,7 +39,6 @@ export const PublicWorkflowCatalog: React.FC = () => {
   const { t } = useTranslation();
   const [workflows, setWorkflows] = useState<WorkflowDefinition[]>([]);
   const [categories, setCategories] = useState<WorkflowCategory[]>([]);
-  const [featuredWorkflows, setFeaturedWorkflows] = useState<WorkflowDefinition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useState<WorkflowSearchParams>({});
@@ -52,15 +52,13 @@ export const PublicWorkflowCatalog: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
-      const [workflowsData, categoriesData, featuredData] = await Promise.all([
+      const [workflowsData, categoriesData] = await Promise.all([
         workflowService.getPublicWorkflows(searchParams),
-        workflowService.getWorkflowCategories(),
-        searchParams.query || searchParams.category ? Promise.resolve([]) : workflowService.getFeaturedWorkflows()
+        workflowService.getWorkflowCategories()
       ]);
 
       setWorkflows(workflowsData);
       setCategories(categoriesData);
-      setFeaturedWorkflows(featuredData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
@@ -112,6 +110,24 @@ export const PublicWorkflowCatalog: React.FC = () => {
             <p>{t('app.subtitle')}</p>
           </section>
 
+          {/* Main Navigation Menu */}
+          <section className="main-navigation">
+            <div className="nav-cards">
+              <Link to="/services" className="nav-card active">
+                <div className="nav-content">
+                  <h3>{t('navigation.services')}</h3>
+                  <p>Trámites y servicios gubernamentales</p>
+                </div>
+              </Link>
+
+              <Link to="/documents" className="nav-card">
+                <div className="nav-content">
+                  <h3>{t('navigation.documents')}</h3>
+                  <p>Procese sus documentos oficiales</p>
+                </div>
+              </Link>
+            </div>
+          </section>
 
           {/* Search and Filters */}
           <section className="search-section">
@@ -123,7 +139,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
                   value={searchParams.query || ''}
                   onChange={(e) => handleSearch(e.target.value)}
                 />
-                <button className="search-btn">🔍</button>
+                <button className="search-btn">Buscar</button>
               </div>
               
               <div className="sort-controls">
@@ -149,7 +165,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
                 className={`category-btn ${!searchParams.category ? 'active' : ''}`}
                 onClick={() => handleCategoryFilter('')}
               >
-                🏛️ {t('workflows.allCategories')}
+{t('workflows.allCategories')}
               </button>
               {categories.map(category => (
                 <button
@@ -178,18 +194,6 @@ export const PublicWorkflowCatalog: React.FC = () => {
             <div className="error-message">
               {error}
             </div>
-          )}
-
-          {/* Featured Services (when no search/filter) */}
-          {!searchParams.query && !searchParams.category && featuredWorkflows.length > 0 && (
-            <section className="featured-section">
-              <h3>{t('workflows.popular')}</h3>
-              <div className="workflow-grid">
-                {featuredWorkflows.map(workflow => (
-                  <WorkflowCard key={workflow.id} workflow={workflow} />
-                ))}
-              </div>
-            </section>
           )}
 
           {/* All Services */}
@@ -222,48 +226,5 @@ export const PublicWorkflowCatalog: React.FC = () => {
         </div>
       </main>
     </div>
-  );
-};
-
-interface WorkflowCardProps {
-  workflow: WorkflowDefinition;
-}
-
-const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
-  const { t } = useTranslation();
-  return (
-    <Link to={`/services/${workflow.id}`} className="workflow-card">
-      <div className="card-header">
-        <h4>{workflow.name}</h4>
-        <span className="category">{workflow.category}</span>
-      </div>
-      
-      <div className="card-content">
-        <p className="description">{workflow.description}</p>
-        
-        <div className="card-meta">
-          <span className="duration">📅 {workflow.estimatedDuration}</span>
-          <span className="steps">📋 {workflow.steps.length} {t('common.steps')}</span>
-        </div>
-        
-        {workflow.requirements.length > 0 && (
-          <div className="requirements">
-            <strong>{t('workflows.requirements')}:</strong>
-            <ul>
-              {workflow.requirements.slice(0, 2).map((req, index) => (
-                <li key={index}>{req}</li>
-              ))}
-              {workflow.requirements.length > 2 && (
-                <li>+ {workflow.requirements.length - 2} more...</li>
-              )}
-            </ul>
-          </div>
-        )}
-      </div>
-      
-      <div className="card-footer">
-        <span className="cta">{t('workflows.learnMore')} →</span>
-      </div>
-    </Link>
   );
 };

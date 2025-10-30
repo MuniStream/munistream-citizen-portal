@@ -58,6 +58,30 @@ export const Header: React.FC<HeaderProps> = ({
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* Navigation Links */}
+            {variant === 'catalog' && (
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  component={Link}
+                  to="/services"
+                  variant="text"
+                  color="inherit"
+                  size="small"
+                >
+                  {t('navigation.services')}
+                </Button>
+                <Button
+                  component={Link}
+                  to="/documents"
+                  variant="text"
+                  color="inherit"
+                  size="small"
+                >
+                  {t('navigation.documents')}
+                </Button>
+              </Box>
+            )}
+
             <LanguageSwitcher variant="compact" />
 
             {isAuthenticated ? (

@@ -30,7 +30,8 @@
     "retry": "Reintentar",
     "back_to_home": "Volver al Inicio",
     "contact_support": "Contactar Soporte",
-    "faq": "Preguntas Frecuentes"
+    "faq": "Preguntas Frecuentes",
+    "more": "más"
   },
   "status": {
     "pending": "Pendiente",
@@ -257,7 +258,17 @@
     "passwordChanged": "Contraseña cambiada exitosamente"
   },
   "documents": {
-    "title": "Mis Documentos",
+    "title": "Documentos",
+    "subtitle": "Procese sus documentos oficiales requeridos para trámites",
+    "searchPlaceholder": "Buscar documentos...",
+    "availableDocuments": "Documentos Disponibles",
+    "processDocument": "Procesar Documento",
+    "aboutTitle": "Sobre el Procesamiento de Documentos",
+    "aboutDescription": "Nuestro sistema permite procesar y validar documentos oficiales de manera eficiente. Los documentos son verificados automáticamente y pueden requerir revisión adicional.",
+    "tipsTitle": "Consejos para el Procesamiento",
+    "tip1": "Asegúrese de que los documentos estén en formato PDF o imagen",
+    "tip2": "Verifique que todos los datos sean legibles y estén completos",
+    "tip3": "Mantenga copias digitales de todos los documentos enviados",
     "upload": "Cargar Documento",
     "download": "Descargar",
     "view": "Ver",
@@ -271,7 +282,8 @@
     "expirationDate": "Fecha de Expiración",
     "status": "Estado",
     "actions": "Acciones",
-    "noDocuments": "Aún no se han cargado documentos",
+    "noDocuments": "No hay documentos disponibles en este momento",
+    "noResults": "No se encontraron documentos que coincidan con su búsqueda",
     "uploadNew": "Cargar Nuevo Documento",
     "identity": "Documento de Identidad",
     "address": "Comprobante de Domicilio",
@@ -281,7 +293,16 @@
     "maxSize": "Tamaño máximo: 10MB",
     "supportedTypes": "Tipos soportados: PDF, JPG, PNG",
     "documentUploaded": "Documento cargado exitosamente",
-    "documentDeleted": "Documento eliminado exitosamente"
+    "documentDeleted": "Documento eliminado exitosamente",
+    "searchPlaceholder": "Buscar documentos...",
+    "availableDocuments": "Documentos Disponibles",
+    "processDocument": "Procesar Documento",
+    "aboutTitle": "Acerca de los Documentos",
+    "aboutDescription": "Los procesos de documentos le permiten cargar y verificar documentos oficiales necesarios para sus trámites. Una vez procesados, estos documentos pueden ser utilizados en otros procesos del sistema.",
+    "tipsTitle": "Consejos importantes",
+    "tip1": "Asegúrese de que sus documentos estén vigentes y sean legibles",
+    "tip2": "Los documentos procesados pueden tardar de 1 a 3 días hábiles en ser verificados",
+    "tip3": "Una vez verificados, sus documentos estarán disponibles para otros trámites"
   },
   "footer": {
     "about": "Acerca del Sistema",

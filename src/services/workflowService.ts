@@ -75,7 +75,7 @@ class WorkflowService {
   async getFeaturedWorkflows(): Promise<WorkflowDefinition[]> {
     const searchParams = new URLSearchParams();
     addLocaleToParams(searchParams);
-    
+
     const response = await fetch(`${API_BASE_URL}/public/workflows/featured?${searchParams}`, {
       method: 'GET',
       headers: {
@@ -89,6 +89,26 @@ class WorkflowService {
 
     const data = await response.json();
     return data.featured || [];
+  }
+
+  // Get document workflows (public)
+  async getDocumentWorkflows(): Promise<WorkflowDefinition[]> {
+    const searchParams = new URLSearchParams();
+    addLocaleToParams(searchParams);
+
+    const response = await fetch(`${API_BASE_URL}/public/workflows/documents?${searchParams}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch document workflows');
+    }
+
+    const data = await response.json();
+    return data.documents || [];
   }
 
   // Start a new workflow instance (requires authentication)

@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 import { Dashboard } from './pages/Dashboard';
 import { PublicWorkflowCatalog } from './pages/PublicWorkflowCatalog';
+import { DocumentsPage } from './pages/DocumentsPage';
 import { WorkflowDetail } from './pages/WorkflowDetail';
 import { WorkflowStartPage } from './pages/WorkflowStartPage';
 import { TrackingPage } from './pages/TrackingPage';
@@ -20,6 +21,7 @@ function App() {
             <Routes>
             {/* Public routes */}
             <Route path="/services" element={<PublicWorkflowCatalog />} />
+            <Route path="/documents" element={<DocumentsPage />} />
             <Route path="/services/:id" element={<WorkflowDetail />} />
             <Route path="/start/:workflowId" element={<WorkflowStartPage />} />
             <Route path="/track/:instanceId" element={<TrackingPage />} />

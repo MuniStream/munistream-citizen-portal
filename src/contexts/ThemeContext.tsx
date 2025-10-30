@@ -98,12 +98,14 @@ function createMuiTheme(config: ThemeConfig): Theme {
         dark: colors.primary_dark,
         contrastText: colors.primary_contrast_text,
       },
-      secondary: colors.secondary_main ? {
-        main: colors.secondary_main,
-        light: colors.secondary_light,
-        dark: colors.secondary_dark,
-        contrastText: colors.secondary_contrast_text,
-      } : undefined,
+      ...(colors.secondary_main && {
+        secondary: {
+          main: colors.secondary_main,
+          light: colors.secondary_light,
+          dark: colors.secondary_dark,
+          contrastText: colors.secondary_contrast_text,
+        }
+      }),
       background: {
         default: colors.background_default || '#ffffff',
         paper: colors.background_paper || '#f5f5f5',
@@ -113,10 +115,10 @@ function createMuiTheme(config: ThemeConfig): Theme {
         secondary: colors.text_secondary || '#666666',
         disabled: colors.text_disabled || '#999999',
       },
-      error: colors.error ? { main: colors.error } : undefined,
-      warning: colors.warning ? { main: colors.warning } : undefined,
-      info: colors.info ? { main: colors.info } : undefined,
-      success: colors.success ? { main: colors.success } : undefined,
+      ...(colors.error && { error: { main: colors.error } }),
+      ...(colors.warning && { warning: { main: colors.warning } }),
+      ...(colors.info && { info: { main: colors.info } }),
+      ...(colors.success && { success: { main: colors.success } }),
     },
     typography: typography ? {
       fontFamily: typography.font_family,
@@ -150,6 +152,7 @@ export function CustomThemeProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       setError(null);
+
 
       const response = await api.get('/themes/current');
       const config = response.data as ThemeConfig;
@@ -185,8 +188,7 @@ export function CustomThemeProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('Failed to load theme:', err);
       setError(err as Error);
-      // Use default theme on error
-      setTheme(createMuiTheme(defaultThemeConfig));
+      // Keep using default theme on error
     } finally {
       setIsLoading(false);
     }
