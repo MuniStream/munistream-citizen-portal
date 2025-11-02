@@ -1,8 +1,10 @@
 export interface WorkflowDefinition {
   id: string;
+  workflow_id?: string;  // Backend sends this instead of id sometimes
   name: string;
   description: string;
   category: string;
+  workflow_type?: 'DOCUMENT' | 'PROCESS';  // Backend categorization
   estimatedDuration: string;
   requirements: string[];
   steps: WorkflowStep[];

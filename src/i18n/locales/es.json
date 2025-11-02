@@ -178,7 +178,9 @@
     "sortBy": "Ordenar por",
     "sortByName": "Nombre",
     "sortByDuration": "Duración",
-    "sortByPopularity": "Popularidad"
+    "sortByPopularity": "Popularidad",
+    "noDocumentWorkflows": "No hay servicios de documentos disponibles",
+    "noProcessWorkflows": "No hay trámites disponibles"
   },
   "applications": {
     "title": "Mis Solicitudes",
@@ -232,10 +234,18 @@
     "home": "Inicio",
     "services": "Servicios",
     "applications": "Mis Solicitudes",
-    "documents": "Mis Documentos",
+    "documents": "Documentos",
+    "documentProcesses": "Carga de Documentos",
+    "workflows": "Trámites",
+    "myDocuments": "Mis Documentos",
+    "myEntities": "Cartera",
+    "myInstances": "Mis Casos",
+    "myProfile": "Mi Perfil",
     "profile": "Perfil",
     "support": "Soporte",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "menu": "Menú",
+    "dashboard": "Tablero"
   },
   "profile": {
     "title": "Mi Perfil",
@@ -255,7 +265,8 @@
     "accountSettings": "Configuración de Cuenta",
     "deleteAccount": "Eliminar Cuenta",
     "profileUpdated": "Perfil actualizado exitosamente",
-    "passwordChanged": "Contraseña cambiada exitosamente"
+    "passwordChanged": "Contraseña cambiada exitosamente",
+    "emailNotVerified": "Correo no verificado"
   },
   "documents": {
     "title": "Documentos",

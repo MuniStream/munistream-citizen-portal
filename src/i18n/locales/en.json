@@ -178,7 +178,9 @@
     "sortBy": "Sort by",
     "sortByName": "Name",
     "sortByDuration": "Duration",
-    "sortByPopularity": "Popularity"
+    "sortByPopularity": "Popularity",
+    "noDocumentWorkflows": "No document services available",
+    "noProcessWorkflows": "No processes available"
   },
   "applications": {
     "title": "My Applications",
@@ -232,10 +234,18 @@
     "home": "Home",
     "services": "Services",
     "applications": "My Applications",
-    "documents": "My Documents",
+    "documents": "Documents",
+    "documentProcesses": "Document Upload",
+    "workflows": "Processes",
+    "myDocuments": "My Documents",
+    "myEntities": "Wallet",
+    "myInstances": "My Cases",
+    "myProfile": "My Profile",
     "profile": "Profile",
     "support": "Support",
-    "settings": "Settings"
+    "settings": "Settings",
+    "menu": "Menu",
+    "dashboard": "Dashboard"
   },
   "profile": {
     "title": "My Profile",
@@ -255,7 +265,8 @@
     "accountSettings": "Account Settings",
     "deleteAccount": "Delete Account",
     "profileUpdated": "Profile updated successfully",
-    "passwordChanged": "Password changed successfully"
+    "passwordChanged": "Password changed successfully",
+    "emailNotVerified": "Email not verified"
   },
   "documents": {
     "title": "My Documents",
