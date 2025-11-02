@@ -12,12 +12,20 @@ COPY . .
 
 # Create .env file with placeholder values
 RUN echo "VITE_API_URL=__VITE_API_URL__" > .env && \
+    echo "VITE_API_BASE_URL=__VITE_API_BASE_URL__" >> .env && \
     echo "VITE_KEYCLOAK_URL=__VITE_KEYCLOAK_URL__" >> .env && \
     echo "VITE_KEYCLOAK_REALM=__VITE_KEYCLOAK_REALM__" >> .env && \
     echo "VITE_KEYCLOAK_CLIENT_ID=__VITE_KEYCLOAK_CLIENT_ID__" >> .env && \
     echo "VITE_TENANT=__VITE_TENANT__" >> .env && \
+    echo "VITE_TENANT_ID=__VITE_TENANT_ID__" >> .env && \
     echo "VITE_TENANT_NAME=__VITE_TENANT_NAME__" >> .env && \
-    echo "VITE_ORGANIZATION=__VITE_ORGANIZATION__" >> .env
+    echo "VITE_ORGANIZATION=__VITE_ORGANIZATION__" >> .env && \
+    echo "VITE_APP_TITLE=__VITE_APP_TITLE__" >> .env && \
+    echo "VITE_LANGUAGE=__VITE_LANGUAGE__" >> .env && \
+    echo "VITE_ENABLE_NOTIFICATIONS=__VITE_ENABLE_NOTIFICATIONS__" >> .env && \
+    echo "VITE_ENABLE_FILE_UPLOAD=__VITE_ENABLE_FILE_UPLOAD__" >> .env && \
+    echo "VITE_MAX_FILE_SIZE=__VITE_MAX_FILE_SIZE__" >> .env && \
+    echo "VITE_ALLOWED_FILE_TYPES=__VITE_ALLOWED_FILE_TYPES__" >> .env
 
 # Build the app with placeholder values
 RUN npm run build
