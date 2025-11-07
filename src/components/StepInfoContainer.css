@@ -1,0 +1,154 @@
+.step-info-container {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f7ff 100%);
+  border-radius: 12px !important;
+  transition: all 0.2s ease;
+}
+
+.step-info-container:hover {
+  box-shadow: 0 4px 12px rgba(44, 90, 160, 0.15) !important;
+}
+
+.step-info-container .MuiTypography-h6 {
+  color: #2c5aa0;
+  font-weight: 600;
+}
+
+.step-info-container .MuiChip-root {
+  font-weight: 500;
+}
+
+.step-info-container .MuiButton-outlined {
+  border-color: #2c5aa0;
+  color: #2c5aa0;
+  font-weight: 500;
+  text-transform: none;
+}
+
+.step-info-container .MuiButton-outlined:hover {
+  background-color: rgba(44, 90, 160, 0.04);
+  border-color: #1e3d6f;
+}
+
+.step-info-container .MuiListItem-root {
+  padding: 8px 0;
+}
+
+.step-info-container .MuiListItemIcon-root {
+  min-width: 36px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .step-info-container .MuiBox-root {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .step-info-container .MuiButton-outlined {
+    margin-top: 8px;
+    margin-left: 0 !important;
+  }
+}
+
+/* Loading state */
+.step-info-container.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Empty state */
+.step-info-container.empty {
+  border-left-color: #ccc;
+  background: #f9f9f9;
+}
+
+.step-info-container.empty .MuiTypography-h6 {
+  color: #666;
+}
+
+/* Entity Requirements Styles */
+.requirements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.requirement-item {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #fafafa;
+}
+
+.requirement-item.entity-requirement {
+  background: #f8f9ff;
+  border-color: #e0e0e0;
+}
+
+.requirement-header {
+  margin-bottom: 8px;
+}
+
+.requirement-title {
+  color: #2c5aa0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.requirement-description {
+  color: #555;
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.requirement-action {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-get-document {
+  background: #2c5aa0;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-get-document:hover {
+  background: #1e3d6f;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(44, 90, 160, 0.3);
+}
+
+.requirement-text {
+  color: #333;
+  font-size: 13px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .requirement-item {
+    padding: 12px;
+  }
+
+  .requirement-title {
+    font-size: 13px;
+  }
+
+  .requirement-description {
+    font-size: 12px;
+  }
+
+  .btn-get-document {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+}

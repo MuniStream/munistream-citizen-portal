@@ -71,39 +71,62 @@ export const TrackingPage: React.FC = () => {
 
   const handleDataSubmission = async (data: Record<string, any>) => {
     if (!instanceId) return;
-    
+
     setIsSubmittingData(true);
     setError(null);
-    
+
     try {
-      // Create FormData for file uploads
-      const formData = new FormData();
-      
-      // Add regular form fields
-      Object.entries(data).forEach(([key, value]) => {
-        if (key !== '_files' && value !== undefined && value !== null) {
-          formData.append(key, value.toString());
+      // Check if this is entity selection data
+      const waitingFor = (progress?.input_form as any)?.waiting_for;
+      const isEntitySelection = waitingFor === 'entity_selection';
+
+      if (isEntitySelection) {
+        // Handle entity selection submission
+        const taskId = (progress?.input_form as any)?.current_step_id || 'pick_required_documents';
+        const selectionData = {
+          [`${taskId}_selections`]: data
+        };
+
+        const response = await workflowService.submitCitizenData(instanceId, selectionData);
+
+        if (response.success) {
+          setSubmissionSuccess(response.message || 'Entity selections submitted successfully');
+          // Refresh progress to get updated state
+          setTimeout(() => {
+            fetchProgress();
+            setSubmissionSuccess(null);
+          }, 2000);
         }
-      });
-      
-      // Add files
-      if (data._files) {
-        Object.entries(data._files).forEach(([key, file]) => {
-          if (file instanceof File) {
-            formData.append(key, file);
+      } else {
+        // Handle regular form submission with files
+        const formData = new FormData();
+
+        // Add regular form fields
+        Object.entries(data).forEach(([key, value]) => {
+          if (key !== '_files' && value !== undefined && value !== null) {
+            formData.append(key, value.toString());
           }
         });
-      }
-      
-      const response = await workflowService.submitCitizenData(instanceId, formData);
-      
-      if (response.success) {
-        setSubmissionSuccess(response.message);
-        // Refresh progress to get updated state
-        setTimeout(() => {
-          fetchProgress();
-          setSubmissionSuccess(null);
-        }, 2000);
+
+        // Add files
+        if (data._files) {
+          Object.entries(data._files).forEach(([key, file]) => {
+            if (file instanceof File) {
+              formData.append(key, file);
+            }
+          });
+        }
+
+        const response = await workflowService.submitCitizenData(instanceId, formData);
+
+        if (response.success) {
+          setSubmissionSuccess(response.message);
+          // Refresh progress to get updated state
+          setTimeout(() => {
+            fetchProgress();
+            setSubmissionSuccess(null);
+          }, 2000);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit data');
@@ -304,11 +327,21 @@ export const TrackingPage: React.FC = () => {
                       required: field.required,
                       placeholder: field.placeholder,
                       options: field.options ? (
-                        // Handle both string arrays and object arrays
-                        typeof field.options[0] === 'string' 
-                          ? field.options 
-                          : field.options.map((opt: any) => opt.value || opt)
-                      ) : undefined
+                        // For entity_select/entity_multi_select, pass full EntityOption objects
+                        field.type === 'entity_select' || field.type === 'entity_multi_select'
+                          ? field.options  // Keep full EntityOption structure
+                          : (
+                            // For regular select fields, handle string/object arrays
+                            typeof field.options[0] === 'string'
+                              ? field.options
+                              : field.options.map((opt: any) => opt.value || opt)
+                          )
+                      ) : undefined,
+                      // Pass through entity-specific fields
+                      entity_type: field.entity_type,
+                      min_count: field.min_count,
+                      max_count: field.max_count,
+                      description: field.description
                     }))}
                     onSubmit={handleDataSubmission}
                     isSubmitting={isSubmittingData}

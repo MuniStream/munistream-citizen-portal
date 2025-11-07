@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
 import keycloakService from '../services/keycloak';
 import type { WorkflowDefinition } from '../types/workflow';
+import '../components/StepInfoContainer.css';
 
 export const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -143,6 +144,7 @@ export const WorkflowDetail: React.FC = () => {
             </section>
           )}
 
+
           {/* Process Steps */}
           <section className="steps-section">
             <h3>{t('workflows.process')}</h3>
@@ -159,11 +161,47 @@ export const WorkflowDetail: React.FC = () => {
                     {step.requirements && step.requirements.length > 0 && (
                       <div className="step-requirements">
                         <strong>{t('forms.required')}:</strong>
-                        <ul>
-                          {step.requirements.map((req, reqIndex) => (
-                            <li key={reqIndex}>{req}</li>
-                          ))}
-                        </ul>
+                        <div className="requirements-list">
+                          {step.requirements.map((req, reqIndex) => {
+                            if (typeof req === 'string') {
+                              return (
+                                <div key={reqIndex} className="requirement-item">
+                                  <span className="requirement-text">{req}</span>
+                                </div>
+                              );
+                            } else if (req && (req as any).info) {
+                              const info = (req as any).info;
+                              return (
+                                <div key={reqIndex} className="requirement-item entity-requirement">
+                                  <div className="requirement-header">
+                                    <strong className="requirement-title">
+                                      {info.display_name || 'Documento requerido'}
+                                    </strong>
+                                  </div>
+                                  <div className="requirement-description">
+                                    {info.instructions || ''}
+                                  </div>
+                                  {info.workflow_id && (
+                                    <div className="requirement-action">
+                                      <Link
+                                        to={`/services/${info.workflow_id}`}
+                                        className="btn-get-document"
+                                      >
+                                        Obtener este documento
+                                      </Link>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div key={reqIndex} className="requirement-item">
+                                  <span className="requirement-text">Requisito adicional</span>
+                                </div>
+                              );
+                            }
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -266,3 +304,4 @@ const UnifiedWorkflowModal: React.FC<UnifiedWorkflowModalProps> = ({ workflow, o
     </div>
   );
 };
+
