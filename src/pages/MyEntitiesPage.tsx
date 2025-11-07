@@ -48,7 +48,54 @@ export const MyEntitiesPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedEntity] = useState<Entity | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [entityToDelete, setEntityToDelete] = useState<Entity | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showWorkflowModal, setShowWorkflowModal] = useState(false);
+
+  const handleDeleteEntity = async () => {
+    if (!entityToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const token = await authService.getToken();
+      if (!token) {
+        await login();
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/public/entities/${entityToDelete.entity_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to delete entity');
+      }
+
+      // Remove entity from local state
+      setEntities(prev => prev.filter(entity => entity.entity_id !== entityToDelete.entity_id));
+
+      // Close dialog
+      setShowDeleteDialog(false);
+      setEntityToDelete(null);
+
+    } catch (err) {
+      console.error('Error deleting entity:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete entity');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const confirmDelete = (entity: Entity) => {
+    setEntityToDelete(entity);
+    setShowDeleteDialog(true);
+  };
 
   useEffect(() => {
     fetchEntities();
@@ -294,7 +341,7 @@ export const MyEntitiesPage: React.FC = () => {
                   </div>
                   
                   <div className="entity-actions">
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent card click
                         navigate(`/entity/${entity.entity_id}`);
@@ -302,6 +349,16 @@ export const MyEntitiesPage: React.FC = () => {
                       className="btn-primary small"
                     >
                       👁️ {t('my_entities.view_details')}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent card click
+                        confirmDelete(entity);
+                      }}
+                      className="btn-danger small"
+                      title={t('common.delete')}
+                    >
+                      🗑️ {t('common.delete')}
                     </button>
                     {entity.available_workflows.length > 0 && (
                       <span className="workflows-count">
@@ -349,6 +406,56 @@ export const MyEntitiesPage: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Delete Confirmation Dialog */}
+          {showDeleteDialog && entityToDelete && (
+            <div className="modal-overlay" onClick={() => !isDeleting && setShowDeleteDialog(false)}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h3>🗑️ {t('common.delete')} {t('entity.detail')}</h3>
+                  {!isDeleting && (
+                    <button
+                      onClick={() => setShowDeleteDialog(false)}
+                      className="close-button"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                <div className="modal-body">
+                  <p className="modal-subtitle">
+                    {t('entities.deleteConfirmMessage')}
+                  </p>
+                  <div className="entity-to-delete">
+                    <strong>{entityToDelete.name}</strong>
+                    <br />
+                    <small>{getEntityDisplayName(entityToDelete.entity_type)}</small>
+                  </div>
+                  <p className="warning-text">
+                    ⚠️ {t('entities.deleteWarning')}
+                  </p>
+                </div>
+
+                <div className="modal-actions">
+                  <button
+                    onClick={() => setShowDeleteDialog(false)}
+                    className="btn-secondary"
+                    disabled={isDeleting}
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button
+                    onClick={handleDeleteEntity}
+                    className="btn-danger"
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? '⏳ ' + t('common.deleting') : '🗑️ ' + t('common.delete')}
+                  </button>
                 </div>
               </div>
             </div>

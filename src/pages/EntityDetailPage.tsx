@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
+import { EntityFieldVisualizer } from '../components/EntityVisualizer/EntityFieldVisualizer';
 import { authService } from '../services/authService';
 import './EntityDetailPage.css';
 
@@ -215,13 +216,6 @@ export const EntityDetailPage: React.FC = () => {
     }
   };
 
-  const formatDataValue = (value: any): string => {
-    if (value === null || value === undefined) return '-';
-    if (typeof value === 'boolean') return value ? 'Sí' : 'No';
-    if (typeof value === 'number') return value.toLocaleString();
-    if (typeof value === 'object') return JSON.stringify(value);
-    return String(value);
-  };
 
   const getDocumentTypeIcon = (docType: string) => {
     const iconMap: Record<string, string> = {
@@ -325,8 +319,12 @@ export const EntityDetailPage: React.FC = () => {
             <div className="data-grid">
               {Object.entries(entity.data).map(([key, value]) => (
                 <div key={key} className="data-item">
-                  <label>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</label>
-                  <span>{formatDataValue(value)}</span>
+                  <EntityFieldVisualizer
+                    entity={entity}
+                    fieldName={key}
+                    fieldValue={value}
+                    showLabel={true}
+                  />
                 </div>
               ))}
             </div>
