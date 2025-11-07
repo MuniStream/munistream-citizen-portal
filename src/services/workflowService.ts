@@ -177,24 +177,33 @@ class WorkflowService {
   }
 
   // Submit citizen data for a workflow step (requires authentication)
-  async submitCitizenData(instanceId: string, formData: FormData): Promise<DataSubmissionResponse> {
+  async submitCitizenData(instanceId: string, data: FormData | Record<string, any>): Promise<DataSubmissionResponse> {
     const searchParams = new URLSearchParams();
     addLocaleToParams(searchParams);
-    
+
     // Get valid token
     const keycloakService = (await import('./keycloak')).default;
     const token = keycloakService.getToken();
     if (!token) {
       throw new Error('Authentication required to submit data. Please login first.');
     }
-    
+
+    // Determine if we're sending FormData or JSON
+    const isFormData = data instanceof FormData;
+
+    const headers: Record<string, string> = {
+      'Authorization': `Bearer ${token}`
+    };
+
+    // Only set Content-Type for JSON, FormData sets its own
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     const response = await fetch(`${API_BASE_URL}/public/instances/${instanceId}/submit-data?${searchParams}`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        // Note: Don't set Content-Type when sending FormData, browser will set it with boundary
-      },
-      body: formData, // FormData handles multipart/form-data automatically
+      headers,
+      body: isFormData ? data : JSON.stringify(data)
     });
 
     if (!response.ok) {
@@ -216,7 +225,7 @@ class WorkflowService {
     if (!token) {
       throw new Error('Authentication required');
     }
-    
+
     const response = await fetch(`${API_BASE_URL}/public/auth/my-workflows`, {
       method: 'GET',
       headers: {
@@ -228,6 +237,33 @@ class WorkflowService {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.detail || 'Failed to fetch customer workflows');
+    }
+
+    return response.json();
+  }
+
+  // Get user's workflow instances (requires authentication)
+  async getMyInstances(): Promise<MyInstancesResponse> {
+    const keycloakService = (await import('./keycloak')).default;
+    const token = keycloakService.getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/public/workflows/my-instances`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Session expired. Please login again.');
+      }
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to fetch workflow instances');
     }
 
     return response.json();
@@ -326,6 +362,24 @@ export interface CustomerWorkflowInstance {
   completed_at?: string;
   current_step?: string;
   tracking_url: string;
+}
+
+export interface MyInstancesResponse {
+  instances: MyWorkflowInstance[];
+  total: number;
+}
+
+export interface MyWorkflowInstance {
+  instance_id: string;
+  workflow_id: string;
+  workflow_name?: string;
+  status: string;
+  current_step?: string;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  progress_percentage?: number;
+  context?: Record<string, any>;
 }
 
 export const workflowService = new WorkflowService();
