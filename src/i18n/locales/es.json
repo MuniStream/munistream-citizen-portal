@@ -31,18 +31,22 @@
     "back_to_home": "Volver al Inicio",
     "contact_support": "Contactar Soporte",
     "faq": "Preguntas Frecuentes",
-    "more": "más"
+    "more": "más",
+    "delete": "Eliminar",
+    "deleting": "Eliminando..."
   },
   "status": {
+    "all": "Todos",
     "pending": "Pendiente",
-    "in_progress": "En Progreso", 
+    "in_progress": "En Progreso",
     "completed": "Completado",
     "failed": "Fallido",
     "running": "Ejecutándose",
     "paused": "Pausado",
     "cancelled": "Cancelado",
     "awaiting_input": "Esperando Información",
-    "pending_validation": "Pendiente de Validación"
+    "pending_validation": "Pendiente de Validación",
+    "waiting": "Esperando"
   },
   "workflow": {
     "start_title": "Iniciar Nueva Solicitud",
@@ -180,7 +184,8 @@
     "sortByDuration": "Duración",
     "sortByPopularity": "Popularidad",
     "noDocumentWorkflows": "No hay servicios de documentos disponibles",
-    "noProcessWorkflows": "No hay trámites disponibles"
+    "noProcessWorkflows": "No hay trámites disponibles",
+    "documentsRequired": "Documentos Requeridos"
   },
   "applications": {
     "title": "Mis Solicitudes",
@@ -423,5 +428,32 @@
       "view": "Ver",
       "download": "Descargar"
     }
+  },
+  "instances": {
+    "subtitle": "Rastrea y gestiona todas tus solicitudes enviadas",
+    "searchPlaceholder": "Buscar por nombre de trámite o ID...",
+    "filterByStatus": "Filtrar por Estado",
+    "totalInstances": "{count} instancias",
+    "lastRefresh": "Última actualización",
+    "noInstances": "Aún No Hay Solicitudes",
+    "noInstancesDescription": "Aún no has iniciado ninguna solicitud. Explora nuestros servicios para comenzar.",
+    "startNewWorkflow": "Ver Servicios",
+    "noResults": "No Hay Solicitudes Coincidentes",
+    "noResultsDescription": "Intenta ajustar tus términos de búsqueda o filtros.",
+    "instanceId": "ID",
+    "currentStep": "Paso Actual",
+    "viewDetails": "Ver Detalles",
+    "continue": "Continuar",
+    "summary": "Resumen",
+    "total": "Total",
+    "active": "Activos",
+    "needsAction": "Requiere Acción"
+  },
+  "entities": {
+    "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar esta entidad?",
+    "deleteWarning": "Esta acción no se puede deshacer. Todas las relaciones y datos asociados se eliminarán permanentemente."
+  },
+  "auth": {
+    "loginRequired": "Por favor inicia sesión para ver tus solicitudes"
   }
 }

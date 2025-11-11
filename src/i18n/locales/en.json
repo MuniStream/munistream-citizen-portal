@@ -30,18 +30,22 @@
     "retry": "Retry",
     "back_to_home": "Back to Home",
     "contact_support": "Contact Support",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "delete": "Delete",
+    "deleting": "Deleting..."
   },
   "status": {
+    "all": "All",
     "pending": "Pending",
-    "in_progress": "In Progress", 
+    "in_progress": "In Progress",
     "completed": "Completed",
     "failed": "Failed",
     "running": "Running",
     "paused": "Paused",
     "cancelled": "Cancelled",
     "awaiting_input": "Awaiting Input",
-    "pending_validation": "Pending Validation"
+    "pending_validation": "Pending Validation",
+    "waiting": "Waiting"
   },
   "workflow": {
     "start_title": "Start New Application",
@@ -180,7 +184,8 @@
     "sortByDuration": "Duration",
     "sortByPopularity": "Popularity",
     "noDocumentWorkflows": "No document services available",
-    "noProcessWorkflows": "No processes available"
+    "noProcessWorkflows": "No processes available",
+    "documentsRequired": "Required Documents"
   },
   "applications": {
     "title": "My Applications",
@@ -403,5 +408,32 @@
       "view": "View",
       "download": "Download"
     }
+  },
+  "instances": {
+    "subtitle": "Track and manage all your submitted applications",
+    "searchPlaceholder": "Search by workflow name or ID...",
+    "filterByStatus": "Filter by Status",
+    "totalInstances": "{count} instances",
+    "lastRefresh": "Last refresh",
+    "noInstances": "No Applications Yet",
+    "noInstancesDescription": "You haven't started any applications yet. Browse our services to get started.",
+    "startNewWorkflow": "Browse Services",
+    "noResults": "No Matching Applications",
+    "noResultsDescription": "Try adjusting your search terms or filters.",
+    "instanceId": "ID",
+    "currentStep": "Current Step",
+    "viewDetails": "View Details",
+    "continue": "Continue",
+    "summary": "Summary",
+    "total": "Total",
+    "active": "Active",
+    "needsAction": "Needs Action"
+  },
+  "entities": {
+    "deleteConfirmMessage": "Are you sure you want to delete this entity?",
+    "deleteWarning": "This action cannot be undone. All relationships and associated data will be permanently deleted."
+  },
+  "auth": {
+    "loginRequired": "Please log in to view your applications"
   }
 }
