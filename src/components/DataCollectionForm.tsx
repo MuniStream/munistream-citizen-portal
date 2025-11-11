@@ -17,10 +17,10 @@ export interface FormField {
   id: string;
   name: string;
   label: string;
-  type: 'text' | 'email' | 'phone' | 'date' | 'number' | 'select' | 'textarea' | 'file';
+  type: 'text' | 'email' | 'phone' | 'date' | 'number' | 'select' | 'textarea' | 'file' | 'entity_select' | 'entity_multi_select';
   required: boolean;
   placeholder?: string;
-  options?: string[];
+  options?: string[] | EntityOption[];
   validation?: {
     pattern?: string;
     minLength?: number;
@@ -33,6 +33,22 @@ export interface FormField {
     triggerOnLength?: number;
     triggerOnPattern?: string;
     triggerOnValue?: string;
+  };
+  // Entity selection specific fields
+  entity_type?: string;
+  min_count?: number;
+  max_count?: number;
+  description?: string;
+}
+
+export interface EntityOption {
+  value: string;
+  label: string;
+  entity_data: {
+    entity_id: string;
+    entity_type: string;
+    name: string;
+    data: Record<string, any>;
   };
 }
 
@@ -270,6 +286,60 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
     onSubmit(submissionData);
   };
 
+  // Entity Card Component
+  const EntityCard: React.FC<{ entity: EntityOption; isSelected: boolean; onToggle: () => void }> = ({ entity, isSelected, onToggle }) => {
+    const entityData = entity.entity_data;
+
+    return (
+      <div
+        className={`entity-card ${isSelected ? 'selected' : ''}`}
+        onClick={onToggle}
+        style={{
+          border: '2px solid',
+          borderColor: isSelected ? '#2c5aa0' : '#e1e5e9',
+          borderRadius: '8px',
+          padding: '1rem',
+          margin: '0.5rem 0',
+          cursor: 'pointer',
+          backgroundColor: isSelected ? '#f8f9fa' : '#fff',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => {}} // Handled by card click
+            style={{ pointerEvents: 'none' }}
+          />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 'bold', color: '#2c5aa0' }}>
+              {entityData.name}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.25rem' }}>
+              Type: {entityData.entity_type}
+            </div>
+            {entityData.data.document_type && (
+              <div style={{ fontSize: '0.8rem', color: '#999' }}>
+                Document: {entityData.data.document_type}
+              </div>
+            )}
+            {entityData.data.upload_date && (
+              <div style={{ fontSize: '0.8rem', color: '#999' }}>
+                Uploaded: {new Date(entityData.data.upload_date).toLocaleDateString()}
+              </div>
+            )}
+            {entityData.data.file_size && (
+              <div style={{ fontSize: '0.8rem', color: '#999' }}>
+                Size: {Math.round(entityData.data.file_size / 1024)} KB
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderField = (field: FormField) => {
     const commonProps = {
       id: field.id,
@@ -301,6 +371,79 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
     }
 
     switch (field.type) {
+      case 'entity_select':
+      case 'entity_multi_select': {
+        const entityOptions = field.options as EntityOption[] || [];
+        const isMultiSelect = field.type === 'entity_multi_select';
+        const currentValue = formData[field.id] || (isMultiSelect ? [] : '');
+        const selectedValues = Array.isArray(currentValue) ? currentValue : (currentValue ? [currentValue] : []);
+
+        const handleEntityToggle = (entityId: string) => {
+          if (isMultiSelect) {
+            const newValues = selectedValues.includes(entityId)
+              ? selectedValues.filter(id => id !== entityId)
+              : [...selectedValues, entityId];
+            handleInputChange(field.id, newValues);
+          } else {
+            handleInputChange(field.id, selectedValues.includes(entityId) ? '' : entityId);
+          }
+        };
+
+        return (
+          <div className="entity-selector">
+            {field.description && (
+              <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                {field.description}
+              </p>
+            )}
+
+            <div style={{ marginBottom: '1rem' }}>
+              <span style={{ fontSize: '0.9rem', color: '#666' }}>
+                {isMultiSelect ?
+                  `Selected: ${selectedValues.length} / ${field.max_count || 'unlimited'}` :
+                  `Selected: ${selectedValues.length > 0 ? '1' : '0'} / 1`
+                }
+                {field.min_count && field.min_count > 0 && (
+                  <span style={{ color: '#dc3545', marginLeft: '0.5rem' }}>
+                    (Minimum: {field.min_count})
+                  </span>
+                )}
+              </span>
+            </div>
+
+            <div className="entity-options">
+              {entityOptions.length === 0 ? (
+                <div style={{
+                  padding: '2rem',
+                  textAlign: 'center',
+                  color: '#666',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px',
+                  border: '2px dashed #e1e5e9'
+                }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📄</div>
+                  <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                    No {field.entity_type} entities available
+                  </div>
+                  <div style={{ fontSize: '0.9rem' }}>
+                    You need to upload {field.entity_type} documents first before you can select them.
+                  </div>
+                </div>
+              ) : (
+                entityOptions.map((entity) => (
+                  <EntityCard
+                    key={entity.value}
+                    entity={entity}
+                    isSelected={selectedValues.includes(entity.value)}
+                    onToggle={() => handleEntityToggle(entity.value)}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        );
+      }
+
       case 'textarea':
         return (
           <textarea
@@ -322,9 +465,15 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
             className="form-input"
           >
             <option value="">Select {field.label}</option>
-            {field.options?.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
+            {field.options?.map(option => {
+              const isEntityOption = typeof option === 'object' && 'value' in option;
+              const key = isEntityOption ? option.value : option;
+              const value = isEntityOption ? option.value : option;
+              const label = isEntityOption ? option.label : option;
+              return (
+                <option key={key} value={value}>{label}</option>
+              );
+            })}
           </select>
         );
 

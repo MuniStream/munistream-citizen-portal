@@ -38,6 +38,7 @@ export const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
             </ul>
           </div>
         )}
+
       </div>
 
       <div className="card-footer">

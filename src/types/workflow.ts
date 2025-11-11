@@ -1,3 +1,10 @@
+export interface EntityRequirement {
+  instructions?: string;
+  workflow_id?: string;
+  display_name?: string;
+  description?: string;
+}
+
 export interface WorkflowDefinition {
   id: string;
   workflow_id?: string;  // Backend sends this instead of id sometimes
@@ -7,6 +14,7 @@ export interface WorkflowDefinition {
   workflow_type?: 'DOCUMENT' | 'PROCESS';  // Backend categorization
   estimatedDuration: string;
   requirements: string[];
+  entity_requirements?: EntityRequirement[];  // New field for entity requirements with workflow links
   steps: WorkflowStep[];
   isActive?: boolean;  // Legacy field
   available?: boolean;  // New field from backend
