@@ -5,6 +5,11 @@ export interface EntityRequirement {
   description?: string;
 }
 
+export interface FAQ {
+  question: string;
+  answer: string;
+}
+
 export interface WorkflowDefinition {
   id: string;
   workflow_id?: string;  // Backend sends this instead of id sometimes
@@ -13,11 +18,17 @@ export interface WorkflowDefinition {
   category: string;
   workflow_type?: 'DOCUMENT' | 'PROCESS';  // Backend categorization
   estimatedDuration: string;
+  estimated_duration?: string;  // Backend compatibility
   requirements: string[];
   entity_requirements?: EntityRequirement[];  // New field for entity requirements with workflow links
   steps: WorkflowStep[];
   isActive?: boolean;  // Legacy field
   available?: boolean;  // New field from backend
+  cost?: number;  // Cost in currency units
+  metadata?: {
+    faqs?: FAQ[];
+    [key: string]: any;
+  };
   createdAt?: string;
   updatedAt?: string;
 }

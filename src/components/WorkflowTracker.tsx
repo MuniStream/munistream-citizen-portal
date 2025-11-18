@@ -82,7 +82,7 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
   };
 
   const handleShare = () => {
-    const url = `${window.location.origin}/track/${instanceId}`;
+    const url = `${window.location.origin}/instances/${instanceId}`;
     navigator.clipboard.writeText(url);
     // Could add a toast notification here
   };

@@ -305,35 +305,53 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
           transition: 'all 0.2s ease'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={() => {}} // Handled by card click
-            style={{ pointerEvents: 'none' }}
-          />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 'bold', color: '#2c5aa0' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+          <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', height: '24px', marginTop: '2px' }}>
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => {}} // Handled by card click
+              style={{
+                pointerEvents: 'none',
+                width: '18px',
+                height: '18px',
+                margin: 0
+              }}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontWeight: 'bold',
+              color: '#2c5aa0',
+              marginBottom: '0.5rem',
+              fontSize: '1rem'
+            }}>
               {entityData.name}
             </div>
-            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.25rem' }}>
-              Type: {entityData.entity_type}
+            <div style={{
+              display: 'grid',
+              gap: '0.25rem',
+              fontSize: '0.875rem'
+            }}>
+              <div style={{ color: '#666' }}>
+                <strong>Tipo:</strong> {entityData.entity_type}
+              </div>
+              {entityData.data.document_type && (
+                <div style={{ color: '#666' }}>
+                  <strong>Documento:</strong> {entityData.data.document_type}
+                </div>
+              )}
+              {entityData.data.upload_date && (
+                <div style={{ color: '#888' }}>
+                  <strong>Subido:</strong> {new Date(entityData.data.upload_date).toLocaleDateString('es-MX')}
+                </div>
+              )}
+              {entityData.data.file_size && (
+                <div style={{ color: '#888' }}>
+                  <strong>Tamaño:</strong> {Math.round(entityData.data.file_size / 1024)} KB
+                </div>
+              )}
             </div>
-            {entityData.data.document_type && (
-              <div style={{ fontSize: '0.8rem', color: '#999' }}>
-                Document: {entityData.data.document_type}
-              </div>
-            )}
-            {entityData.data.upload_date && (
-              <div style={{ fontSize: '0.8rem', color: '#999' }}>
-                Uploaded: {new Date(entityData.data.upload_date).toLocaleDateString()}
-              </div>
-            )}
-            {entityData.data.file_size && (
-              <div style={{ fontSize: '0.8rem', color: '#999' }}>
-                Size: {Math.round(entityData.data.file_size / 1024)} KB
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -375,7 +393,7 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
       case 'entity_multi_select': {
         const entityOptions = field.options as EntityOption[] || [];
         const isMultiSelect = field.type === 'entity_multi_select';
-        const currentValue = formData[field.id] || (isMultiSelect ? [] : '');
+        const currentValue = formData[field.id] || [];
         const selectedValues = Array.isArray(currentValue) ? currentValue : (currentValue ? [currentValue] : []);
 
         const handleEntityToggle = (entityId: string) => {
@@ -385,7 +403,9 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
               : [...selectedValues, entityId];
             handleInputChange(field.id, newValues);
           } else {
-            handleInputChange(field.id, selectedValues.includes(entityId) ? '' : entityId);
+            // For single select, send array with one element or empty array
+            const newValues = selectedValues.includes(entityId) ? [] : [entityId];
+            handleInputChange(field.id, newValues);
           }
         };
 
@@ -426,7 +446,10 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
                     No {field.entity_type} entities available
                   </div>
                   <div style={{ fontSize: '0.9rem' }}>
-                    You need to upload {field.entity_type} documents first before you can select them.
+                    {field.min_count && field.min_count > 0
+                      ? `You need to upload ${field.entity_type} documents first before you can select them.`
+                      : `No ${field.entity_type} documents available. This is optional - you can skip it or upload documents if needed.`
+                    }
                   </div>
                 </div>
               ) : (

@@ -168,7 +168,7 @@ export const EntityDetailPage: React.FC = () => {
 
       const data = await response.json();
       // Redirect to tracking page
-      navigate(`/track/${data.instance_id}`);
+      navigate(`/instances/${data.instance_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start workflow');
     } finally {
@@ -482,7 +482,7 @@ export const EntityDetailPage: React.FC = () => {
                         </td>
                         <td>
                           <Link 
-                            to={`/track/${instance.instance_id}`}
+                            to={`/instances/${instance.instance_id}`}
                             className="btn-link"
                           >
                             {t('entity.view_progress')} →

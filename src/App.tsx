@@ -6,7 +6,7 @@ import { PublicWorkflowCatalog } from './pages/PublicWorkflowCatalog';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { WorkflowDetail } from './pages/WorkflowDetail';
 import { WorkflowStartPage } from './pages/WorkflowStartPage';
-import { TrackingPage } from './pages/TrackingPage';
+import { InstanceDetail } from './pages/InstanceDetail';
 import { MyEntitiesPage } from './pages/MyEntitiesPage';
 import { MyInstancesPage } from './pages/MyInstancesPage';
 import { EntityDetailPage } from './pages/EntityDetailPage';
@@ -25,7 +25,7 @@ function App() {
             <Route path="/documents" element={<DocumentsPage />} />
             <Route path="/services/:id" element={<WorkflowDetail />} />
             <Route path="/start/:workflowId" element={<WorkflowStartPage />} />
-            <Route path="/track/:instanceId" element={<TrackingPage />} />
+            <Route path="/instances/:id" element={<InstanceDetail />} />
             
             {/* Protected routes */}
             <Route 

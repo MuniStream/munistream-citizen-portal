@@ -51,6 +51,38 @@ class WorkflowService {
     return response.json();
   }
 
+  // Get workflow pre-check (public)
+  async getWorkflowPreCheck(workflowId: string): Promise<any> {
+    const searchParams = new URLSearchParams();
+    addLocaleToParams(searchParams);
+
+    // Try to get token for authenticated pre-check (optional)
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      const keycloakService = (await import('./keycloak')).default;
+      const token = keycloakService.getToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    } catch {
+      // No token available, continue without auth
+    }
+
+    const response = await fetch(`${API_BASE_URL}/public/workflows/${workflowId}/pre-check?${searchParams}`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch workflow pre-check');
+    }
+
+    return response.json();
+  }
+
   // Get workflow categories (public)
   async getWorkflowCategories(): Promise<WorkflowCategory[]> {
     const searchParams = new URLSearchParams();

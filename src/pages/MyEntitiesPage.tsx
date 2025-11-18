@@ -175,7 +175,7 @@ export const MyEntitiesPage: React.FC = () => {
 
       const data = await response.json();
       // Redirect to tracking page
-      navigate(`/track/${data.instance_id}`);
+      navigate(`/instances/${data.instance_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start workflow');
     }

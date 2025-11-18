@@ -84,7 +84,7 @@ export const MyInstancesPage: React.FC = () => {
   };
 
   const handleViewInstance = (instanceId: string) => {
-    navigate(`/track/${instanceId}`);
+    navigate(`/instances/${instanceId}`);
   };
 
   const getStatusColor = (status: string): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' => {

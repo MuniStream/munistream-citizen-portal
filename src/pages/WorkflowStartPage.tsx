@@ -45,7 +45,7 @@ export const WorkflowStartPage: React.FC = () => {
       
       // Show success message and redirect
       alert(`${t('workflow.started_successfully')} Tracking ID: ${instance.instance_id}`);
-      navigate(`/track/${instance.instance_id}`);
+      navigate(`/instances/${instance.instance_id}`);
     } catch (err) {
       alert(`Error: ${err instanceof Error ? err.message : 'Failed to start workflow'}`);
     } finally {
