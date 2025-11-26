@@ -344,7 +344,8 @@ export const InstanceDetail: React.FC = () => {
         </section>
 
         {/* Active Form Section - Prominent Position */}
-        {instance.requires_input && instance.input_form &&
+        {instance.status === 'paused' && instance.input_form &&
+         (instance.waiting_for === 'user_input' || instance.waiting_for === 'entity_selection') &&
          ((instance.input_form as any).sections || (instance.input_form as any).fields) && (
           <section className="active-form-section">
             <div className="container">

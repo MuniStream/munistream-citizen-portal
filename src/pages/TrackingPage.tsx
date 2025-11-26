@@ -283,7 +283,9 @@ export const TrackingPage: React.FC = () => {
           </section>
 
           {/* Data Collection Section - Prominent Position */}
-          {progress.requires_input && progress.input_form && ((progress.input_form as any).sections || (progress.input_form as any).fields) && (
+          {progress.status === 'paused' && progress.input_form &&
+           (progress.waiting_for === 'user_input' || progress.waiting_for === 'entity_selection') &&
+           ((progress.input_form as any).sections || (progress.input_form as any).fields) && (
             <section className="requirements-section" style={{
               backgroundColor: '#fff3cd',
               border: '2px solid #ffc107',

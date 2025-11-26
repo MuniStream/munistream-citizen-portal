@@ -3,7 +3,8 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
-import { EntityFieldVisualizer } from '../components/EntityVisualizer/EntityFieldVisualizer';
+// import { EntityFieldVisualizer } from '../components/EntityVisualizer/EntityFieldVisualizer';
+import { EntityViewer } from '../components/signature/EntityViewer';
 import { authService } from '../services/authService';
 import './EntityDetailPage.css';
 
@@ -313,7 +314,7 @@ export const EntityDetailPage: React.FC = () => {
             </div>
           </section>
 
-          {/* Entity Data */}
+          {/* Entity Data - HIDDEN/REMOVED
           <section className="entity-data-section">
             <h3>📊 {t('entity.information')}</h3>
             <div className="data-grid">
@@ -328,7 +329,7 @@ export const EntityDetailPage: React.FC = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="entity-timestamps">
               <div className="timestamp-item">
                 <span className="timestamp-label">📅 {t('entity.created_at')}:</span>
@@ -345,6 +346,29 @@ export const EntityDetailPage: React.FC = () => {
                 </div>
               )}
             </div>
+          </section>
+          */}
+
+          {/* Entity PDF Viewer */}
+          <section className="entity-viewer-section">
+            <h3>📄 {t('entity.document_viewer')}</h3>
+            <EntityViewer
+              entity={{
+                id: entity.entity_id,
+                type: entity.entity_type,
+                name: entity.name,
+                data: entity.data,
+                created_at: entity.created_at,
+                has_signature: entity.data.signature ? true : false,
+                signature_info: entity.data.signature ? {
+                  algorithm: entity.data.signature.algorithm || 'RSA-SHA256',
+                  signer: entity.data.signature.certificate_info?.subject || 'Unknown',
+                  timestamp: entity.data.signature.timestamp || entity.created_at,
+                  verified: entity.data.signature.verified || false,
+                } : undefined
+              }}
+              apiBaseUrl={`${import.meta.env.VITE_API_URL}${import.meta.env.VITE_API_BASE_URL}`}
+            />
           </section>
 
           {/* Available Workflows */}
