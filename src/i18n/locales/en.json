@@ -395,6 +395,7 @@
       "suspended": "Suspended"
     },
     "documents": "Documents",
+    "document_viewer": "Document Viewer",
     "no_documents": "No documents associated with this entity",
     "document": {
       "type": "Type",
@@ -435,5 +436,32 @@
   },
   "auth": {
     "loginRequired": "Please log in to view your applications"
+  },
+  "verification": {
+    "title": "Document Verification",
+    "entity_id": "Document ID",
+    "unknown": "Unknown status",
+    "valid_document": "Valid and authentic document",
+    "invalid_document": "Invalid or suspicious document",
+    "not_available": "Not available",
+    "document_details": "Document Details",
+    "document_name": "Document Name",
+    "issuing_authority": "Issuing Authority",
+    "document_type": "Document Type",
+    "issue_date": "Issue Date",
+    "verification_date": "Verification Date",
+    "verified_by": "Verified by",
+    "security_info": "Security Information",
+    "checksum_verification": "Integrity Verification",
+    "passed": "Valid",
+    "failed": "Failed",
+    "not_provided": "Not provided",
+    "last_updated": "Last Updated",
+    "validation_errors": "Validation Errors",
+    "integrity_valid": "Integrity Valid",
+    "integrity_invalid": "Integrity Compromised",
+    "officially_verified": "Officially Verified",
+    "not_verified": "Not Verified",
+    "help_text": "This system allows verifying the authenticity of official documents through QR codes. Valid documents show a green checkmark and have passed all security validations."
   }
 }

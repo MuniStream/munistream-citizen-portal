@@ -10,6 +10,7 @@ import { InstanceDetail } from './pages/InstanceDetail';
 import { MyEntitiesPage } from './pages/MyEntitiesPage';
 import { MyInstancesPage } from './pages/MyInstancesPage';
 import { EntityDetailPage } from './pages/EntityDetailPage';
+import { VerificationPage } from './pages/VerificationPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import './App.css';
 
@@ -26,6 +27,7 @@ function App() {
             <Route path="/services/:id" element={<WorkflowDetail />} />
             <Route path="/start/:workflowId" element={<WorkflowStartPage />} />
             <Route path="/instances/:id" element={<InstanceDetail />} />
+            <Route path="/verify/:entityId" element={<VerificationPage />} />
             
             {/* Protected routes */}
             <Route 

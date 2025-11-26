@@ -415,6 +415,7 @@
       "suspended": "Suspendido"
     },
     "documents": "Documentos",
+    "document_viewer": "Visor de Documentos",
     "no_documents": "No hay documentos asociados a esta entidad",
     "document": {
       "type": "Tipo",
@@ -455,5 +456,32 @@
   },
   "auth": {
     "loginRequired": "Por favor inicia sesión para ver tus solicitudes"
+  },
+  "verification": {
+    "title": "Verificación de Documento",
+    "entity_id": "ID de Documento",
+    "unknown": "Estado desconocido",
+    "valid_document": "Documento válido y auténtico",
+    "invalid_document": "Documento inválido o sospechoso",
+    "not_available": "No disponible",
+    "document_details": "Detalles del Documento",
+    "document_name": "Nombre del Documento",
+    "issuing_authority": "Autoridad Emisora",
+    "document_type": "Tipo de Documento",
+    "issue_date": "Fecha de Emisión",
+    "verification_date": "Fecha de Verificación",
+    "verified_by": "Verificado por",
+    "security_info": "Información de Seguridad",
+    "checksum_verification": "Verificación de Integridad",
+    "passed": "Válido",
+    "failed": "Falló",
+    "not_provided": "No proporcionado",
+    "last_updated": "Última Actualización",
+    "validation_errors": "Errores de Validación",
+    "integrity_valid": "Integridad Válida",
+    "integrity_invalid": "Integridad Comprometida",
+    "officially_verified": "Verificado Oficialmente",
+    "not_verified": "No Verificado",
+    "help_text": "Este sistema permite verificar la autenticidad de documentos oficiales mediante códigos QR. Los documentos válidos muestran una marca de verificación verde y han pasado todas las validaciones de seguridad."
   }
 }

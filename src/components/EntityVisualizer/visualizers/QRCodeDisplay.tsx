@@ -27,25 +27,28 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
     // Prepare QR data based on field type
     let dataToEncode: string;
 
+    // Helper function to limit data size for QR codes
+    const limitDataSize = (data: any, maxLength: number = 800): any => {
+      const dataStr = String(data);
+      if (dataStr.length > maxLength) {
+        return `${dataStr.substring(0, maxLength)}...`;
+      }
+      return data;
+    };
+
     if (detectedField.type === 'signature') {
-      // For signatures, include verification info
-      dataToEncode = JSON.stringify({
-        type: 'signature',
-        entity_id: entity.entity_id,
-        field: fieldName,
-        signature: fieldValue,
-        verify_url: `${window.location.origin}/verify/${entity.entity_id}/${fieldName}`
-      });
+      // For signatures, just include verification URL - don't include full signature
+      dataToEncode = `${window.location.origin}/verify/${entity.entity_id}?field=${fieldName}`;
     } else if (detectedField.type === 'qr_data') {
-      // Use the value directly
-      dataToEncode = String(fieldValue);
+      // Use the value directly but limit size
+      dataToEncode = String(limitDataSize(fieldValue));
     } else {
-      // For other types, create a verification payload
+      // For other types, create a verification payload with limited data
       dataToEncode = JSON.stringify({
         type: 'field_verification',
         entity_id: entity.entity_id,
         field: fieldName,
-        value: fieldValue,
+        value: limitDataSize(fieldValue, 300), // Smaller limit for field values
         timestamp: new Date().toISOString()
       });
     }

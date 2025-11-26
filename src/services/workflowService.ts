@@ -330,6 +330,7 @@ export interface WorkflowInstanceProgress {
   completed_steps: number;
   step_progress: StepProgress[];
   requires_input: boolean;
+  waiting_for?: string;
   input_form: InputForm;
   estimated_completion?: string;
   message: string;
