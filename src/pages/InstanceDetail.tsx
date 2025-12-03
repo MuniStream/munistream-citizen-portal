@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowInstanceProgress } from '../services/workflowService';
 import { Header } from '../components/Header';
 import { DataCollectionForm } from '../components/DataCollectionForm';
+import { SelfieCapture, IDCapture } from '../components/capture';
+import { SigningForm } from '../components/signature/SigningForm';
 import './InstanceDetail.css';
 
 export const InstanceDetail: React.FC = () => {
@@ -343,7 +345,7 @@ export const InstanceDetail: React.FC = () => {
           </div>
         </section>
 
-        {/* Active Form Section - Prominent Position */}
+        {/* Active Form Section - User Input & Entity Selection */}
         {instance.status === 'paused' && instance.input_form &&
          (instance.waiting_for === 'user_input' || instance.waiting_for === 'entity_selection') &&
          ((instance.input_form as any).sections || (instance.input_form as any).fields) && (
@@ -402,6 +404,96 @@ export const InstanceDetail: React.FC = () => {
                       submitButtonText="Enviar Información"
                     />
                   </>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Selfie Capture Section */}
+        {instance.status === 'paused' &&
+         instance.waiting_for === 'selfie' && (
+          <section className="active-form-section">
+            <div className="container">
+              <div className="form-card action-required" style={{ borderColor: '#2196f3' }}>
+                <h2>Verificación de Identidad Requerida</h2>
+                {submissionSuccess ? (
+                  <div className="success-message">
+                    <h4>Selfie enviado exitosamente</h4>
+                    <p>{submissionSuccess}</p>
+                    <p>Su solicitud continuará procesándose.</p>
+                  </div>
+                ) : (
+                  <SelfieCapture
+                    title={instance.input_form?.title || 'Verificación de Identidad - Selfie'}
+                    description={instance.input_form?.description || 'Toma una selfie para verificar tu identidad'}
+                    onSubmit={handleDataSubmission}
+                    isSubmitting={isSubmittingData}
+                  />
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ID Capture Section */}
+        {instance.status === 'paused' &&
+         instance.waiting_for === 'id_capture' && (
+          <section className="active-form-section">
+            <div className="container">
+              <div className="form-card action-required" style={{ borderColor: '#9c27b0' }}>
+                <h2>Captura de Documento Requerida</h2>
+                {submissionSuccess ? (
+                  <div className="success-message">
+                    <h4>Documento enviado exitosamente</h4>
+                    <p>{submissionSuccess}</p>
+                    <p>Su solicitud continuará procesándose.</p>
+                  </div>
+                ) : (
+                  <IDCapture
+                    title={instance.input_form?.title || 'Captura de Documento de Identidad'}
+                    description={instance.input_form?.description || 'Captura ambos lados de tu documento de identidad'}
+                    onSubmit={handleDataSubmission}
+                    isSubmitting={isSubmittingData}
+                  />
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Signature Section */}
+        {instance.status === 'paused' &&
+         instance.waiting_for === 'signature' && (
+          <section className="active-form-section">
+            <div className="container">
+              <div className="form-card action-required" style={{ borderColor: '#9c27b0' }}>
+                <h2>Firma Digital Requerida</h2>
+                {submissionSuccess ? (
+                  <div className="success-message">
+                    <h4>Firma enviada exitosamente</h4>
+                    <p>{submissionSuccess}</p>
+                    <p>Su solicitud continuará procesándose.</p>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ marginBottom: '2rem', color: '#666' }}>
+                      Se requiere una firma digital para continuar con el proceso.
+                    </p>
+                    <SigningForm
+                      instanceId={id!}
+                      documentToSign={instance.input_form?.signable_data || instance.input_form?.document_to_sign || instance.input_form}
+                      operatorConfig={{
+                        task_id: instance.input_form?.current_step_id || 'signature_step',
+                        certificate_field: instance.input_form?.certificate_field || 'digital_signature_certificate',
+                        private_key_field: instance.input_form?.private_key_field || 'digital_signature_private_key',
+                        password_field: instance.input_form?.password_field || 'digital_signature_password',
+                        document_type: instance.input_form?.document_type
+                      }}
+                      onSubmitSignature={handleDataSubmission}
+                      loading={isSubmittingData}
+                    />
+                  </div>
                 )}
               </div>
             </div>

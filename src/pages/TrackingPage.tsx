@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowInstanceProgress } from '../services/workflowService';
 import { Header } from '../components/Header';
 import { DataCollectionForm } from '../components/DataCollectionForm';
+import { SelfieCapture, IDCapture } from '../components/capture';
+import { SigningForm } from '../components/signature/SigningForm';
 
 export const TrackingPage: React.FC = () => {
   const { instanceId } = useParams<{ instanceId: string }>();
@@ -282,7 +284,7 @@ export const TrackingPage: React.FC = () => {
             </div>
           </section>
 
-          {/* Data Collection Section - Prominent Position */}
+          {/* Data Collection Section - User Input & Entity Selection */}
           {progress.status === 'paused' && progress.input_form &&
            (progress.waiting_for === 'user_input' || progress.waiting_for === 'entity_selection') &&
            ((progress.input_form as any).sections || (progress.input_form as any).fields) && (
@@ -350,6 +352,105 @@ export const TrackingPage: React.FC = () => {
                     submitButtonText={t('common.submit_information')}
                   />
                 </>
+              )}
+            </section>
+          )}
+
+          {/* Selfie Capture Section */}
+          {progress.status === 'paused' &&
+           progress.waiting_for === 'selfie' && (
+            <section className="requirements-section" style={{
+              backgroundColor: '#e3f2fd',
+              border: '2px solid #2196f3',
+              borderRadius: '8px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            }}>
+              <h3 style={{ color: '#1565c0', marginBottom: '1rem' }}>Verificación de Identidad Requerida</h3>
+              {submissionSuccess ? (
+                <div className="success-message">
+                  <h4>Selfie enviado exitosamente</h4>
+                  <p>{submissionSuccess}</p>
+                  <p>{t('workflow.application_continue_message')}</p>
+                </div>
+              ) : (
+                <SelfieCapture
+                  title={progress.input_form?.title || 'Verificación de Identidad - Selfie'}
+                  description={progress.input_form?.description || 'Toma una selfie para verificar tu identidad'}
+                  onSubmit={handleDataSubmission}
+                  isSubmitting={isSubmittingData}
+                />
+              )}
+            </section>
+          )}
+
+          {/* ID Capture Section */}
+          {progress.status === 'paused' &&
+           progress.waiting_for === 'id_capture' && (
+            <section className="requirements-section" style={{
+              backgroundColor: '#f3e5f5',
+              border: '2px solid #9c27b0',
+              borderRadius: '8px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            }}>
+              <h3 style={{ color: '#7b1fa2', marginBottom: '1rem' }}>Captura de Documento Requerida</h3>
+              {submissionSuccess ? (
+                <div className="success-message">
+                  <h4>Documento enviado exitosamente</h4>
+                  <p>{submissionSuccess}</p>
+                  <p>{t('workflow.application_continue_message')}</p>
+                </div>
+              ) : (
+                <IDCapture
+                  title={progress.input_form?.title || 'Captura de Documento de Identidad'}
+                  description={progress.input_form?.description || 'Captura ambos lados de tu documento de identidad'}
+                  onSubmit={handleDataSubmission}
+                  isSubmitting={isSubmittingData}
+                />
+              )}
+            </section>
+          )}
+
+          {/* Signature Section */}
+          {progress.status === 'paused' &&
+           progress.waiting_for === 'signature' && (
+            <section className="requirements-section" style={{
+              backgroundColor: '#f3e5f5',
+              border: '2px solid #9c27b0',
+              borderRadius: '8px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            }}>
+              <h3 style={{ color: '#7b1fa2', marginBottom: '1rem' }}>Firma Digital Requerida</h3>
+              {submissionSuccess ? (
+                <div className="success-message">
+                  <h4>Firma enviada exitosamente</h4>
+                  <p>{submissionSuccess}</p>
+                  <p>{t('workflow.application_continue_message')}</p>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ marginBottom: '2rem', color: '#666' }}>
+                    Se requiere una firma digital para continuar con el proceso.
+                  </p>
+                  <SigningForm
+                    instanceId={instanceId!}
+                    documentToSign={progress.input_form?.signable_data || progress.input_form?.document_to_sign || progress.input_form}
+                    operatorConfig={{
+                      task_id: progress.input_form?.current_step_id || 'signature_step',
+                      certificate_field: progress.input_form?.certificate_field || 'digital_signature_certificate',
+                      private_key_field: progress.input_form?.private_key_field || 'digital_signature_private_key',
+                      password_field: progress.input_form?.password_field || 'digital_signature_password',
+                      document_type: progress.input_form?.document_type
+                    }}
+                    onSubmitSignature={handleDataSubmission}
+                    loading={isSubmittingData}
+                  />
+                </div>
               )}
             </section>
           )}
