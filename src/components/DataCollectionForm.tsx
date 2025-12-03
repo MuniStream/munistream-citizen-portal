@@ -17,7 +17,7 @@ export interface FormField {
   id: string;
   name: string;
   label: string;
-  type: 'text' | 'email' | 'phone' | 'date' | 'number' | 'select' | 'textarea' | 'file' | 'entity_select' | 'entity_multi_select';
+  type: 'text' | 'email' | 'phone' | 'date' | 'number' | 'select' | 'textarea' | 'file' | 'camera' | 'entity_select' | 'entity_multi_select';
   required: boolean;
   placeholder?: string;
   options?: string[] | EntityOption[];
@@ -39,6 +39,9 @@ export interface FormField {
   min_count?: number;
   max_count?: number;
   description?: string;
+  // Camera specific fields
+  capture?: 'user' | 'environment';
+  instructions?: string;
 }
 
 export interface EntityOption {
@@ -218,11 +221,129 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
       const file = files[0];
       setUploadedFiles(prev => ({ ...prev, [fieldId]: file }));
       setFormData(prev => ({ ...prev, [fieldId]: file.name }));
-      
+
       // Clear error
       if (errors[fieldId]) {
         setErrors(prev => ({ ...prev, [fieldId]: '' }));
       }
+    }
+  };
+
+  const handleCameraCapture = async (fieldId: string, facingMode: string = 'user') => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: facingMode,
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
+      });
+
+      // Create video element
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.autoplay = true;
+
+      // Create overlay div for camera
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+      `;
+
+      // Style video
+      video.style.cssText = `
+        max-width: 90%;
+        max-height: 70%;
+        border: 2px solid #007bff;
+        border-radius: 8px;
+      `;
+
+      // Create capture button
+      const captureBtn = document.createElement('button');
+      captureBtn.textContent = 'Capturar Foto';
+      captureBtn.style.cssText = `
+        margin-top: 20px;
+        padding: 12px 24px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+      `;
+
+      // Create cancel button
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancelar';
+      cancelBtn.style.cssText = `
+        margin: 10px;
+        padding: 8px 16px;
+        background: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      `;
+
+      overlay.appendChild(video);
+      overlay.appendChild(captureBtn);
+      overlay.appendChild(cancelBtn);
+      document.body.appendChild(overlay);
+
+      const cleanup = () => {
+        stream.getTracks().forEach(track => track.stop());
+        document.body.removeChild(overlay);
+      };
+
+      captureBtn.onclick = () => {
+        // Create canvas to capture frame
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(video, 0, 0);
+
+        // Convert to blob and create file
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const timestamp = new Date().getTime();
+            const filename = `camera_capture_${fieldId}_${timestamp}.jpg`;
+            const file = new File([blob], filename, { type: 'image/jpeg' });
+
+            // Create data URL for preview
+            const reader = new FileReader();
+            reader.onload = () => {
+              const fileWithDataURL = Object.assign(file, { dataURL: reader.result });
+              setUploadedFiles(prev => ({ ...prev, [fieldId]: fileWithDataURL }));
+              setFormData(prev => ({ ...prev, [fieldId]: filename }));
+
+              // Clear error
+              if (errors[fieldId]) {
+                setErrors(prev => ({ ...prev, [fieldId]: '' }));
+              }
+            };
+            reader.readAsDataURL(file);
+          }
+          cleanup();
+        }, 'image/jpeg', 0.8);
+      };
+
+      cancelBtn.onclick = cleanup;
+
+    } catch (error) {
+      console.error('Camera access error:', error);
+      alert('No se pudo acceder a la cámara. Por favor verifica los permisos.');
     }
   };
 
@@ -524,6 +645,105 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
                   <span className="upload-icon">⬆️</span>
                   <span>Click to upload {field.label}</span>
                   <small>PDF, JPG, PNG, DOC (max 10MB)</small>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'camera':
+        const facingMode = field.capture || 'user'; // 'user' for selfie, 'environment' for documents
+        return (
+          <div className="camera-capture-container">
+            <div className="camera-preview" style={{
+              width: '100%',
+              maxWidth: '400px',
+              aspectRatio: '4/3',
+              backgroundColor: '#f8f9fa',
+              border: '2px dashed #dee2e6',
+              borderRadius: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '1rem auto',
+              position: 'relative'
+            }}>
+              {uploadedFiles[field.id] ? (
+                <div style={{ textAlign: 'center' }}>
+                  <img
+                    src={(uploadedFiles[field.id] as any).dataURL}
+                    alt={`Captured ${field.label}`}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '300px',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <div style={{ marginTop: '1rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleCameraCapture(field.id, facingMode)}
+                      className="camera-retake-btn"
+                      style={{
+                        padding: '0.5rem 1rem',
+                        backgroundColor: '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Tomar nueva foto
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{
+                    fontSize: '3rem',
+                    marginBottom: '1rem',
+                    color: '#6c757d'
+                  }}>
+                    {facingMode === 'user' ? '●' : '⬜'}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCameraCapture(field.id, facingMode)}
+                    className="camera-capture-btn"
+                    style={{
+                      padding: '1rem 2rem',
+                      backgroundColor: '#28a745',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '1.1rem',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {facingMode === 'user' ? 'Tomar Selfie' : `Capturar ${field.label}`}
+                  </button>
+                  <div style={{
+                    marginTop: '1rem',
+                    fontSize: '0.9rem',
+                    color: '#6c757d'
+                  }}>
+                    {facingMode === 'user'
+                      ? 'Usa la cámara frontal de tu dispositivo'
+                      : 'Usa la cámara trasera para documentos'
+                    }
+                  </div>
+                  {field.instructions && (
+                    <div style={{
+                      marginTop: '0.5rem',
+                      fontSize: '0.8rem',
+                      color: '#6c757d',
+                      fontStyle: 'italic'
+                    }}>
+                      {field.instructions}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
