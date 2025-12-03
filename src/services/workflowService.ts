@@ -351,6 +351,14 @@ export interface InputForm {
   title?: string;
   description?: string;
   fields?: FormField[];
+  // Signature operator fields
+  signable_data?: any;
+  document_to_sign?: any;
+  current_step_id?: string;
+  certificate_field?: string;
+  private_key_field?: string;
+  password_field?: string;
+  document_type?: string;
 }
 
 export interface FormField {
