@@ -186,7 +186,7 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
                 variant="outlined"
                 color="inherit"
               >
-                {t('auth.login')}
+                {t('navigation.login')}
               </Button>
             )}
           </Box>
