@@ -124,7 +124,8 @@
     "passwordReset": "Instrucciones de restablecimiento enviadas a su email",
     "invalidCredentials": "Usuario o contraseña inválidos",
     "accountLocked": "La cuenta está bloqueada. Contacte soporte.",
-    "emailExists": "Ya existe una cuenta con este email"
+    "emailExists": "Ya existe una cuenta con este email",
+    "loginRequired": "Por favor inicia sesión para ver tus solicitudes"
   },
   "dashboard": {
     "title": "Panel Principal",
@@ -237,6 +238,7 @@
   },
   "navigation": {
     "home": "Inicio",
+    "login": "Iniciar Sesión",
     "services": "Servicios",
     "applications": "Mis Solicitudes",
     "documents": "Documentos",
@@ -453,9 +455,6 @@
   "entities": {
     "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar esta entidad?",
     "deleteWarning": "Esta acción no se puede deshacer. Todas las relaciones y datos asociados se eliminarán permanentemente."
-  },
-  "auth": {
-    "loginRequired": "Por favor inicia sesión para ver tus solicitudes"
   },
   "verification": {
     "title": "Verificación de Documento",
