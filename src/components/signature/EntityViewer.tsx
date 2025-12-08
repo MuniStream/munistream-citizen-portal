@@ -30,6 +30,9 @@ import {
   Info,
   CheckCircle,
   Schedule,
+  Wallet,
+  Apple,
+  Android,
 } from '@mui/icons-material';
 import axios from 'axios';
 
@@ -70,6 +73,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [htmlContent, setHtmlContent] = useState<string>('');
+  const [walletLoading, setWalletLoading] = useState(false);
 
   // Load HTML content on component mount
   useEffect(() => {
@@ -162,6 +166,108 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
       setLoading(false);
     }
   }, [entity.id, entity.has_signature, apiBaseUrl]);
+
+  // Detect platform
+  const detectPlatform = () => {
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (/iphone|ipad|ipod/.test(userAgent)) {
+      return 'ios';
+    } else if (/android/.test(userAgent)) {
+      return 'android';
+    }
+    return 'desktop';
+  };
+
+  // Handle Apple Wallet
+  const handleAddToAppleWallet = useCallback(async () => {
+    try {
+      setWalletLoading(true);
+      setError(null);
+
+      const response = await axios.get(
+        `${apiBaseUrl}/entities/${entity.id}/wallet/apple`,
+        { responseType: 'blob' }
+      );
+
+      // Create download link for .pkpass file
+      const blob = new Blob([response.data], { type: 'application/vnd.apple.pkpass' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${entity.name || entity.type}_${entity.id}.pkpass`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      const errorMessage = axios.isAxiosError(error)
+        ? error.response?.data?.detail || error.message
+        : 'Error al agregar a Apple Wallet';
+      setError(errorMessage);
+    } finally {
+      setWalletLoading(false);
+    }
+  }, [entity.id, entity.name, entity.type, apiBaseUrl]);
+
+  // Handle Google Wallet
+  const handleAddToGoogleWallet = useCallback(async () => {
+    try {
+      setWalletLoading(true);
+      setError(null);
+
+      const response = await axios.get(
+        `${apiBaseUrl}/entities/${entity.id}/wallet/google`
+      );
+
+      // Open Google Wallet save URL
+      if (response.data.save_url) {
+        window.open(response.data.save_url, '_blank');
+      } else {
+        throw new Error('No se pudo generar el enlace de Google Wallet');
+      }
+    } catch (error) {
+      const errorMessage = axios.isAxiosError(error)
+        ? error.response?.data?.detail || error.message
+        : 'Error al agregar a Google Wallet';
+      setError(errorMessage);
+    } finally {
+      setWalletLoading(false);
+    }
+  }, [entity.id, apiBaseUrl]);
+
+  // Handle wallet button click
+  const handleWalletAction = useCallback(() => {
+    const platform = detectPlatform();
+
+    if (platform === 'ios') {
+      handleAddToAppleWallet();
+    } else if (platform === 'android') {
+      handleAddToGoogleWallet();
+    } else {
+      // Desktop - show options or default to Apple
+      handleAddToAppleWallet();
+    }
+  }, [handleAddToAppleWallet, handleAddToGoogleWallet]);
+
+  const getWalletButtonText = () => {
+    const platform = detectPlatform();
+    if (platform === 'ios') {
+      return 'Agregar a Apple Wallet';
+    } else if (platform === 'android') {
+      return 'Agregar a Google Wallet';
+    }
+    return 'Agregar a Wallet';
+  };
+
+  const getWalletIcon = () => {
+    const platform = detectPlatform();
+    if (platform === 'ios') {
+      return <Apple />;
+    } else if (platform === 'android') {
+      return <Android />;
+    }
+    return <Wallet />;
+  };
 
 
   // Get signature status color and icon
@@ -324,6 +430,16 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
               Descargar PDF
             </Button>
 
+            <Button
+              startIcon={getWalletIcon()}
+              onClick={handleWalletAction}
+              disabled={walletLoading}
+              variant="outlined"
+              color="secondary"
+            >
+              {getWalletButtonText()}
+            </Button>
+
             {entity.has_signature && (
               <Button
                 startIcon={<CheckCircle />}
@@ -335,7 +451,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
               </Button>
             )}
 
-            {loading && <CircularProgress size={20} />}
+            {(loading || walletLoading) && <CircularProgress size={20} />}
           </CardActions>
         </Card>
       ) : (
@@ -446,6 +562,16 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
                 Descargar PDF
               </Button>
 
+              <Button
+                startIcon={getWalletIcon()}
+                onClick={handleWalletAction}
+                disabled={walletLoading}
+                variant="outlined"
+                color="secondary"
+              >
+                {getWalletButtonText()}
+              </Button>
+
               {entity.has_signature && (
                 <Button
                   startIcon={<CheckCircle />}
@@ -457,7 +583,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
                 </Button>
               )}
 
-              {loading && <CircularProgress size={20} />}
+              {(loading || walletLoading) && <CircularProgress size={20} />}
             </CardActions>
           </Card>
 
