@@ -19,6 +19,13 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Paper,
+  Link,
 } from '@mui/material';
 import {
   PictureAsPdf,
@@ -305,159 +312,121 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
 
   const signatureStatus = getSignatureStatus();
 
+  // Helper function to detect and format catalog data
+  const getCatalogData = () => {
+    const catalogSections: { title: string; data: Record<string, any> }[] = [];
+
+    // Look for catalog data keys
+    const catalogKeys = Object.keys(entity.data).filter(key =>
+      key.includes('_catastral_data') ||
+      key.includes('_folio_data') ||
+      key.includes('clave_catastral_data') ||
+      key.includes('folio_real_data')
+    );
+
+    catalogKeys.forEach(key => {
+      const data = entity.data[key];
+      if (data && typeof data === 'object') {
+        const title = key.replace('_data', '').replace('_', ' ').toUpperCase();
+        catalogSections.push({ title, data });
+      }
+    });
+
+    return catalogSections;
+  };
+
+  // Helper function to detect related entities
+  const getRelatedEntities = () => {
+    const relatedKeys = Object.keys(entity.data).filter(key =>
+      key.includes('_ids') && Array.isArray(entity.data[key])
+    );
+
+    const relatedEntities: { type: string; ids: string[] }[] = [];
+
+    relatedKeys.forEach(key => {
+      const ids = entity.data[key];
+      if (ids.length > 0) {
+        const type = key.replace('_ids', '').replace('_', ' ');
+        relatedEntities.push({ type, ids });
+      }
+    });
+
+    return relatedEntities;
+  };
+
+  // Helper function to detect and format S3 file URLs
+  const getS3Files = () => {
+    const fileGroups: { title: string; files: Array<{ name: string; url: string; size?: number }> }[] = [];
+
+    // Look for S3 URLs in various fields
+    const data = entity.data;
+
+    // Check for uploaded_files array
+    if (data.uploaded_files && Array.isArray(data.uploaded_files)) {
+      const files = data.uploaded_files.map((file: any) => ({
+        name: file.filename || 'Archivo',
+        url: `/files/download/${file.s3_key}`,
+        size: file.size
+      }));
+
+      if (files.length > 0) {
+        fileGroups.push({
+          title: 'ARCHIVOS SUBIDOS',
+          files
+        });
+      }
+    }
+
+    // Check for files in signable_data (admin workflow files)
+    if (data.signable_data?.data) {
+      const signableFiles: Array<{ name: string; url: string; size?: number }> = [];
+
+      Object.keys(data.signable_data.data).forEach(key => {
+        if (key.includes('_result') && Array.isArray(data.signable_data.data[key])) {
+          data.signable_data.data[key].forEach((file: any) => {
+            if (file.download_url) {
+              signableFiles.push({
+                name: file.filename || 'Archivo',
+                url: file.download_url,
+                size: file.size
+              });
+            }
+          });
+        }
+      });
+
+      if (signableFiles.length > 0) {
+        fileGroups.push({
+          title: 'ARCHIVOS DEL FLUJO',
+          files: signableFiles
+        });
+      }
+    }
+
+    // Check for direct s3_urls and s3_keys
+    if (data.s3_urls && Array.isArray(data.s3_urls) && data.s3_keys && Array.isArray(data.s3_keys)) {
+      const directFiles = data.s3_keys.map((key: string, index: number) => ({
+        name: key.split('/').pop() || `Archivo ${index + 1}`,
+        url: `/files/download/${key}`,
+        size: undefined
+      }));
+
+      if (directFiles.length > 0) {
+        fileGroups.push({
+          title: 'DOCUMENTOS',
+          files: directFiles
+        });
+      }
+    }
+
+    return fileGroups;
+  };
+
   return (
     <Box>
-      {!htmlContent ? (
-        /* Cuando NO hay visualizador - mostrar información completa */
-        <Card variant="outlined">
-          <CardContent>
-            <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-              <Box>
-                <Typography variant="h6" gutterBottom>
-                  📊 Información de la Entidad
-                </Typography>
-                <Typography variant="h5" gutterBottom>
-                  {entity.name || `${entity.type} ${entity.id}`}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Tipo: {entity.type} • Creado: {new Date(entity.created_at).toLocaleDateString()}
-                </Typography>
-              </Box>
-
-              <Box display="flex" gap={1}>
-                <Chip
-                  icon={signatureStatus.icon}
-                  label={signatureStatus.label}
-                  color={signatureStatus.color}
-                  size="small"
-                />
-                {entity.has_signature && (
-                  <Chip
-                    icon={<Security />}
-                    label="Firmado"
-                    color="primary"
-                    size="small"
-                  />
-                )}
-              </Box>
-            </Box>
-
-            {entity.signature_info && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Información de Firma:
-                </Typography>
-                <List dense>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Security />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Algoritmo"
-                      secondary={entity.signature_info.algorithm}
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Verified />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Firmante"
-                      secondary={entity.signature_info.signer}
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Schedule />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Fecha de firma"
-                      secondary={new Date(entity.signature_info.timestamp).toLocaleString()}
-                    />
-                  </ListItem>
-                </List>
-              </Box>
-            )}
-
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-                {error}
-              </Alert>
-            )}
-
-            {verificationResult && (
-              <Alert
-                severity={verificationResult.overall_valid ? 'success' : 'error'}
-                sx={{ mb: 2 }}
-              >
-                <Typography variant="body2">
-                  <strong>Verificación:</strong>{' '}
-                  {verificationResult.overall_valid
-                    ? 'Firma válida y verificada'
-                    : 'Firma inválida o no se pudo verificar'}
-                </Typography>
-                <Typography variant="caption" display="block">
-                  Verificado el: {new Date(verificationResult.verification_timestamp).toLocaleString()}
-                </Typography>
-              </Alert>
-            )}
-
-            {loading && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-                <CircularProgress />
-                <Typography variant="body2" sx={{ ml: 2 }}>
-                  Cargando...
-                </Typography>
-              </Box>
-            )}
-
-            {!loading && !htmlContent && (
-              <Alert severity="info" sx={{ mb: 2 }}>
-                <Typography variant="body2">
-                  No hay visualizador disponible para esta entidad. Solo se puede descargar como PDF.
-                </Typography>
-              </Alert>
-            )}
-          </CardContent>
-
-          <CardActions>
-            <Button
-              startIcon={<Download />}
-              onClick={handleDownload}
-              disabled={loading}
-              variant="contained"
-            >
-              Descargar PDF
-            </Button>
-
-            <Button
-              startIcon={getWalletIcon()}
-              onClick={handleWalletAction}
-              disabled={walletLoading}
-              variant="outlined"
-              color="secondary"
-            >
-              {getWalletButtonText()}
-            </Button>
-
-            {entity.has_signature && (
-              <Button
-                startIcon={<CheckCircle />}
-                onClick={handleVerifySignature}
-                disabled={loading}
-                color="primary"
-              >
-                Verificar Firma
-              </Button>
-            )}
-
-            {(loading || walletLoading) && <CircularProgress size={20} />}
-          </CardActions>
-        </Card>
-      ) : (
-        /* Cuando hay visualizador - iframe arriba completamente */
+      {/* HTML Visualizer (if available) */}
+      {htmlContent && (
         <>
-          {/* HTML Iframe hasta arriba */}
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', mb: 2 }}>
               <CircularProgress />
@@ -493,124 +462,283 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
               />
             </Box>
           )}
-
-          {/* Controles y información abajo del iframe */}
-          <Card variant="outlined">
-            <CardContent>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h6">
-                  {entity.name || `${entity.type} ${entity.id}`}
-                </Typography>
-                <Box display="flex" gap={1}>
-                  <Chip
-                    icon={signatureStatus.icon}
-                    label={signatureStatus.label}
-                    color={signatureStatus.color}
-                    size="small"
-                  />
-                  {entity.has_signature && (
-                    <Chip
-                      icon={<Security />}
-                      label="Firmado"
-                      color="primary"
-                      size="small"
-                    />
-                  )}
-                </Box>
-              </Box>
-
-              {error && (
-                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-                  {error}
-                </Alert>
-              )}
-
-              {verificationResult && (
-                <Alert
-                  severity={verificationResult.overall_valid ? 'success' : 'error'}
-                  sx={{ mb: 2 }}
-                >
-                  <Typography variant="body2">
-                    <strong>Verificación:</strong>{' '}
-                    {verificationResult.overall_valid
-                      ? 'Firma válida y verificada'
-                      : 'Firma inválida o no se pudo verificar'}
-                  </Typography>
-                  <Typography variant="caption" display="block">
-                    Verificado el: {new Date(verificationResult.verification_timestamp).toLocaleString()}
-                  </Typography>
-                </Alert>
-              )}
-            </CardContent>
-
-            <CardActions>
-              <Button
-                startIcon={<PictureAsPdf />}
-                onClick={handlePrintHtml}
-                disabled={loading}
-                variant="outlined"
-              >
-                Imprimir/Guardar PDF
-              </Button>
-
-              <Button
-                startIcon={<Download />}
-                onClick={handleDownload}
-                disabled={loading}
-                variant="contained"
-              >
-                Descargar PDF
-              </Button>
-
-              <Button
-                startIcon={getWalletIcon()}
-                onClick={handleWalletAction}
-                disabled={walletLoading}
-                variant="outlined"
-                color="secondary"
-              >
-                {getWalletButtonText()}
-              </Button>
-
-              {entity.has_signature && (
-                <Button
-                  startIcon={<CheckCircle />}
-                  onClick={handleVerifySignature}
-                  disabled={loading}
-                  color="primary"
-                >
-                  Verificar Firma
-                </Button>
-              )}
-
-              {(loading || walletLoading) && <CircularProgress size={20} />}
-            </CardActions>
-          </Card>
-
-          {/* Metadatos mínimos */}
-          <Card variant="outlined" sx={{ mt: 2 }}>
-            <CardContent>
-              <Typography variant="subtitle2" gutterBottom>
-                Metadatos del Documento
-              </Typography>
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1 }}>
-                <Typography variant="caption">
-                  <strong>ID:</strong> {entity.id}
-                </Typography>
-                <Typography variant="caption">
-                  <strong>Tipo:</strong> {entity.type}
-                </Typography>
-                <Typography variant="caption">
-                  <strong>Creado:</strong> {new Date(entity.created_at).toLocaleString()}
-                </Typography>
-                <Typography variant="caption">
-                  <strong>Estado de Firma:</strong> {entity.has_signature ? 'Firmado' : 'Sin Firma'}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
         </>
       )}
+
+      {/* Complete Entity Information (always shown) */}
+      <Card variant="outlined">
+        <CardContent>
+          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                📊 Información de la Entidad
+              </Typography>
+              <Typography variant="h5" gutterBottom>
+                {entity.name || `${entity.type} ${entity.id}`}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Tipo: {entity.type} • Creado: {new Date(entity.created_at).toLocaleDateString()}
+              </Typography>
+            </Box>
+
+            <Box display="flex" gap={1}>
+              <Chip
+                icon={signatureStatus.icon}
+                label={signatureStatus.label}
+                color={signatureStatus.color}
+                size="small"
+              />
+              {entity.has_signature && (
+                <Chip
+                  icon={<Security />}
+                  label="Firmado"
+                  color="primary"
+                  size="small"
+                />
+              )}
+            </Box>
+          </Box>
+
+          {entity.signature_info && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" gutterBottom>
+                Información de Firma:
+              </Typography>
+              <List dense>
+                <ListItem>
+                  <ListItemIcon>
+                    <Security />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Algoritmo"
+                    secondary={entity.signature_info.algorithm}
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <Verified />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Firmante"
+                    secondary={entity.signature_info.signer}
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <Schedule />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Fecha de firma"
+                    secondary={new Date(entity.signature_info.timestamp).toLocaleString()}
+                  />
+                </ListItem>
+              </List>
+            </Box>
+          )}
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+              {error}
+            </Alert>
+          )}
+
+          {verificationResult && (
+            <Alert
+              severity={verificationResult.overall_valid ? 'success' : 'error'}
+              sx={{ mb: 2 }}
+            >
+              <Typography variant="body2">
+                <strong>Verificación:</strong>{' '}
+                {verificationResult.overall_valid
+                  ? 'Firma válida y verificada'
+                  : 'Firma inválida o no se pudo verificar'}
+              </Typography>
+              <Typography variant="caption" display="block">
+                Verificado el: {new Date(verificationResult.verification_timestamp).toLocaleString()}
+              </Typography>
+            </Alert>
+          )}
+
+          {!htmlContent && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <Typography variant="body2">
+                No hay visualizador disponible para esta entidad. Solo se puede descargar como PDF.
+              </Typography>
+            </Alert>
+          )}
+
+          {/* Catalog Data Section */}
+          {getCatalogData().length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                📊 Datos del Catálogo
+              </Typography>
+              {getCatalogData().map((section, index) => (
+                <Box key={index} sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" color="primary" gutterBottom>
+                    {section.title}
+                  </Typography>
+                  <TableContainer component={Paper} variant="outlined">
+                    <Table size="small">
+                      <TableBody>
+                        {Object.entries(section.data).map(([field, value]) => (
+                          <TableRow key={field}>
+                            <TableCell component="th" scope="row" sx={{ fontWeight: 'medium' }}>
+                              {field.replace('_', ' ').toUpperCase()}
+                            </TableCell>
+                            <TableCell>
+                              {String(value)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+              ))}
+            </Box>
+          )}
+
+          {/* Related Entities Section */}
+          {getRelatedEntities().length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                🔗 Entidades Relacionadas
+              </Typography>
+              {getRelatedEntities().map((relation, index) => (
+                <Box key={index} sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" color="primary" gutterBottom>
+                    {relation.type.toUpperCase()}
+                  </Typography>
+                  <List dense>
+                    {relation.ids.map((entityId, i) => (
+                      <ListItem key={i}>
+                        <ListItemIcon>
+                          📄
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Link
+                              href={`/entity/${entityId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              underline="hover"
+                            >
+                              {entityId}
+                            </Link>
+                          }
+                          secondary={`${relation.type} relacionado`}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              ))}
+            </Box>
+          )}
+
+          {/* S3 Files Section */}
+          {getS3Files().length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                📎 Archivos Adjuntos
+              </Typography>
+              {getS3Files().map((group, index) => (
+                <Box key={index} sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" color="primary" gutterBottom>
+                    {group.title}
+                  </Typography>
+                  <List dense>
+                    {group.files.map((file, i) => (
+                      <ListItem key={i}>
+                        <ListItemIcon>
+                          📄
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={file.name}
+                          secondary={file.size ? `Tamaño: ${Math.round(file.size / 1024)} KB` : 'Archivo adjunto'}
+                        />
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={async () => {
+                            try {
+                              const response = await fetch(`${apiBaseUrl}${file.url}`);
+                              if (!response.ok) {
+                                throw new Error('Error al descargar archivo');
+                              }
+                              const blob = await response.blob();
+                              const url = window.URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+                              link.href = url;
+                              link.download = file.name;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              window.URL.revokeObjectURL(url);
+                            } catch (err) {
+                              console.error('Error downloading file:', err);
+                              setError('Error al descargar el archivo');
+                            }
+                          }}
+                          sx={{ ml: 1 }}
+                        >
+                          Descargar
+                        </Button>
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </CardContent>
+
+        <CardActions>
+          {htmlContent && (
+            <Button
+              startIcon={<PictureAsPdf />}
+              onClick={handlePrintHtml}
+              disabled={loading}
+              variant="outlined"
+            >
+              Imprimir/Guardar PDF
+            </Button>
+          )}
+
+          <Button
+            startIcon={<Download />}
+            onClick={handleDownload}
+            disabled={loading}
+            variant="contained"
+          >
+            Descargar PDF
+          </Button>
+
+          <Button
+            startIcon={getWalletIcon()}
+            onClick={handleWalletAction}
+            disabled={walletLoading}
+            variant="outlined"
+            color="secondary"
+          >
+            {getWalletButtonText()}
+          </Button>
+
+          {entity.has_signature && (
+            <Button
+              startIcon={<CheckCircle />}
+              onClick={handleVerifySignature}
+              disabled={loading}
+              color="primary"
+            >
+              Verificar Firma
+            </Button>
+          )}
+
+          {(loading || walletLoading) && <CircularProgress size={20} />}
+        </CardActions>
+      </Card>
     </Box>
   );
 };
