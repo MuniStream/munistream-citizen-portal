@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowInstanceProgress } from '../services/workflowService';
 import { Header } from '../components/Header';
 import { DataCollectionForm } from '../components/DataCollectionForm';
+import { CatalogSelector } from '../components/CatalogSelector';
 import { SelfieCapture, IDCapture } from '../components/capture';
 import { SigningForm } from '../components/signature/SigningForm';
 import './InstanceDetail.css';
@@ -159,7 +160,9 @@ export const InstanceDetail: React.FC = () => {
           // Add regular form fields
           Object.entries(data).forEach(([key, value]) => {
             if (key !== '_files' && value !== undefined && value !== null) {
-              formData.append(key, value.toString());
+              // Handle objects by JSON stringifying them, otherwise convert to string
+              const stringValue = typeof value === 'object' ? JSON.stringify(value) : value.toString();
+              formData.append(key, stringValue);
             }
           });
 
@@ -402,6 +405,46 @@ export const InstanceDetail: React.FC = () => {
                       onSubmit={handleDataSubmission}
                       isSubmitting={isSubmittingData}
                       submitButtonText="Enviar Información"
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Catalog Selection Section */}
+        {instance.status === 'paused' && instance.input_form &&
+         instance.waiting_for === 'catalog_selection' && (
+          <section className="active-form-section">
+            <div className="container">
+              <div className="form-card action-required" style={{ borderColor: '#4caf50' }}>
+                <h2>Selección de Catálogo Requerida</h2>
+                {submissionSuccess ? (
+                  <div className="success-message">
+                    <h4>Selección enviada exitosamente</h4>
+                    <p>{submissionSuccess}</p>
+                    <p>Su solicitud continuará procesándose.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="requirement-notice">
+                      <div className="requirement-icon">
+                        <i className="icon-info"></i>
+                      </div>
+                      <div className="requirement-content">
+                        <strong>Selección Requerida</strong>
+                        <p>Seleccione los elementos del catálogo para continuar con el proceso.</p>
+                      </div>
+                    </div>
+
+                    <CatalogSelector
+                      title={instance.input_form.title || 'Seleccione del Catálogo'}
+                      description={instance.input_form.description || 'Seleccione los elementos necesarios del catálogo para continuar.'}
+                      catalog_config={(instance.input_form as any).catalog_config}
+                      validation_errors={(instance.input_form as any).validation_errors || []}
+                      previous_input={(instance.input_form as any).previous_input}
+                      onSubmit={handleDataSubmission}
                     />
                   </>
                 )}
