@@ -15,7 +15,7 @@ export type { User, AuthState } from '../contexts/AuthContext';
 export { useThemeConfig } from '../contexts/ThemeContext';
 
 // React Router
-export { useNavigate, useLocation, Link } from 'react-router-dom';
+export { useNavigate, useLocation, Link, useSearchParams, useParams } from 'react-router-dom';
 
 // i18n
 export { useTranslation } from 'react-i18next';
@@ -29,6 +29,8 @@ export {
   AppBar,
   Toolbar,
   IconButton,
+  CircularProgress,
+  Chip,
 } from '@mui/material';
 
 // MUI hooks
@@ -36,4 +38,12 @@ export { useTheme, useMediaQuery } from '@mui/material';
 
 // Services
 export { workflowService } from '../services/workflowService';
-export type { WorkflowDefinition } from '../services/workflowService';
+export type { WorkflowDefinition, WorkflowInstanceProgress, StepProgress, InputForm, DataSubmissionResponse } from '../services/workflowService';
+export type { WorkflowStep } from '../types/workflow';
+export { default as keycloakService } from '../services/keycloak';
+
+// Form components (for InstanceDetailContent override)
+export { DataCollectionForm } from '../components/DataCollectionForm';
+export { CatalogSelector } from '../components/CatalogSelector';
+export { SelfieCapture, IDCapture } from '../components/capture';
+export { SigningForm } from '../components/signature/SigningForm';

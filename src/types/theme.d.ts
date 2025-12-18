@@ -39,6 +39,14 @@ declare module '@mui/material/styles' {
       linkColor?: string;
       borderTop?: string;
     };
+    hero?: {
+      backgroundColor?: string;
+      backgroundGradient?: string;
+      textColor?: string;
+      subtitleColor?: string;
+      minHeight?: string;
+      padding?: string;
+    };
   }
 
   interface ThemeOptions {
@@ -78,6 +86,14 @@ declare module '@mui/material/styles' {
       textColor?: string;
       linkColor?: string;
       borderTop?: string;
+    };
+    hero?: {
+      backgroundColor?: string;
+      backgroundGradient?: string;
+      textColor?: string;
+      subtitleColor?: string;
+      minHeight?: string;
+      padding?: string;
     };
   }
 }
