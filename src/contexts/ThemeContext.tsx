@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material/styles';
 import type { Theme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import api from '../services/api';
 
 interface ThemeColors {
   primary_main: string;
@@ -36,6 +35,13 @@ interface ThemeTypography {
   font_weight_regular?: number;
   font_weight_medium?: number;
   font_weight_bold?: number;
+}
+
+interface FooterThemeConfig {
+  backgroundColor?: string;
+  textColor?: string;
+  linkColor?: string;
+  borderTop?: string;
 }
 
 interface HeaderThemeConfig {
@@ -90,14 +96,23 @@ interface ThemeConfig {
     radius_sm?: number;
     radius_md?: number;
     radius_lg?: number;
+    color?: string;
   };
   header?: HeaderThemeConfig;
+  footer?: FooterThemeConfig;
   components?: Record<string, any>;
   assets?: {
     logo?: string;
     favicon?: string;
     background_image?: string;
   };
+  templates?: {
+    enabled?: boolean;
+    components?: Record<string, string>;
+    layouts?: Record<string, string>;
+    variables?: Record<string, any>;
+  };
+  html_overrides?: Record<string, boolean>;
 }
 
 interface ThemeContextType {
@@ -121,7 +136,7 @@ const defaultThemeConfig: ThemeConfig = {
 };
 
 function createMuiTheme(config: ThemeConfig): Theme {
-  const { colors, typography, spacing, borders, header, components } = config;
+  const { colors, typography, spacing, borders, header, footer, components } = config;
 
   return createTheme({
     palette: {
@@ -224,6 +239,12 @@ function createMuiTheme(config: ThemeConfig): Theme {
         menuTextColor: header?.profile?.menuTextColor || colors.text_primary || '#000000',
       }
     } as any,
+    footer: {
+      backgroundColor: footer?.backgroundColor || colors.primary_dark || colors.primary_main,
+      textColor: footer?.textColor || '#ffffff',
+      linkColor: footer?.linkColor || colors.primary_light || '#90caf9',
+      borderTop: footer?.borderTop || 'none',
+    } as any,
   });
 }
 
@@ -238,9 +259,12 @@ export function CustomThemeProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       setError(null);
 
-
-      const response = await api.get('/themes/current');
-      const config = response.data as ThemeConfig;
+      // Load theme from local static file
+      const response = await fetch('/themes/theme-config.json');
+      if (!response.ok) {
+        throw new Error(`Failed to load theme: ${response.status} ${response.statusText}`);
+      }
+      const config = await response.json() as ThemeConfig;
 
       setThemeConfig(config);
       setTheme(createMuiTheme(config));
@@ -251,11 +275,31 @@ export function CustomThemeProvider({ children }: { children: ReactNode }) {
         root.style.setProperty('--primary-color', config.colors.primary_main);
         root.style.setProperty('--primary-light', config.colors.primary_light || config.colors.primary_main);
         root.style.setProperty('--primary-dark', config.colors.primary_dark || config.colors.primary_main);
+        root.style.setProperty('--primary-contrast', config.colors.primary_contrast_text || '#ffffff');
         root.style.setProperty('--secondary-color', config.colors.secondary_main || config.colors.primary_main);
         root.style.setProperty('--background-default', config.colors.background_default || '#ffffff');
         root.style.setProperty('--background-paper', config.colors.background_paper || '#f5f5f5');
         root.style.setProperty('--text-primary', config.colors.text_primary || '#000000');
         root.style.setProperty('--text-secondary', config.colors.text_secondary || '#666666');
+        root.style.setProperty('--text-disabled', config.colors.text_disabled || '#999999');
+        root.style.setProperty('--error-color', config.colors.error || '#d32f2f');
+        root.style.setProperty('--warning-color', config.colors.warning || '#ed6c02');
+        root.style.setProperty('--success-color', config.colors.success || '#2e7d32');
+        root.style.setProperty('--info-color', config.colors.info || '#0288d1');
+        root.style.setProperty('--border-color', config.borders?.color || '#e0e0e0');
+        root.style.setProperty('--border-radius', `${config.borders?.radius_md || 4}px`);
+      }
+
+      // Inject tenant style.css if available as HTML override
+      if (config.html_overrides?.style) {
+        let styleLink = document.querySelector('link[data-theme-style]') as HTMLLinkElement | null;
+        if (!styleLink) {
+          styleLink = document.createElement('link');
+          styleLink.rel = 'stylesheet';
+          styleLink.setAttribute('data-theme-style', 'true');
+          document.head.appendChild(styleLink);
+        }
+        styleLink.href = `/themes/components/style.css?t=${Date.now()}`;
       }
 
       // Update document metadata if available
@@ -267,7 +311,7 @@ export function CustomThemeProvider({ children }: { children: ReactNode }) {
       if (config.assets?.favicon) {
         const favicon = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
         if (favicon) {
-          favicon.href = `/api/v1/themes/current/assets/${config.assets.favicon}`;
+          favicon.href = `/themes/assets/${config.assets.favicon}`;
         }
       }
     } catch (err) {
@@ -301,10 +345,10 @@ export function CustomThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useTheme() {
+export function useThemeConfig() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useTheme must be used within a CustomThemeProvider');
+    throw new Error('useThemeConfig must be used within a CustomThemeProvider');
   }
   return context;
 }

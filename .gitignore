@@ -36,3 +36,6 @@ coverage
 
 # Misc
 .cache
+
+# Tenant TSX overrides (transient, copied by refresh-citizen.sh during build)
+src/overrides/*.tsx

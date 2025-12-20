@@ -1,0 +1,266 @@
+<!-- Default Citizen Portal Header Template -->
+<header class="citizen-header" style="
+  background: {{colors.primary_main}};
+  color: {{colors.primary_contrast_text}};
+  height: {{layout.header_height}}px;
+  box-shadow: {{shadows.md}};
+">
+  <div class="header-container" style="
+    max-width: {{layout.max_width}}px;
+    margin: 0 auto;
+    padding: 0 {{spacing.md}}px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  ">
+    <!-- Logo Section -->
+    <div class="header-logo" style="
+      display: flex;
+      align-items: center;
+      gap: {{spacing.sm}}px;
+    ">
+      {{#if assets.logo}}
+      <img
+        src="/api/v1/themes/current/assets/{{assets.logo}}"
+        alt="{{metadata.organization || variables.app_name}}"
+        style="
+          height: 40px;
+          width: auto;
+          max-width: 150px;
+        "
+      />
+      {{else}}
+      <div style="
+        font-size: {{typography.font_size_large}}px;
+        font-weight: {{typography.font_weight_bold}};
+        color: {{colors.primary_contrast_text}};
+      ">
+        {{metadata.organization || variables.app_name}}
+      </div>
+      {{/if}}
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="header-nav" style="
+      display: flex;
+      align-items: center;
+      gap: {{spacing.lg}}px;
+    ">
+      <a href="/services" class="nav-link" style="
+        color: {{colors.primary_contrast_text}};
+        text-decoration: none;
+        font-weight: {{typography.font_weight_medium}};
+        padding: {{spacing.sm}}px {{spacing.md}}px;
+        border-radius: {{borders.radius_sm}}px;
+        transition: background-color {{custom_variables.transition_duration}};
+      ">
+        {{i18n.services || 'Servicios'}}
+      </a>
+
+      <a href="/documents" class="nav-link" style="
+        color: {{colors.primary_contrast_text}};
+        text-decoration: none;
+        font-weight: {{typography.font_weight_medium}};
+        padding: {{spacing.sm}}px {{spacing.md}}px;
+        border-radius: {{borders.radius_sm}}px;
+        transition: background-color {{custom_variables.transition_duration}};
+      ">
+        {{i18n.documents || 'Documentos'}}
+      </a>
+
+      {{#if user.authenticated}}
+      <a href="/dashboard" class="nav-link" style="
+        color: {{colors.primary_contrast_text}};
+        text-decoration: none;
+        font-weight: {{typography.font_weight_medium}};
+        padding: {{spacing.sm}}px {{spacing.md}}px;
+        border-radius: {{borders.radius_sm}}px;
+        transition: background-color {{custom_variables.transition_duration}};
+      ">
+        {{i18n.dashboard || 'Mi Panel'}}
+      </a>
+      {{/if}}
+    </nav>
+
+    <!-- User Actions -->
+    <div class="header-actions" style="
+      display: flex;
+      align-items: center;
+      gap: {{spacing.md}}px;
+    ">
+      <!-- Language Switcher -->
+      <div class="language-switcher" style="
+        display: flex;
+        gap: {{spacing.xs}}px;
+      ">
+        <button onclick="switchLanguage('es')" style="
+          background: transparent;
+          border: 1px solid {{colors.primary_contrast_text}};
+          color: {{colors.primary_contrast_text}};
+          padding: {{spacing.xs}}px {{spacing.sm}}px;
+          border-radius: {{borders.radius_sm}}px;
+          font-size: {{typography.font_size_small}}px;
+          cursor: pointer;
+        ">ES</button>
+        <button onclick="switchLanguage('en')" style="
+          background: transparent;
+          border: 1px solid {{colors.primary_contrast_text}};
+          color: {{colors.primary_contrast_text}};
+          padding: {{spacing.xs}}px {{spacing.sm}}px;
+          border-radius: {{borders.radius_sm}}px;
+          font-size: {{typography.font_size_small}}px;
+          cursor: pointer;
+        ">EN</button>
+      </div>
+
+      <!-- User Menu -->
+      {{#if user.authenticated}}
+      <div class="user-menu" style="
+        display: flex;
+        align-items: center;
+        gap: {{spacing.sm}}px;
+        padding: {{spacing.sm}}px {{spacing.md}}px;
+        background: rgba(255,255,255,0.1);
+        border-radius: {{borders.radius_md}}px;
+      ">
+        <div class="user-avatar" style="
+          width: 32px;
+          height: 32px;
+          background: {{colors.secondary_main}};
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: {{colors.secondary_contrast_text}};
+          font-weight: {{typography.font_weight_bold}};
+          font-size: {{typography.font_size_small}}px;
+        ">
+          {{user.initials || 'U'}}
+        </div>
+        <div class="user-info" style="
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        ">
+          <span style="
+            font-size: {{typography.font_size_small}}px;
+            font-weight: {{typography.font_weight_medium}};
+            color: {{colors.primary_contrast_text}};
+          ">
+            {{user.name || user.email}}
+          </span>
+          <button onclick="logout()" style="
+            background: none;
+            border: none;
+            color: {{colors.primary_contrast_text}};
+            font-size: {{typography.font_size_small}}px;
+            text-decoration: underline;
+            cursor: pointer;
+            text-align: left;
+            opacity: 0.8;
+          ">
+            {{i18n.logout || 'Cerrar Sesión'}}
+          </button>
+        </div>
+      </div>
+      {{else}}
+      <button onclick="login()" style="
+        background: {{colors.secondary_main}};
+        color: {{colors.secondary_contrast_text}};
+        border: none;
+        padding: {{spacing.sm}}px {{spacing.lg}}px;
+        border-radius: {{borders.radius_sm}}px;
+        font-weight: {{typography.font_weight_medium}};
+        cursor: pointer;
+        transition: background-color {{custom_variables.transition_duration}};
+      ">
+        {{i18n.login || 'Iniciar Sesión'}}
+      </button>
+      {{/if}}
+    </div>
+  </div>
+
+  <!-- Mobile Menu Toggle (Hidden by default, shown via CSS media queries) -->
+  <button class="mobile-menu-toggle" style="
+    display: none;
+    background: transparent;
+    border: none;
+    color: {{colors.primary_contrast_text}};
+    font-size: 24px;
+    cursor: pointer;
+    position: absolute;
+    right: {{spacing.md}}px;
+    top: 50%;
+    transform: translateY(-50%);
+  " onclick="toggleMobileMenu()">
+    ☰
+  </button>
+</header>
+
+{{slot:after_header}}
+
+<style>
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .citizen-header .header-nav {
+    display: none;
+  }
+
+  .citizen-header .mobile-menu-toggle {
+    display: block !important;
+  }
+
+  .citizen-header .header-actions {
+    gap: {{spacing.sm}}px;
+  }
+
+  .citizen-header .language-switcher {
+    display: none;
+  }
+}
+
+/* Hover effects */
+.nav-link:hover {
+  background: rgba(255,255,255,0.1) !important;
+}
+
+.user-menu:hover {
+  background: rgba(255,255,255,0.2) !important;
+}
+
+/* Focus states for accessibility */
+.nav-link:focus,
+button:focus {
+  outline: 2px solid {{colors.secondary_main}};
+  outline-offset: 2px;
+}
+</style>
+
+<script>
+// Template JavaScript functions
+function switchLanguage(lang) {
+  if (typeof window.i18n !== 'undefined') {
+    window.i18n.changeLanguage(lang);
+  }
+}
+
+function login() {
+  if (typeof window.auth !== 'undefined') {
+    window.auth.login();
+  }
+}
+
+function logout() {
+  if (typeof window.auth !== 'undefined') {
+    window.auth.logout();
+  }
+}
+
+function toggleMobileMenu() {
+  const nav = document.querySelector('.header-nav');
+  if (nav) {
+    nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+  }
+}
+</script>

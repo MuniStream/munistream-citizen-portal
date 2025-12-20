@@ -1,0 +1,475 @@
+<!-- Default Workflow Tracker Template -->
+<div class="workflow-tracker" style="
+  background: {{colors.background_paper}};
+  border: 1px solid {{borders.color}};
+  border-radius: {{borders.radius_md}}px;
+  padding: {{spacing.lg}}px;
+  margin: {{spacing.md}}px 0;
+">
+  <!-- Tracker Header -->
+  <div class="tracker-header" style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: {{spacing.lg}}px;
+    padding-bottom: {{spacing.md}}px;
+    border-bottom: 1px solid {{borders.color}};
+  ">
+    <div class="tracker-info">
+      <h3 style="
+        color: {{colors.text_primary}};
+        font-size: {{typography.font_size_large}}px;
+        font-weight: {{typography.font_weight_bold}};
+        margin: 0 0 {{spacing.xs}}px 0;
+      ">
+        {{instance.workflow_name || 'Trámite'}}
+      </h3>
+      <div style="
+        color: {{colors.text_secondary}};
+        font-size: {{typography.font_size_small}}px;
+      ">
+        <strong>{{i18n.instance_id || 'Folio'}}:</strong> {{instance.id}}
+      </div>
+      <div style="
+        color: {{colors.text_secondary}};
+        font-size: {{typography.font_size_small}}px;
+      ">
+        <strong>{{i18n.started_date || 'Iniciado'}}:</strong> {{format_date instance.created_at}}
+      </div>
+    </div>
+
+    <!-- Overall Status Badge -->
+    <div class="status-badge" style="
+      background: {{get_status_color instance.status colors}};
+      color: {{colors.primary_contrast_text}};
+      padding: {{spacing.sm}}px {{spacing.md}}px;
+      border-radius: {{borders.radius_md}}px;
+      font-size: {{typography.font_size_small}}px;
+      font-weight: {{typography.font_weight_bold}};
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    ">
+      {{get_status_text instance.status i18n}}
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-section" style="
+    margin-bottom: {{spacing.xl}}px;
+  ">
+    <div class="progress-header" style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: {{spacing.sm}}px;
+    ">
+      <span style="
+        color: {{colors.text_primary}};
+        font-size: {{typography.font_size_small}}px;
+        font-weight: {{typography.font_weight_medium}};
+      ">
+        {{i18n.progress || 'Progreso'}}
+      </span>
+      <span style="
+        color: {{colors.text_secondary}};
+        font-size: {{typography.font_size_small}}px;
+        font-weight: {{typography.font_weight_bold}};
+      ">
+        {{instance.progress_percentage}}%
+      </span>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" style="
+      width: 100%;
+      height: 8px;
+      background: {{colors.text_disabled}};
+      border-radius: 4px;
+      overflow: hidden;
+    ">
+      <div class="progress-fill" style="
+        width: {{instance.progress_percentage}}%;
+        height: 100%;
+        background: linear-gradient(90deg, {{colors.primary_main}}, {{colors.primary_light}});
+        transition: width 0.3s ease;
+      "></div>
+    </div>
+  </div>
+
+  <!-- Step Timeline -->
+  <div class="timeline" style="
+    position: relative;
+    padding-left: {{spacing.xl}}px;
+  ">
+    <!-- Timeline Line -->
+    <div class="timeline-line" style="
+      position: absolute;
+      left: 12px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: {{colors.text_disabled}};
+    "></div>
+
+    {{#each instance.steps}}
+    <div class="timeline-step" style="
+      position: relative;
+      margin-bottom: {{../spacing.lg}}px;
+      padding-left: {{../spacing.md}}px;
+    ">
+      <!-- Step Indicator -->
+      <div class="step-indicator" style="
+        position: absolute;
+        left: -{{../spacing.md}}px;
+        top: 2px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: {{get_step_color this.status ../colors}};
+        border: 3px solid {{../colors.background_default}};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+      ">
+        {{#if (eq this.status 'completed')}}
+        <span style="color: white; font-size: 12px; font-weight: bold;">✓</span>
+        {{else if (eq this.status 'current')}}
+        <span style="color: white; font-size: 10px;">●</span>
+        {{else if (eq this.status 'failed')}}
+        <span style="color: white; font-size: 12px; font-weight: bold;">✗</span>
+        {{else}}
+        <span style="color: white; font-size: 8px;">○</span>
+        {{/if}}
+      </div>
+
+      <!-- Step Content -->
+      <div class="step-content" style="
+        background: {{../colors.background_default}};
+        border: 1px solid {{../borders.color}};
+        border-radius: {{../borders.radius_sm}}px;
+        padding: {{../spacing.md}}px;
+        {{#if (eq this.status 'current')}}
+        box-shadow: {{../shadows.md}};
+        border-color: {{../colors.primary_main}};
+        {{/if}}
+      ">
+        <!-- Step Header -->
+        <div class="step-header" style="
+          display: flex;
+          justify-content: between;
+          align-items: flex-start;
+          margin-bottom: {{../spacing.sm}}px;
+        ">
+          <div class="step-info" style="flex: 1;">
+            <h4 style="
+              color: {{../colors.text_primary}};
+              font-size: {{../typography.font_size_base}}px;
+              font-weight: {{../typography.font_weight_bold}};
+              margin: 0 0 {{../spacing.xs}}px 0;
+            ">
+              {{this.name}}
+            </h4>
+
+            {{#if this.description}}
+            <p style="
+              color: {{../colors.text_secondary}};
+              font-size: {{../typography.font_size_small}}px;
+              margin: 0;
+              line-height: {{../typography.line_height_base}};
+            ">
+              {{this.description}}
+            </p>
+            {{/if}}
+          </div>
+
+          <!-- Step Status Badge -->
+          <div class="step-status" style="
+            background: {{get_step_color this.status ../colors}};
+            color: white;
+            padding: {{../spacing.xs}}px {{../spacing.sm}}px;
+            border-radius: {{../borders.radius_sm}}px;
+            font-size: {{../typography.font_size_small}}px;
+            font-weight: {{../typography.font_weight_medium}};
+            text-transform: capitalize;
+            white-space: nowrap;
+          ">
+            {{get_step_status_text this.status ../i18n}}
+          </div>
+        </div>
+
+        <!-- Step Timestamps -->
+        <div class="step-timestamps" style="
+          display: flex;
+          gap: {{../spacing.md}}px;
+          margin-bottom: {{../spacing.sm}}px;
+          font-size: {{../typography.font_size_small}}px;
+          color: {{../colors.text_secondary}};
+        ">
+          {{#if this.started_at}}
+          <div>
+            <strong>{{../i18n.started || 'Iniciado'}}:</strong> {{format_date this.started_at}}
+          </div>
+          {{/if}}
+
+          {{#if this.completed_at}}
+          <div>
+            <strong>{{../i18n.completed || 'Completado'}}:</strong> {{format_date this.completed_at}}
+          </div>
+          {{/if}}
+        </div>
+
+        <!-- Step Actions -->
+        {{#if this.actions}}
+        <div class="step-actions" style="
+          display: flex;
+          gap: {{../spacing.sm}}px;
+          margin-top: {{../spacing.md}}px;
+          padding-top: {{../spacing.sm}}px;
+          border-top: 1px solid {{../borders.color}};
+        ">
+          {{#each this.actions}}
+          <button style="
+            background: {{../colors.primary_main}};
+            color: {{../colors.primary_contrast_text}};
+            border: none;
+            padding: {{../spacing.sm}}px {{../spacing.md}}px;
+            border-radius: {{../borders.radius_sm}}px;
+            font-size: {{../typography.font_size_small}}px;
+            font-weight: {{../typography.font_weight_medium}};
+            cursor: pointer;
+            transition: background-color {{../custom_variables.transition_duration}};
+          " onclick="executeStepAction('{{../../instance.id}}', '{{../id}}', '{{this.action}}')">
+            {{this.label}}
+          </button>
+          {{/each}}
+        </div>
+        {{/if}}
+
+        <!-- Step Notes/Comments -->
+        {{#if this.notes}}
+        <div class="step-notes" style="
+          margin-top: {{../spacing.md}}px;
+          padding: {{../spacing.sm}}px;
+          background: {{../colors.custom.workflow_progress}};
+          border-radius: {{../borders.radius_sm}}px;
+          border-left: 4px solid {{../colors.info}};
+        ">
+          <div style="
+            font-size: {{../typography.font_size_small}}px;
+            font-weight: {{../typography.font_weight_bold}};
+            color: {{../colors.text_primary}};
+            margin-bottom: {{../spacing.xs}}px;
+          ">
+            {{../i18n.notes || 'Notas'}}:
+          </div>
+          <div style="
+            font-size: {{../typography.font_size_small}}px;
+            color: {{../colors.text_secondary}};
+            line-height: {{../typography.line_height_base}};
+          ">
+            {{this.notes}}
+          </div>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    {{/each}}
+  </div>
+
+  <!-- Tracker Actions -->
+  <div class="tracker-actions" style="
+    margin-top: {{spacing.xl}}px;
+    padding-top: {{spacing.md}}px;
+    border-top: 1px solid {{borders.color}};
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: {{spacing.md}}px;
+  ">
+    <div class="tracker-meta" style="
+      color: {{colors.text_secondary}};
+      font-size: {{typography.font_size_small}}px;
+    ">
+      <div>
+        <strong>{{i18n.last_updated || 'Última actualización'}}:</strong> {{format_date instance.updated_at}}
+      </div>
+      {{#if instance.assigned_to}}
+      <div>
+        <strong>{{i18n.assigned_to || 'Asignado a'}}:</strong> {{instance.assigned_to}}
+      </div>
+      {{/if}}
+    </div>
+
+    <div class="tracker-buttons" style="
+      display: flex;
+      gap: {{spacing.sm}}px;
+    ">
+      <button onclick="refreshTracker('{{instance.id}}')" style="
+        background: transparent;
+        color: {{colors.primary_main}};
+        border: 1px solid {{colors.primary_main}};
+        padding: {{spacing.sm}}px {{spacing.md}}px;
+        border-radius: {{borders.radius_sm}}px;
+        font-size: {{typography.font_size_small}}px;
+        font-weight: {{typography.font_weight_medium}};
+        cursor: pointer;
+        transition: all {{custom_variables.transition_duration}};
+      ">
+        {{i18n.refresh || 'Actualizar'}}
+      </button>
+
+      <button onclick="viewInstanceDetails('{{instance.id}}')" style="
+        background: {{colors.primary_main}};
+        color: {{colors.primary_contrast_text}};
+        border: none;
+        padding: {{spacing.sm}}px {{spacing.md}}px;
+        border-radius: {{borders.radius_sm}}px;
+        font-size: {{typography.font_size_small}}px;
+        font-weight: {{typography.font_weight_medium}};
+        cursor: pointer;
+        transition: background-color {{custom_variables.transition_duration}};
+      ">
+        {{i18n.view_details || 'Ver Detalles'}}
+      </button>
+    </div>
+  </div>
+
+  {{slot:workflow_tracker_bottom}}
+</div>
+
+<style>
+/* Hover effects */
+.tracker-buttons button:hover {
+  transform: translateY(-1px);
+}
+
+.tracker-buttons button:first-child:hover {
+  background: {{colors.primary_main}} !important;
+  color: {{colors.primary_contrast_text}} !important;
+}
+
+.tracker-buttons button:last-child:hover {
+  background: {{colors.primary_dark}} !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .tracker-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: {{spacing.md}}px;
+  }
+
+  .tracker-actions {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .tracker-buttons {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .tracker-buttons button {
+    flex: 1;
+  }
+}
+
+/* Animation for current step */
+.step-indicator {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(25, 118, 210, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(25, 118, 210, 0); }
+}
+</style>
+
+<script>
+// Helper functions for Handlebars
+if (typeof Handlebars !== 'undefined') {
+  Handlebars.registerHelper('get_status_color', function(status, colors) {
+    const statusColors = {
+      'pending': colors.custom.status_pending,
+      'running': colors.primary_main,
+      'completed': colors.custom.status_approved,
+      'failed': colors.custom.status_rejected,
+      'cancelled': colors.text_disabled
+    };
+    return statusColors[status] || colors.text_disabled;
+  });
+
+  Handlebars.registerHelper('get_step_color', function(status, colors) {
+    const stepColors = {
+      'completed': colors.success,
+      'current': colors.primary_main,
+      'failed': colors.error,
+      'pending': colors.text_disabled
+    };
+    return stepColors[status] || colors.text_disabled;
+  });
+
+  Handlebars.registerHelper('get_status_text', function(status, i18n) {
+    const statusTexts = {
+      'pending': i18n.status_pending || 'Pendiente',
+      'running': i18n.status_running || 'En Proceso',
+      'completed': i18n.status_completed || 'Completado',
+      'failed': i18n.status_failed || 'Fallido',
+      'cancelled': i18n.status_cancelled || 'Cancelado'
+    };
+    return statusTexts[status] || status;
+  });
+
+  Handlebars.registerHelper('get_step_status_text', function(status, i18n) {
+    const stepTexts = {
+      'completed': i18n.step_completed || 'Completado',
+      'current': i18n.step_current || 'En Curso',
+      'failed': i18n.step_failed || 'Fallido',
+      'pending': i18n.step_pending || 'Pendiente'
+    };
+    return stepTexts[status] || status;
+  });
+
+  Handlebars.registerHelper('format_date', function(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  });
+
+  Handlebars.registerHelper('eq', function(a, b) {
+    return a === b;
+  });
+}
+
+// Tracker actions
+function refreshTracker(instanceId) {
+  if (typeof window.workflowService !== 'undefined') {
+    window.workflowService.refreshInstance(instanceId);
+  } else {
+    window.location.reload();
+  }
+}
+
+function viewInstanceDetails(instanceId) {
+  if (typeof window.router !== 'undefined') {
+    window.router.push(`/instances/${instanceId}`);
+  } else {
+    window.location.href = `/instances/${instanceId}`;
+  }
+}
+
+function executeStepAction(instanceId, stepId, action) {
+  if (typeof window.workflowService !== 'undefined') {
+    window.workflowService.executeStepAction(instanceId, stepId, action);
+  }
+}
+</script>

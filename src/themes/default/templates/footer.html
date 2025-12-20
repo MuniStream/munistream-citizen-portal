@@ -1,0 +1,286 @@
+<!-- Default Citizen Portal Footer Template -->
+<footer class="citizen-footer" style="
+  background: {{colors.background_paper}};
+  border-top: 1px solid {{borders.color}};
+  padding: {{spacing.xl}}px 0;
+  margin-top: auto;
+">
+  <div class="footer-container" style="
+    max-width: {{layout.max_width}}px;
+    margin: 0 auto;
+    padding: 0 {{spacing.md}}px;
+  ">
+    <!-- Main Footer Content -->
+    <div class="footer-content" style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: {{spacing.xl}}px;
+      margin-bottom: {{spacing.lg}}px;
+    ">
+      <!-- Organization Info -->
+      <div class="footer-section">
+        <h3 style="
+          color: {{colors.text_primary}};
+          font-size: {{typography.font_size_large}}px;
+          font-weight: {{typography.font_weight_bold}};
+          margin-bottom: {{spacing.md}}px;
+          margin-top: 0;
+        ">
+          {{metadata.organization || variables.app_name}}
+        </h3>
+        <p style="
+          color: {{colors.text_secondary}};
+          font-size: {{typography.font_size_base}}px;
+          line-height: {{typography.line_height_base}};
+          margin: 0;
+        ">
+          {{metadata.description || 'Plataforma digital para trámites y servicios gubernamentales'}}
+        </p>
+
+        {{#if assets.logo}}
+        <div style="margin-top: {{spacing.md}}px;">
+          <img
+            src="/api/v1/themes/current/assets/{{assets.logo}}"
+            alt="{{metadata.organization}}"
+            style="
+              height: 32px;
+              width: auto;
+              opacity: 0.7;
+            "
+          />
+        </div>
+        {{/if}}
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer-section">
+        <h4 style="
+          color: {{colors.text_primary}};
+          font-size: {{typography.font_size_base}}px;
+          font-weight: {{typography.font_weight_bold}};
+          margin-bottom: {{spacing.md}}px;
+          margin-top: 0;
+        ">
+          {{i18n.quick_links || 'Enlaces Rápidos'}}
+        </h4>
+        <nav class="footer-nav" style="
+          display: flex;
+          flex-direction: column;
+          gap: {{spacing.sm}}px;
+        ">
+          <a href="/services" style="
+            color: {{colors.text_secondary}};
+            text-decoration: none;
+            font-size: {{typography.font_size_base}}px;
+            transition: color {{custom_variables.transition_duration}};
+          ">
+            {{i18n.services || 'Servicios'}}
+          </a>
+          <a href="/documents" style="
+            color: {{colors.text_secondary}};
+            text-decoration: none;
+            font-size: {{typography.font_size_base}}px;
+            transition: color {{custom_variables.transition_duration}};
+          ">
+            {{i18n.documents || 'Documentos'}}
+          </a>
+          {{#if user.authenticated}}
+          <a href="/dashboard" style="
+            color: {{colors.text_secondary}};
+            text-decoration: none;
+            font-size: {{typography.font_size_base}}px;
+            transition: color {{custom_variables.transition_duration}};
+          ">
+            {{i18n.dashboard || 'Mi Panel'}}
+          </a>
+          <a href="/instances" style="
+            color: {{colors.text_secondary}};
+            text-decoration: none;
+            font-size: {{typography.font_size_base}}px;
+            transition: color {{custom_variables.transition_duration}};
+          ">
+            {{i18n.my_requests || 'Mis Trámites'}}
+          </a>
+          {{/if}}
+        </nav>
+      </div>
+
+      <!-- Support Info -->
+      <div class="footer-section">
+        <h4 style="
+          color: {{colors.text_primary}};
+          font-size: {{typography.font_size_base}}px;
+          font-weight: {{typography.font_weight_bold}};
+          margin-bottom: {{spacing.md}}px;
+          margin-top: 0;
+        ">
+          {{i18n.support || 'Soporte'}}
+        </h4>
+        <div class="contact-info" style="
+          display: flex;
+          flex-direction: column;
+          gap: {{spacing.sm}}px;
+        ">
+          {{#if variables.support_phone}}
+          <div style="
+            color: {{colors.text_secondary}};
+            font-size: {{typography.font_size_base}}px;
+          ">
+            <strong>{{i18n.phone || 'Teléfono'}}:</strong>
+            <a href="tel:{{variables.support_phone}}" style="
+              color: {{colors.primary_main}};
+              text-decoration: none;
+            ">
+              {{variables.support_phone}}
+            </a>
+          </div>
+          {{/if}}
+
+          {{#if variables.support_email}}
+          <div style="
+            color: {{colors.text_secondary}};
+            font-size: {{typography.font_size_base}}px;
+          ">
+            <strong>{{i18n.email || 'Email'}}:</strong>
+            <a href="mailto:{{variables.support_email}}" style="
+              color: {{colors.primary_main}};
+              text-decoration: none;
+            ">
+              {{variables.support_email}}
+            </a>
+          </div>
+          {{/if}}
+
+          <div style="
+            color: {{colors.text_secondary}};
+            font-size: {{typography.font_size_base}}px;
+          ">
+            <strong>{{i18n.hours || 'Horarios'}}:</strong>
+            {{variables.support_hours || 'Lun-Vie 8:00-18:00'}}
+          </div>
+        </div>
+      </div>
+
+      <!-- Legal Links -->
+      <div class="footer-section">
+        <h4 style="
+          color: {{colors.text_primary}};
+          font-size: {{typography.font_size_base}}px;
+          font-weight: {{typography.font_weight_bold}};
+          margin-bottom: {{spacing.md}}px;
+          margin-top: 0;
+        ">
+          {{i18n.legal || 'Legal'}}
+        </h4>
+        <nav class="legal-nav" style="
+          display: flex;
+          flex-direction: column;
+          gap: {{spacing.sm}}px;
+        ">
+          <a href="/privacy" style="
+            color: {{colors.text_secondary}};
+            text-decoration: none;
+            font-size: {{typography.font_size_base}}px;
+            transition: color {{custom_variables.transition_duration}};
+          ">
+            {{i18n.privacy_policy || 'Aviso de Privacidad'}}
+          </a>
+          <a href="/terms" style="
+            color: {{colors.text_secondary}};
+            text-decoration: none;
+            font-size: {{typography.font_size_base}}px;
+            transition: color {{custom_variables.transition_duration}};
+          ">
+            {{i18n.terms_conditions || 'Términos y Condiciones'}}
+          </a>
+          <a href="/accessibility" style="
+            color: {{colors.text_secondary}};
+            text-decoration: none;
+            font-size: {{typography.font_size_base}}px;
+            transition: color {{custom_variables.transition_duration}};
+          ">
+            {{i18n.accessibility || 'Accesibilidad'}}
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom" style="
+      border-top: 1px solid {{borders.color}};
+      padding-top: {{spacing.lg}}px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: {{spacing.md}}px;
+    ">
+      <div style="
+        color: {{colors.text_secondary}};
+        font-size: {{typography.font_size_small}}px;
+      ">
+        © {{current_year}} {{metadata.organization || variables.app_name}}.
+        {{i18n.all_rights_reserved || 'Todos los derechos reservados'}}.
+      </div>
+
+      <div class="footer-meta" style="
+        display: flex;
+        align-items: center;
+        gap: {{spacing.md}}px;
+      ">
+        <span style="
+          color: {{colors.text_disabled}};
+          font-size: {{typography.font_size_small}}px;
+        ">
+          {{i18n.powered_by || 'Desarrollado con'}} MuniStream
+        </span>
+
+        <div class="version-info" style="
+          color: {{colors.text_disabled}};
+          font-size: {{typography.font_size_small}}px;
+        ">
+          v{{metadata.version}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{slot:footer_bottom}}
+</footer>
+
+<style>
+/* Hover effects */
+.footer-nav a:hover,
+.legal-nav a:hover {
+  color: {{colors.primary_main}} !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr !important;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* Focus states for accessibility */
+.footer-nav a:focus,
+.legal-nav a:focus {
+  outline: 2px solid {{colors.primary_main}};
+  outline-offset: 2px;
+}
+</style>
+
+<script>
+// Set current year
+document.addEventListener('DOMContentLoaded', function() {
+  const currentYearElements = document.querySelectorAll('.citizen-footer');
+  currentYearElements.forEach(footer => {
+    footer.innerHTML = footer.innerHTML.replace('{{current_year}}', new Date().getFullYear());
+  });
+});
+</script>

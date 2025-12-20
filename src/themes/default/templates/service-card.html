@@ -1,0 +1,305 @@
+<!-- Default Service Card Template -->
+<div class="service-card" style="
+  background: {{colors.custom.service_card_bg}};
+  border: 1px solid {{borders.color}};
+  border-radius: {{components.card.borderRadius}}px;
+  padding: {{components.card.padding}}px;
+  box-shadow: {{components.card.boxShadow}};
+  transition: all {{custom_variables.transition_duration}};
+  cursor: pointer;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+" onclick="navigateToService('{{service.id}}')">
+
+  <!-- Service Icon/Image -->
+  {{#if service.icon}}
+  <div class="service-icon" style="
+    width: 64px;
+    height: 64px;
+    margin: 0 auto {{spacing.md}}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: {{colors.primary_light}};
+    border-radius: {{borders.radius_md}}px;
+    color: {{colors.primary_contrast_text}};
+    font-size: 32px;
+  ">
+    {{#if service.icon_url}}
+    <img src="{{service.icon_url}}" alt="{{service.name}}" style="
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    "/>
+    {{else}}
+    <span>{{service.icon}}</span>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  <!-- Service Header -->
+  <div class="service-header" style="
+    text-align: center;
+    margin-bottom: {{spacing.md}}px;
+  ">
+    <h3 class="service-title" style="
+      color: {{colors.text_primary}};
+      font-size: {{typography.font_size_large}}px;
+      font-weight: {{typography.font_weight_bold}};
+      margin: 0 0 {{spacing.sm}}px 0;
+      line-height: {{typography.line_height_heading}};
+    ">
+      {{service.name}}
+    </h3>
+
+    {{#if service.category}}
+    <div class="service-category" style="
+      display: inline-block;
+      background: {{colors.primary_main}};
+      color: {{colors.primary_contrast_text}};
+      padding: {{spacing.xs}}px {{spacing.sm}}px;
+      border-radius: {{borders.radius_sm}}px;
+      font-size: {{typography.font_size_small}}px;
+      font-weight: {{typography.font_weight_medium}};
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    ">
+      {{service.category}}
+    </div>
+    {{/if}}
+  </div>
+
+  <!-- Service Description -->
+  <div class="service-description" style="
+    flex: 1;
+    margin-bottom: {{spacing.lg}}px;
+  ">
+    <p style="
+      color: {{colors.text_secondary}};
+      font-size: {{typography.font_size_base}}px;
+      line-height: {{typography.line_height_base}};
+      margin: 0;
+      text-align: center;
+    ">
+      {{service.description}}
+    </p>
+  </div>
+
+  <!-- Service Meta Information -->
+  <div class="service-meta" style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: {{spacing.md}}px;
+    gap: {{spacing.sm}}px;
+  ">
+    <!-- Duration -->
+    {{#if service.estimated_duration}}
+    <div class="service-duration" style="
+      display: flex;
+      align-items: center;
+      gap: {{spacing.xs}}px;
+      color: {{colors.text_secondary}};
+      font-size: {{typography.font_size_small}}px;
+    ">
+      <span style="font-weight: {{typography.font_weight_medium}};">⏱</span>
+      <span>{{service.estimated_duration}}</span>
+    </div>
+    {{/if}}
+
+    <!-- Difficulty Level -->
+    {{#if service.difficulty}}
+    <div class="service-difficulty" style="
+      display: flex;
+      align-items: center;
+      gap: {{spacing.xs}}px;
+    ">
+      {{#each service.difficulty_stars}}
+      <span style="
+        color: {{#if @index < ../service.difficulty}}{{../colors.warning}}{{else}}{{../colors.text_disabled}}{{/if}};
+        font-size: 12px;
+      ">★</span>
+      {{/each}}
+    </div>
+    {{/if}}
+  </div>
+
+  <!-- Requirements Preview -->
+  {{#if service.requirements}}
+  <div class="service-requirements" style="
+    margin-bottom: {{spacing.md}}px;
+  ">
+    <h4 style="
+      color: {{colors.text_primary}};
+      font-size: {{typography.font_size_small}}px;
+      font-weight: {{typography.font_weight_bold}};
+      margin: 0 0 {{spacing.xs}}px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    ">
+      {{i18n.requirements || 'Requisitos'}}
+    </h4>
+    <div class="requirements-list" style="
+      display: flex;
+      flex-wrap: wrap;
+      gap: {{spacing.xs}}px;
+    ">
+      {{#each service.requirements}}
+      {{#if @index < 3}}
+      <span class="requirement-tag" style="
+        background: {{../colors.info}};
+        color: {{../colors.primary_contrast_text}};
+        padding: {{../spacing.xs}}px {{../spacing.sm}}px;
+        border-radius: {{../borders.radius_sm}}px;
+        font-size: {{../typography.font_size_small}}px;
+        font-weight: {{../typography.font_weight_medium}};
+      ">
+        {{this.name}}
+      </span>
+      {{/if}}
+      {{/each}}
+      {{#if service.requirements.length > 3}}
+      <span style="
+        color: {{colors.text_secondary}};
+        font-size: {{typography.font_size_small}}px;
+        font-weight: {{typography.font_weight_medium}};
+      ">
+        +{{subtract service.requirements.length 3}} más
+      </span>
+      {{/if}}
+    </div>
+  </div>
+  {{/if}}
+
+  <!-- Service Status -->
+  <div class="service-status" style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: {{spacing.sm}}px 0;
+    border-top: 1px solid {{borders.color}};
+  ">
+    <!-- Availability Status -->
+    <div class="availability-status" style="
+      display: flex;
+      align-items: center;
+      gap: {{spacing.xs}}px;
+    ">
+      <span class="status-dot" style="
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: {{#if service.available}}{{colors.success}}{{else}}{{colors.error}}{{/if}};
+      "></span>
+      <span style="
+        color: {{colors.text_secondary}};
+        font-size: {{typography.font_size_small}}px;
+        font-weight: {{typography.font_weight_medium}};
+      ">
+        {{#if service.available}}{{i18n.available || 'Disponible'}}{{else}}{{i18n.unavailable || 'No disponible'}}{{/if}}
+      </span>
+    </div>
+
+    <!-- Action Button -->
+    <button class="service-action" style="
+      background: {{#if service.available}}{{colors.primary_main}}{{else}}{{colors.text_disabled}}{{/if}};
+      color: {{colors.primary_contrast_text}};
+      border: none;
+      padding: {{spacing.sm}}px {{spacing.md}}px;
+      border-radius: {{borders.radius_sm}}px;
+      font-size: {{typography.font_size_small}}px;
+      font-weight: {{typography.font_weight_bold}};
+      cursor: {{#if service.available}}pointer{{else}}not-allowed{{/if}};
+      transition: background-color {{custom_variables.transition_duration}};
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    " {{#if service.available}}onclick="startService('{{service.id}}')"{{else}}disabled{{/if}}>
+      {{#if service.available}}
+        {{i18n.start_service || 'Iniciar'}}
+      {{else}}
+        {{i18n.unavailable || 'No disponible'}}
+      {{/if}}
+    </button>
+  </div>
+
+  {{slot:service_card_bottom}}
+</div>
+
+<style>
+/* Hover and interaction effects */
+.service-card:hover {
+  background: {{colors.custom.service_card_hover}} !important;
+  box-shadow: {{shadows.md}} !important;
+  transform: translateY(-2px);
+}
+
+.service-card:active {
+  transform: translateY(0);
+}
+
+/* Button hover effects */
+.service-action:hover:not(:disabled) {
+  background: {{colors.primary_dark}} !important;
+}
+
+/* Focus states for accessibility */
+.service-card:focus {
+  outline: 2px solid {{colors.primary_main}};
+  outline-offset: 2px;
+}
+
+.service-action:focus {
+  outline: 2px solid {{colors.secondary_main}};
+  outline-offset: 2px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 480px) {
+  .service-meta {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .service-status {
+    flex-direction: column;
+    gap: {{spacing.sm}}px !important;
+  }
+
+  .requirements-list {
+    flex-direction: column;
+  }
+}
+
+/* Print styles */
+@media print {
+  .service-action {
+    display: none;
+  }
+}
+</style>
+
+<script>
+function navigateToService(serviceId) {
+  if (typeof window.router !== 'undefined') {
+    window.router.push(`/services/${serviceId}`);
+  } else {
+    window.location.href = `/services/${serviceId}`;
+  }
+}
+
+function startService(serviceId) {
+  if (typeof window.workflowService !== 'undefined') {
+    window.workflowService.startWorkflow(serviceId);
+  } else {
+    window.location.href = `/start/${serviceId}`;
+  }
+}
+
+// Helper function for Handlebars
+if (typeof Handlebars !== 'undefined') {
+  Handlebars.registerHelper('subtract', function(a, b) {
+    return a - b;
+  });
+}
+</script>

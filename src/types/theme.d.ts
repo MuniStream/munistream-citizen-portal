@@ -33,6 +33,12 @@ declare module '@mui/material/styles' {
         menuTextColor?: string;
       };
     };
+    footer?: {
+      backgroundColor?: string;
+      textColor?: string;
+      linkColor?: string;
+      borderTop?: string;
+    };
   }
 
   interface ThemeOptions {
@@ -66,6 +72,12 @@ declare module '@mui/material/styles' {
         menuBackground?: string;
         menuTextColor?: string;
       };
+    };
+    footer?: {
+      backgroundColor?: string;
+      textColor?: string;
+      linkColor?: string;
+      borderTop?: string;
     };
   }
 }

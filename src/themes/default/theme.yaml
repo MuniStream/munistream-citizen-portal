@@ -1,0 +1,188 @@
+# Default Theme for MuniStream Citizen Portal
+metadata:
+  name: "MuniStream Citizen Default"
+  version: "1.0.0"
+  description: "Default theme for MuniStream citizen portal"
+  author: "MuniStream Platform"
+  frontend_type: "citizen"
+  created_at: "2026-02-20"
+  updated_at: "2026-02-20"
+
+# Color scheme
+colors:
+  primary_main: "#1976d2"        # Primary blue
+  primary_light: "#42a5f5"
+  primary_dark: "#1565c0"
+  primary_contrast_text: "#ffffff"
+
+  secondary_main: "#dc004e"      # Accent pink
+  secondary_light: "#e91e63"
+  secondary_dark: "#ad1457"
+  secondary_contrast_text: "#ffffff"
+
+  background_default: "#ffffff"
+  background_paper: "#f5f5f5"
+
+  text_primary: "#212529"
+  text_secondary: "#6c757d"
+  text_disabled: "#adb5bd"
+
+  error: "#f44336"
+  warning: "#ff9800"
+  info: "#2196f3"
+  success: "#4caf50"
+
+  # Citizen portal specific colors
+  custom:
+    service_card_bg: "#ffffff"
+    service_card_hover: "#f0f7ff"
+    workflow_progress: "#e3f2fd"
+    status_pending: "#ffc107"
+    status_approved: "#4caf50"
+    status_rejected: "#f44336"
+
+# Typography
+typography:
+  font_family: '"Roboto", "Helvetica", "Arial", sans-serif'
+  font_family_headings: '"Roboto", sans-serif'
+
+  font_size_base: 14
+  font_size_small: 12
+  font_size_large: 16
+
+  font_weight_light: 300
+  font_weight_regular: 400
+  font_weight_medium: 500
+  font_weight_bold: 700
+
+  line_height_base: 1.5
+  line_height_heading: 1.2
+
+# Spacing
+spacing:
+  unit: 8
+  xs: 4
+  sm: 8
+  md: 16
+  lg: 24
+  xl: 32
+
+# Borders
+borders:
+  radius_sm: 4
+  radius_md: 8
+  radius_lg: 12
+  width: 1
+  color: "#e0e0e0"
+
+# Shadows
+shadows:
+  sm: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)"
+  md: "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)"
+  lg: "0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)"
+
+# Component styles
+components:
+  button:
+    borderRadius: 4
+    textTransform: "none"
+    fontWeight: 500
+    padding: "8px 16px"
+
+  card:
+    borderRadius: 8
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+    padding: 16
+    backgroundColor: "#ffffff"
+
+  header:
+    height: 64
+    backgroundColor: "#1976d2"
+    color: "#ffffff"
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+
+  workflow_card:
+    borderRadius: 8
+    padding: 20
+    margin: 8
+    hoverElevation: 4
+
+  service_catalog:
+    cardSpacing: 16
+    cardsPerRow: 3
+    categorySpacing: 24
+
+# Templates configuration
+templates:
+  enabled: true
+  components:
+    header: "templates/header.html"
+    footer: "templates/footer.html"
+    service_card: "templates/service-card.html"
+    workflow_tracker: "templates/workflow-tracker.html"
+
+  layouts:
+    main: "templates/layouts/main.html"
+
+  variables:
+    app_name: "Portal Ciudadano"
+    support_email: "soporte@munistream.mx"
+    support_phone: "800-123-4567"
+
+# Custom components
+custom_components:
+  - name: "Header"
+    template: "header"
+    fallback: true
+  - name: "Footer"
+    template: "footer"
+    fallback: true
+  - name: "ServiceCard"
+    template: "service_card"
+    fallback: true
+
+# Slots for content injection
+slots:
+  before_app: null
+  after_header: null
+  before_footer: null
+  after_app: null
+  sidebar_top: null
+  sidebar_bottom: null
+
+# HTML injection points
+html_injection:
+  before_header: ""
+  after_content: ""
+  custom_scripts: ""
+
+# Assets
+assets:
+  logo: "logo.svg"
+  favicon: "favicon.ico"
+  loading_spinner: "loading.gif"
+
+  custom_assets:
+    hero_background: "hero-bg.jpg"
+    service_icons: "icons/"
+
+# Layout configuration
+layout:
+  type: "citizen"
+  header_height: 64
+  footer_enabled: false
+  sidebar_enabled: false
+  max_width: 1200
+  container_padding: 24
+
+# Theme modes
+dark_mode: false
+dark_colors: null
+
+# Custom CSS variables
+custom_variables:
+  header_height: "64px"
+  max_content_width: "1200px"
+  border_radius_default: "4px"
+  transition_duration: "150ms"
+  service_card_aspect_ratio: "1.2"
