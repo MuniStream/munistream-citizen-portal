@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { Header } from '../components/Header';
+import { MainLayout } from '../components/Layout/MainLayout';
 import { authService } from '../services/authService';
 import './MyEntitiesPage.css';
 
@@ -242,11 +242,8 @@ export const MyEntitiesPage: React.FC = () => {
   }
 
   return (
-    <div className="my-entities-page">
-      <Header
-        variant="default"
-        showBackLink={false}
-      />
+    <MainLayout>
+      <div className="my-entities-page">
 
       <main className="entities-main">
         <div className="container">
@@ -462,6 +459,7 @@ export const MyEntitiesPage: React.FC = () => {
           )}
         </div>
       </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 };

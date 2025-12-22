@@ -7,7 +7,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { workflowService } from '../services/workflowService';
-import { Header } from '../components/Header';
+import { MainLayout } from '../components/Layout/MainLayout';
 import { TenantBranding } from '../components/TenantBranding';
 import { WorkflowCard } from '../components/WorkflowCard';
 import type { WorkflowDefinition, WorkflowCategory, WorkflowSearchParams } from '../types/workflow';
@@ -99,8 +99,8 @@ export const PublicWorkflowCatalog: React.FC = () => {
   }
 
   return (
-    <div className="public-catalog">
-      <Header variant="catalog" />
+    <MainLayout headerProps={{ variant: 'catalog' }}>
+      <div className="public-catalog">
 
       <main className="catalog-main">
         <div className="container">
@@ -225,6 +225,7 @@ export const PublicWorkflowCatalog: React.FC = () => {
           </section>
         </div>
       </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 };

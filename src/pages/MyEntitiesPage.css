@@ -27,7 +27,7 @@
 }
 
 .page-header p {
-  color: #666;
+  color: var(--text-secondary, #666);
   font-size: 1.1rem;
 }
 
@@ -46,7 +46,7 @@
   flex: 1;
   max-width: 300px;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color, #ddd);
   border-radius: 6px;
   font-size: 1rem;
   background: white;
@@ -98,11 +98,11 @@
 .entity-info h3 {
   margin: 0 0 0.25rem 0;
   font-size: 1.25rem;
-  color: #333;
+  color: var(--text-primary, #333);
 }
 
 .entity-type {
-  color: #666;
+  color: var(--text-secondary, #666);
   font-size: 0.9rem;
   text-transform: capitalize;
 }
@@ -121,7 +121,7 @@
 }
 
 .entity-data {
-  color: #555;
+  color: var(--text-secondary, #555);
   font-size: 0.95rem;
   margin-bottom: 0.5rem;
   line-height: 1.4;
@@ -148,7 +148,7 @@
 }
 
 .btn-danger {
-  background-color: #dc3545;
+  background-color: var(--error-color, #dc3545);
   color: white;
   border: none;
   border-radius: 6px;
@@ -179,7 +179,7 @@
 }
 
 .btn-secondary {
-  background-color: #6c757d;
+  background-color: var(--text-secondary, #6c757d);
   color: white;
   border: none;
   border-radius: 6px;
@@ -200,7 +200,7 @@
 
 .workflows-count {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 /* Loading State */
@@ -235,7 +235,7 @@
 
 .empty-state h3 {
   font-size: 1.5rem;
-  color: #666;
+  color: var(--text-secondary, #666);
   margin-bottom: 1rem;
 }
 
@@ -303,7 +303,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #666;
+  color: var(--text-secondary, #666);
   padding: 0;
   width: 32px;
   height: 32px;
@@ -324,7 +324,7 @@
 }
 
 .modal-subtitle {
-  color: #666;
+  color: var(--text-secondary, #666);
   margin-bottom: 1.5rem;
 }
 
@@ -339,7 +339,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color, #ddd);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
@@ -347,18 +347,18 @@
 
 .workflow-option:hover {
   border-color: var(--primary-color, #2c5aa0);
-  background: #f8f9fa;
+  background: var(--background-paper, #f8f9fa);
   transform: translateX(4px);
 }
 
 .workflow-info h4 {
   margin: 0 0 0.5rem 0;
-  color: #333;
+  color: var(--text-primary, #333);
 }
 
 .workflow-info p {
   margin: 0 0 0.5rem 0;
-  color: #666;
+  color: var(--text-secondary, #666);
   font-size: 0.9rem;
 }
 
@@ -412,12 +412,12 @@
   gap: 1rem;
   padding: 1.5rem;
   border-top: 1px solid #eee;
-  background-color: #f8f9fa;
+  background-color: var(--background-paper, #f8f9fa);
 }
 
 /* Delete Dialog Specific Styles */
 .entity-to-delete {
-  background-color: #f8f9fa;
+  background-color: var(--background-paper, #f8f9fa);
   padding: 1rem;
   border-radius: 6px;
   margin: 1rem 0;
@@ -425,17 +425,17 @@
 }
 
 .entity-to-delete strong {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   font-size: 1.1rem;
 }
 
 .entity-to-delete small {
-  color: #666;
+  color: var(--text-secondary, #666);
   font-style: italic;
 }
 
 .warning-text {
-  color: #dc3545;
+  color: var(--error-color, #dc3545);
   font-weight: 500;
   background-color: #fff5f5;
   padding: 0.75rem;

@@ -185,8 +185,7 @@
     "sortByDuration": "Duración",
     "sortByPopularity": "Popularidad",
     "noDocumentWorkflows": "No hay servicios de documentos disponibles",
-    "noProcessWorkflows": "No hay trámites disponibles",
-    "documentsRequired": "Documentos Requeridos"
+    "noProcessWorkflows": "No hay trámites disponibles"
   },
   "applications": {
     "title": "Mis Solicitudes",
@@ -281,12 +280,12 @@
     "searchPlaceholder": "Buscar documentos...",
     "availableDocuments": "Documentos Disponibles",
     "processDocument": "Procesar Documento",
-    "aboutTitle": "Sobre el Procesamiento de Documentos",
-    "aboutDescription": "Nuestro sistema permite procesar y validar documentos oficiales de manera eficiente. Los documentos son verificados automáticamente y pueden requerir revisión adicional.",
-    "tipsTitle": "Consejos para el Procesamiento",
-    "tip1": "Asegúrese de que los documentos estén en formato PDF o imagen",
-    "tip2": "Verifique que todos los datos sean legibles y estén completos",
-    "tip3": "Mantenga copias digitales de todos los documentos enviados",
+    "aboutTitle": "Acerca de los Documentos",
+    "aboutDescription": "Los procesos de documentos le permiten cargar y verificar documentos oficiales necesarios para sus trámites. Una vez procesados, estos documentos pueden ser utilizados en otros procesos del sistema.",
+    "tipsTitle": "Consejos importantes",
+    "tip1": "Asegúrese de que sus documentos estén vigentes y sean legibles",
+    "tip2": "Los documentos procesados pueden tardar de 1 a 3 días hábiles en ser verificados",
+    "tip3": "Una vez verificados, sus documentos estarán disponibles para otros trámites",
     "upload": "Cargar Documento",
     "download": "Descargar",
     "view": "Ver",
@@ -311,16 +310,7 @@
     "maxSize": "Tamaño máximo: 10MB",
     "supportedTypes": "Tipos soportados: PDF, JPG, PNG",
     "documentUploaded": "Documento cargado exitosamente",
-    "documentDeleted": "Documento eliminado exitosamente",
-    "searchPlaceholder": "Buscar documentos...",
-    "availableDocuments": "Documentos Disponibles",
-    "processDocument": "Procesar Documento",
-    "aboutTitle": "Acerca de los Documentos",
-    "aboutDescription": "Los procesos de documentos le permiten cargar y verificar documentos oficiales necesarios para sus trámites. Una vez procesados, estos documentos pueden ser utilizados en otros procesos del sistema.",
-    "tipsTitle": "Consejos importantes",
-    "tip1": "Asegúrese de que sus documentos estén vigentes y sean legibles",
-    "tip2": "Los documentos procesados pueden tardar de 1 a 3 días hábiles en ser verificados",
-    "tip3": "Una vez verificados, sus documentos estarán disponibles para otros trámites"
+    "documentDeleted": "Documento eliminado exitosamente"
   },
   "footer": {
     "about": "Acerca del Sistema",
@@ -330,7 +320,13 @@
     "contact": "Contáctanos",
     "accessibility": "Accesibilidad",
     "languages": "Idiomas",
-    "copyright": "© 2025 CONAPESCA. Todos los derechos reservados."
+    "copyright": "© 2025 CONAPESCA. Todos los derechos reservados.",
+    "quickLinks": "Accesos Rápidos",
+    "contactTitle": "Contacto y Soporte",
+    "phone": "Teléfono",
+    "email": "Correo electrónico",
+    "hours": "Horario de atención",
+    "allRightsReserved": "Todos los derechos reservados."
   },
   "errors": {
     "genericError": "Ocurrió un error. Inténtelo nuevamente.",
@@ -356,7 +352,7 @@
   },
   "categories": {
     "rpp": "RPP",
-    "catastro": "Catastro", 
+    "catastro": "Catastro",
     "vinculado": "Vinculado",
     "rpp_inscripciones": "Inscripciones",
     "rpp_gravamenes": "Gravámenes",
@@ -405,17 +401,16 @@
     "start_workflow": "Iniciar Proceso",
     "recent_workflows": "Procesos Recientes",
     "workflow": "Proceso",
-    "status": "Estado",
-    "started": "Iniciado",
-    "completed": "Completado",
-    "actions": "Acciones",
-    "view_progress": "Ver Progreso",
     "status": {
       "active": "Activo",
       "inactive": "Inactivo",
       "pending": "Pendiente",
       "suspended": "Suspendido"
     },
+    "started": "Iniciado",
+    "completed": "Completado",
+    "actions": "Acciones",
+    "view_progress": "Ver Progreso",
     "documents": "Documentos",
     "document_viewer": "Visor de Documentos",
     "no_documents": "No hay documentos asociados a esta entidad",

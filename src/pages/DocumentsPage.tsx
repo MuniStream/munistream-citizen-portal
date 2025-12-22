@@ -7,7 +7,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { workflowService } from '../services/workflowService';
-import { Header } from '../components/Header';
+import { MainLayout } from '../components/Layout/MainLayout';
 import { WorkflowCard } from '../components/WorkflowCard';
 import type { WorkflowDefinition } from '../types/workflow';
 
@@ -55,8 +55,8 @@ export const DocumentsPage: React.FC = () => {
   }
 
   return (
-    <div className="documents-page">
-      <Header variant="catalog" />
+    <MainLayout headerProps={{ variant: 'catalog' }}>
+      <div className="documents-page">
 
       <main className="catalog-main">
         <div className="container">
@@ -152,6 +152,7 @@ export const DocumentsPage: React.FC = () => {
           </section>
         </div>
       </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 };

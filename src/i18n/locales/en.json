@@ -170,7 +170,7 @@
     "applyNow": "Apply Now",
     "description": "Description",
     "process": "Process",
-    "documentsRequired": "Documents Required",
+    "documentsRequired": "Required Documents",
     "applicationFee": "Application Fee",
     "processingTime": "Processing Time",
     "eligibility": "Eligibility",
@@ -185,8 +185,7 @@
     "sortByDuration": "Duration",
     "sortByPopularity": "Popularity",
     "noDocumentWorkflows": "No document services available",
-    "noProcessWorkflows": "No processes available",
-    "documentsRequired": "Required Documents"
+    "noProcessWorkflows": "No processes available"
   },
   "applications": {
     "title": "My Applications",
@@ -310,7 +309,13 @@
     "contact": "Contact Us",
     "accessibility": "Accessibility",
     "languages": "Languages",
-    "copyright": "© 2025 All rights reserved."
+    "copyright": "© 2025 All rights reserved.",
+    "quickLinks": "Quick Links",
+    "contactTitle": "Contact & Support",
+    "phone": "Phone",
+    "email": "Email",
+    "hours": "Office hours",
+    "allRightsReserved": "All rights reserved."
   },
   "errors": {
     "genericError": "An error occurred. Please try again.",
@@ -336,7 +341,7 @@
   },
   "categories": {
     "rpp": "PPR",
-    "catastro": "Cadastre", 
+    "catastro": "Cadastre",
     "vinculado": "Linked",
     "rpp_inscripciones": "Registrations",
     "rpp_gravamenes": "Liens",
@@ -385,17 +390,16 @@
     "start_workflow": "Start Process",
     "recent_workflows": "Recent Processes",
     "workflow": "Process",
-    "status": "Status",
-    "started": "Started",
-    "completed": "Completed",
-    "actions": "Actions",
-    "view_progress": "View Progress",
     "status": {
       "active": "Active",
       "inactive": "Inactive",
       "pending": "Pending",
       "suspended": "Suspended"
     },
+    "started": "Started",
+    "completed": "Completed",
+    "actions": "Actions",
+    "view_progress": "View Progress",
     "documents": "Documents",
     "document_viewer": "Document Viewer",
     "no_documents": "No documents associated with this entity",

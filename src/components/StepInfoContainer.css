@@ -9,7 +9,7 @@
 }
 
 .step-info-container .MuiTypography-h6 {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   font-weight: 600;
 }
 
@@ -18,15 +18,15 @@
 }
 
 .step-info-container .MuiButton-outlined {
-  border-color: #2c5aa0;
-  color: #2c5aa0;
+  border-color: var(--primary-color, #2c5aa0);
+  color: var(--primary-color, #2c5aa0);
   font-weight: 500;
   text-transform: none;
 }
 
 .step-info-container .MuiButton-outlined:hover {
   background-color: rgba(44, 90, 160, 0.04);
-  border-color: #1e3d6f;
+  border-color: var(--primary-dark, #1e3d6f);
 }
 
 .step-info-container .MuiListItem-root {
@@ -63,7 +63,7 @@
 }
 
 .step-info-container.empty .MuiTypography-h6 {
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 /* Entity Requirements Styles */
@@ -77,13 +77,13 @@
 .requirement-item {
   padding: 16px;
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color, #e0e0e0);
   background: #fafafa;
 }
 
 .requirement-item.entity-requirement {
   background: #f8f9ff;
-  border-color: #e0e0e0;
+  border-color: var(--border-color, #e0e0e0);
 }
 
 .requirement-header {
@@ -91,13 +91,13 @@
 }
 
 .requirement-title {
-  color: #2c5aa0;
+  color: var(--primary-color, #2c5aa0);
   font-size: 14px;
   font-weight: 600;
 }
 
 .requirement-description {
-  color: #555;
+  color: var(--text-secondary, #555);
   font-size: 13px;
   line-height: 1.4;
   margin-bottom: 12px;
@@ -109,7 +109,7 @@
 }
 
 .btn-get-document {
-  background: #2c5aa0;
+  background: var(--primary-color, #2c5aa0);
   color: white;
   padding: 8px 16px;
   border-radius: 6px;
@@ -129,7 +129,7 @@
 }
 
 .requirement-text {
-  color: #333;
+  color: var(--text-primary, #333);
   font-size: 13px;
 }
 

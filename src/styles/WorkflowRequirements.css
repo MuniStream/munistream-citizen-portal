@@ -2,7 +2,7 @@
 
 .workflow-requirements {
   padding: 1.5rem;
-  background: #fff;
+  background: var(--background-default, #fff);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
@@ -20,7 +20,7 @@
 .requirements-header h3 {
   margin: 0;
   font-size: 1.5rem;
-  color: #333;
+  color: var(--text-primary, #333);
 }
 
 .status-badge {
@@ -44,15 +44,15 @@
 
 .requirements-summary {
   padding: 1rem;
-  background-color: #f8f9fa;
-  border-left: 4px solid #ffc107;
+  background-color: var(--background-paper, #f8f9fa);
+  border-left: 4px solid var(--warning-color, #ffc107);
   margin-bottom: 1.5rem;
   border-radius: 4px;
 }
 
 .requirements-summary p {
   margin: 0;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 /* Operator Section */
@@ -68,7 +68,7 @@
 }
 
 .operator-message {
-  color: #6c757d;
+  color: var(--text-secondary, #6c757d);
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }
@@ -83,7 +83,7 @@
 /* Requirement Item */
 .requirement-item {
   padding: 1rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color, #e0e0e0);
   border-radius: 6px;
   transition: all 0.3s ease;
 }
@@ -94,17 +94,17 @@
 
 .requirement-item.fulfilled {
   background-color: #f8fff9;
-  border-color: #28a745;
+  border-color: var(--success-color, #28a745);
 }
 
 .requirement-item.missing.critical {
   background-color: #fff5f5;
-  border-color: #dc3545;
+  border-color: var(--error-color, #dc3545);
 }
 
 .requirement-item.missing:not(.critical) {
   background-color: #fffef5;
-  border-color: #ffc107;
+  border-color: var(--warning-color, #ffc107);
 }
 
 .requirement-header {
@@ -128,12 +128,12 @@
 }
 
 .status-icon.success {
-  background-color: #28a745;
+  background-color: var(--success-color, #28a745);
   color: white;
 }
 
 .status-icon.warning {
-  background-color: #ffc107;
+  background-color: var(--warning-color, #ffc107);
   color: white;
 }
 
@@ -144,23 +144,23 @@
 .requirement-name {
   margin: 0 0 0.5rem 0;
   font-size: 1rem;
-  color: #333;
+  color: var(--text-primary, #333);
   font-weight: 600;
 }
 
 .requirement-description {
   margin: 0 0 0.5rem 0;
-  color: #666;
+  color: var(--text-secondary, #666);
   font-size: 0.9rem;
 }
 
 .requirement-message {
   margin: 0.5rem 0;
   padding: 0.5rem;
-  background-color: #f0f0f0;
+  background-color: var(--background-paper, #f0f0f0);
   border-radius: 4px;
   font-size: 0.85rem;
-  color: #555;
+  color: var(--text-secondary, #555);
 }
 
 /* Entity Details */
@@ -182,7 +182,7 @@
 .btn-link {
   background: none;
   border: none;
-  color: #007bff;
+  color: var(--primary-color, #007bff);
   cursor: pointer;
   text-decoration: underline;
   font-size: 0.9rem;
@@ -190,21 +190,21 @@
 }
 
 .btn-link:hover {
-  color: #0056b3;
+  color: var(--primary-dark, #0056b3);
 }
 
 /* Available Resources */
 .available-resources {
   margin-top: 1rem;
   padding: 1rem;
-  background-color: #f8f9fa;
+  background-color: var(--background-paper, #f8f9fa);
   border-radius: 4px;
 }
 
 .available-resources h6 {
   margin: 0 0 0.5rem 0;
   font-size: 0.9rem;
-  color: #495057;
+  color: var(--text-secondary, #495057);
 }
 
 .available-resources ul {
@@ -215,7 +215,7 @@
 
 .available-resources li {
   padding: 0.5rem 0;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
   display: flex;
   justify-content: space-between;
 }
@@ -226,11 +226,11 @@
 
 .resource-name {
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary, #333);
 }
 
 .resource-type {
-  color: #6c757d;
+  color: var(--text-secondary, #6c757d);
   font-size: 0.85rem;
 }
 
@@ -248,7 +248,7 @@
 }
 
 .btn-secondary {
-  background-color: #6c757d;
+  background-color: var(--text-secondary, #6c757d);
   color: white;
   border: 1px solid #6c757d;
 }
@@ -259,7 +259,7 @@
 }
 
 .action-text {
-  color: #6c757d;
+  color: var(--text-secondary, #6c757d);
   font-style: italic;
 }
 
@@ -272,7 +272,7 @@
 }
 
 .btn-primary {
-  background-color: #007bff;
+  background-color: var(--primary-color, #007bff);
   color: white;
   padding: 0.75rem 2rem;
   border-radius: 4px;
@@ -280,12 +280,12 @@
   display: inline-block;
   font-weight: 600;
   transition: all 0.3s ease;
-  border: 1px solid #007bff;
+  border: 1px solid var(--primary-color, #007bff);
 }
 
 .btn-primary:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
+  background-color: var(--primary-dark, #0056b3);
+  border-color: var(--primary-dark, #0056b3);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
@@ -300,7 +300,7 @@
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #007bff;
+  border-top: 4px solid var(--primary-color, #007bff);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;

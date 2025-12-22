@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowDefinition } from '../services/workflowService';
-import { Header } from '../components/Header';
+import { MainLayout } from '../components/Layout/MainLayout';
 
 export const WorkflowStartPage: React.FC = () => {
   const { workflowId } = useParams<{ workflowId: string }>();
@@ -77,13 +77,8 @@ export const WorkflowStartPage: React.FC = () => {
   }
 
   return (
-    <div className="workflow-detail">
-      <Header
-        variant="detail"
-        showBackLink={true}
-        backLinkTo="/services"
-        backLinkText={t('workflows.title')}
-      />
+    <MainLayout headerProps={{ variant: 'detail', showBackLink: true, backLinkTo: '/services', backLinkText: t('workflows.title') }}>
+      <div className="workflow-detail">
 
       <main className="detail-main">
         <div className="container">
@@ -263,6 +258,7 @@ export const WorkflowStartPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </MainLayout>
   );
 };

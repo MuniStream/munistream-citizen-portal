@@ -26,7 +26,7 @@ import {
   Business,
   Refresh
 } from '@mui/icons-material';
-import { Header } from '../components/Header';
+import { MainLayout } from '../components/Layout/MainLayout';
 import { verificationService, type VerificationResult } from '../services/verificationService';
 
 export const VerificationPage: React.FC = () => {
@@ -126,9 +126,7 @@ export const VerificationPage: React.FC = () => {
   );
 
   return (
-    <Box>
-      <Header />
-
+    <MainLayout hideFooter>
       <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
         <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Security />
@@ -300,6 +298,6 @@ export const VerificationPage: React.FC = () => {
           </Typography>
         </Paper>
       </Box>
-    </Box>
+    </MainLayout>
   );
 };

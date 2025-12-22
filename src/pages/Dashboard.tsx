@@ -1,13 +1,13 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Header } from '../components/Header';
+import { MainLayout } from '../components/Layout/MainLayout';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className="dashboard">
-      <Header variant="default" />
+    <MainLayout>
+      <div className="dashboard">
 
       <main className="dashboard-main">
         <div className="container">
@@ -56,6 +56,7 @@ export const Dashboard: React.FC = () => {
           </section>
         </div>
       </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 };

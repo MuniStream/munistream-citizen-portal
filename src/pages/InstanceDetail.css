@@ -2,7 +2,7 @@
 
 .instance-detail-container {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--background-paper, #f5f7fa);
 }
 
 .instance-detail-main {
@@ -24,8 +24,8 @@
 .spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid #e0e0e0;
-  border-top: 4px solid #1976d2;
+  border: 4px solid var(--border-color, #e0e0e0);
+  border-top: 4px solid var(--primary-color, #1976d2);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -37,7 +37,7 @@
 }
 
 .error-state h2 {
-  color: #dc3545;
+  color: var(--error-color, #dc3545);
   margin-bottom: 1rem;
 }
 
@@ -52,14 +52,14 @@
 .instance-header {
   background: white;
   padding: 2.5rem 0;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
 }
 
 .instance-id {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   background: #e3f2fd;
-  color: #1976d2;
+  color: var(--primary-color, #1976d2);
   border-radius: 4px;
   font-size: 0.875rem;
   font-weight: 500;
@@ -69,14 +69,14 @@
 
 .instance-title {
   font-size: 2rem;
-  color: #212529;
+  color: var(--text-primary, #212529);
   margin: 0 0 1rem 0;
   font-weight: 600;
 }
 
 .instance-description {
   font-size: 1.125rem;
-  color: #6c757d;
+  color: var(--text-secondary, #6c757d);
   margin: 0 0 1.5rem 0;
   line-height: 1.6;
 }
@@ -92,7 +92,7 @@
 .progress-bar {
   width: 100%;
   height: 24px;
-  background: #e1e5e9;
+  background: var(--border-color, #e1e5e9);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 0.5rem;
@@ -108,7 +108,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 .instance-meta {
@@ -122,12 +122,12 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #495057;
+  color: var(--text-secondary, #495057);
   font-size: 0.95rem;
 }
 
 .meta-item i {
-  color: #6c757d;
+  color: var(--text-secondary, #6c757d);
 }
 
 .instance-actions {
@@ -137,7 +137,7 @@
 
 .btn-refresh {
   padding: 0.75rem 1.5rem;
-  background: #1976d2;
+  background: var(--primary-color, #1976d2);
   color: white;
   border: none;
   border-radius: 4px;
@@ -147,17 +147,17 @@
 }
 
 .btn-refresh:hover:not(:disabled) {
-  background: #1565c0;
+  background: var(--primary-dark, #1565c0);
 }
 
 .btn-refresh:disabled {
-  background: #ccc;
+  background: var(--border-color, #ccc);
   cursor: not-allowed;
 }
 
 .btn-primary {
   padding: 0.75rem 1.5rem;
-  background: #1976d2;
+  background: var(--primary-color, #1976d2);
   color: white;
   border: none;
   border-radius: 4px;
@@ -169,7 +169,7 @@
 }
 
 .btn-primary:hover {
-  background: #1565c0;
+  background: var(--primary-dark, #1565c0);
 }
 
 /* Active Form Section */
@@ -187,7 +187,7 @@
 
 .form-card.action-required {
   background: #fff3cd;
-  border: 2px solid #ffc107;
+  border: 2px solid var(--warning-color, #ffc107);
 }
 
 .form-card h2 {
@@ -203,14 +203,14 @@
   background: white;
   border-radius: 8px;
   margin-bottom: 2rem;
-  border: 1px solid #ffc107;
+  border: 1px solid var(--warning-color, #ffc107);
 }
 
 .requirement-icon {
   flex-shrink: 0;
   width: 32px;
   height: 32px;
-  background: #ffc107;
+  background: var(--warning-color, #ffc107);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -231,7 +231,7 @@
 
 .requirement-content p {
   margin: 0;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 .success-message {
@@ -253,14 +253,14 @@
 
 /* Steps Timeline Section */
 .steps-timeline-section {
-  background: #f8f9fa;
+  background: var(--background-paper, #f8f9fa);
   padding: 3rem 0;
 }
 
 .steps-timeline-section h2 {
   font-size: 1.75rem;
   margin: 0 0 2.5rem 0;
-  color: #212529;
+  color: var(--text-primary, #212529);
 }
 
 .timeline {
@@ -302,7 +302,7 @@
   left: 19px;
   width: 2px;
   height: calc(100% + 2.5rem);
-  background: #dee2e6;
+  background: var(--border-color, #dee2e6);
   z-index: 1;
 }
 
@@ -320,7 +320,7 @@
 
 .step-header h3 {
   margin: 0;
-  color: #212529;
+  color: var(--text-primary, #212529);
   font-size: 1.125rem;
   font-weight: 600;
 }
@@ -332,7 +332,7 @@
 
 .step-description {
   margin: 0 0 1rem 0;
-  color: #6c757d;
+  color: var(--text-secondary, #6c757d);
   line-height: 1.6;
 }
 
@@ -347,11 +347,11 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 .step-time i {
-  color: #999;
+  color: var(--text-disabled, #999);
 }
 
 /* Current Status Section */
@@ -362,7 +362,7 @@
 
 .status-card {
   background: #e8f5e9;
-  border: 2px solid #4caf50;
+  border: 2px solid var(--success-color, #4caf50);
   border-radius: 12px;
   padding: 2rem;
 }
@@ -370,7 +370,7 @@
 .status-card h2 {
   font-size: 1.5rem;
   margin: 0 0 1.5rem 0;
-  color: #2e7d32;
+  color: var(--success-color, #2e7d32);
 }
 
 .current-step {
@@ -383,7 +383,7 @@
   flex-shrink: 0;
   width: 48px;
   height: 48px;
-  background: #4caf50;
+  background: var(--success-color, #4caf50);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -397,14 +397,14 @@
 }
 
 .step-info strong {
-  color: #2e7d32;
+  color: var(--success-color, #2e7d32);
   display: block;
   margin-bottom: 0.5rem;
 }
 
 .step-info p {
   margin: 0;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 /* Icons */
@@ -482,7 +482,7 @@
 }
 
 .form-card .form-header h3 {
-  color: #856404;
+  color: var(--warning-color, #856404);
 }
 
 .form-card .form-content {

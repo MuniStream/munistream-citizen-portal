@@ -29,7 +29,7 @@ import {
   Assignment as WorkflowIcon
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
-import { Header } from '../components/Header';
+import { MainLayout } from '../components/Layout/MainLayout';
 import { workflowService } from '../services/workflowService';
 
 interface WorkflowInstance {
@@ -133,20 +133,18 @@ export const MyInstancesPage: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <div>
-        <Header variant="default" />
+      <MainLayout>
         <Container maxWidth="lg" sx={{ mt: 4 }}>
           <Alert severity="warning">
             {t('auth.loginRequired')}
           </Alert>
         </Container>
-      </div>
+      </MainLayout>
     );
   }
 
   return (
-    <div>
-      <Header variant="default" />
+    <MainLayout>
 
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         {/* Page Header */}
@@ -441,6 +439,6 @@ export const MyInstancesPage: React.FC = () => {
           </Card>
         )}
       </Container>
-    </div>
+    </MainLayout>
   );
 };

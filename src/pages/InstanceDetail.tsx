@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowInstanceProgress } from '../services/workflowService';
-import { Header } from '../components/Header';
+import { MainLayout } from '../components/Layout/MainLayout';
 import { DataCollectionForm } from '../components/DataCollectionForm';
 import { CatalogSelector } from '../components/CatalogSelector';
 import { SelfieCapture, IDCapture } from '../components/capture';
@@ -277,13 +277,8 @@ export const InstanceDetail: React.FC = () => {
   }
 
   return (
-    <div className="instance-detail-container">
-      <Header
-        variant="detail"
-        showBackLink={true}
-        backLinkTo="/applications"
-        backLinkText={t('applications.title')}
-      />
+    <MainLayout headerProps={{ variant: 'detail', showBackLink: true, backLinkTo: '/applications', backLinkText: t('applications.title') }}>
+      <div className="instance-detail-container">
 
       <main className="instance-detail-main">
         {/* Instance Header */}
@@ -622,8 +617,9 @@ export const InstanceDetail: React.FC = () => {
             </div>
           </section>
         )}
-      </main>
-    </div>
+            </main>
+      </div>
+    </MainLayout>
   );
 };
 

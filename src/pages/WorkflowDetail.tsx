@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { workflowService } from '../services/workflowService';
 import { useAuth } from '../contexts/AuthContext';
 import keycloakService from '../services/keycloak';
-import { Header } from '../components/Header';
+import { MainLayout } from '../components/Layout/MainLayout';
 import type { WorkflowDefinition, FAQ } from '../types/workflow';
 import './WorkflowDetail.css';
 
@@ -183,13 +183,8 @@ export const WorkflowDetail: React.FC = () => {
   const optionalMissing = allRequirements.filter(req => !req.critical);
 
   return (
-    <div className="workflow-detail-container">
-      <Header
-        variant="detail"
-        showBackLink={true}
-        backLinkTo="/services"
-        backLinkText={t('workflows.title')}
-      />
+    <MainLayout headerProps={{ variant: 'detail', showBackLink: true, backLinkTo: '/services', backLinkText: t('workflows.title') }}>
+      <div className="workflow-detail-container">
 
       <main className="workflow-detail-main">
         {/* Header Section - Full Width */}
@@ -367,6 +362,7 @@ export const WorkflowDetail: React.FC = () => {
         </section>
       </main>
     </div>
+    </MainLayout>
   );
 };
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { Header } from '../components/Header';
+import { MainLayout } from '../components/Layout/MainLayout';
 // import { EntityFieldVisualizer } from '../components/EntityVisualizer/EntityFieldVisualizer';
 import { EntityViewer } from '../components/signature/EntityViewer';
 import { authService } from '../services/authService';
@@ -284,13 +284,8 @@ export const EntityDetailPage: React.FC = () => {
   const { entity, available_workflows, recent_instances } = entityDetail;
 
   return (
-    <div className="entity-detail-page">
-      <Header
-        variant="detail"
-        showBackLink={true}
-        backLinkTo="/my-entities"
-        backLinkText={t('my_entities.title')}
-      />
+    <MainLayout headerProps={{ variant: 'detail', showBackLink: true, backLinkTo: '/my-entities', backLinkText: t('my_entities.title') }}>
+      <div className="entity-detail-page">
 
       <main className="detail-main">
         <div className="container">
@@ -521,6 +516,7 @@ export const EntityDetailPage: React.FC = () => {
           )}
         </div>
       </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 };
