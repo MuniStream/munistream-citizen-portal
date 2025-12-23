@@ -5,6 +5,22 @@
 
 echo "Configuring application with runtime environment variables..."
 
+# Load theme if script exists and plugins are mounted
+if [ -f "/app/load-theme.sh" ] && [ -d "/app/plugins" ]; then
+    echo "🎨 Loading theme for tenant: ${VITE_TENANT_ID:-${VITE_TENANT}}"
+    cd /app && ./load-theme.sh
+
+    # Copy themes to nginx html directory if they exist
+    if [ -d "/app/public/themes" ]; then
+        echo "📁 Copying themes to nginx html directory..."
+        mkdir -p /usr/share/nginx/html/themes
+        cp -r /app/public/themes/* /usr/share/nginx/html/themes/
+        echo "✅ Themes copied successfully"
+    fi
+else
+    echo "ℹ️  No theme loading - script or plugins not found"
+fi
+
 # Function to replace placeholders in all JS files
 replace_env_vars() {
     # Find all JS files in the dist directory

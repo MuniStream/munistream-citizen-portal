@@ -41,11 +41,19 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine AS production
 
+# Install Node.js and js-yaml for theme loading
+RUN apk add --no-cache nodejs npm && \
+    npm install -g js-yaml
+
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built assets from build stage
 COPY --from=build /app/dist /usr/share/nginx/html
+
+# Copy theme loading script and setup
+COPY load-theme.sh /app/load-theme.sh
+RUN chmod +x /app/load-theme.sh
 
 # Copy and setup entrypoint script
 COPY docker-entrypoint.sh /docker-entrypoint.sh

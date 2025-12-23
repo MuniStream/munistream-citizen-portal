@@ -148,9 +148,8 @@ class KeycloakService {
         pkceMethod: 'S256',
         checkLoginIframe: false, // Disable iframe check to avoid X-Frame-Options issues
         enableLogging: true,
-        // Changed from 'check-sso' to 'login-required' to avoid iframe issues
-        // We'll handle auth state ourselves with stored tokens
-        onLoad: isCallback ? 'check-sso' : undefined,
+        // Always check SSO to detect existing sessions in Keycloak
+        onLoad: 'check-sso',
       };
 
       // Handle different scenarios
@@ -298,7 +297,7 @@ class KeycloakService {
     if (this.keycloak) {
       console.log('[Keycloak.login] Redirecting to Keycloak login');
       await this.keycloak.login({
-        redirectUri: window.location.origin + window.location.pathname,
+        redirectUri: window.location.origin + '/',
         locale: 'es', // Default to Spanish for citizens
       });
     }
@@ -314,7 +313,7 @@ class KeycloakService {
 
     if (this.keycloak) {
       await this.keycloak.register({
-        redirectUri: window.location.origin,
+        redirectUri: window.location.origin + '/',
         locale: 'es', // Default to Spanish for citizens
       });
     }
@@ -328,7 +327,7 @@ class KeycloakService {
 
     if (this.keycloak?.authenticated) {
       await this.keycloak.logout({
-        redirectUri: window.location.origin,
+        redirectUri: window.location.origin + '/',
       });
     }
   }
