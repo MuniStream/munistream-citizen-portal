@@ -291,6 +291,14 @@ export const WorkflowDetailContent: React.FC = () => {
                       Necesitas <button onClick={() => keycloakService.login()} className="btn-link">iniciar sesión</button> para comenzar
                     </p>
                   )}
+
+                  {criticalMissing.filter(req => req.action_needed && req.action_url).map(req => (
+                    <p key={req.id} className="auth-note">
+                      <button onClick={() => navigate(req.action_url!)} className="btn-link">
+                        {req.action_needed}
+                      </button>{' '}para continuar con este trámite
+                    </p>
+                  ))}
                 </div>
               </div>
             </div>
@@ -387,7 +395,7 @@ const RequirementItem: React.FC<{ requirement: RequirementDetail }> = ({ require
         {isAuthenticated && requirement.message && (
           <span className="requirement-message">{requirement.message}</span>
         )}
-        {isAuthenticated && requirement.action_needed && requirement.action_url && (
+        {requirement.action_needed && requirement.action_url && (
           <button
             onClick={() => navigate(requirement.action_url!)}
             className="btn-action"
