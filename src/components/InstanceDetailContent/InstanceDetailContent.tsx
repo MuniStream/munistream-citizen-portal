@@ -6,6 +6,7 @@ import { DataCollectionForm } from '../DataCollectionForm';
 import { CatalogSelector } from '../CatalogSelector';
 import { SelfieCapture, IDCapture } from '../capture';
 import { SigningForm } from '../signature/SigningForm';
+import { AssertionReview } from '../AssertionReview';
 import '../../pages/InstanceDetail.css';
 
 export const InstanceDetailContent: React.FC = () => {
@@ -69,11 +70,12 @@ export const InstanceDetailContent: React.FC = () => {
     setError(null);
 
     try {
-      const waitingFor = (instance.input_form as any)?.waiting_for;
+      const waitingFor = instance.waiting_for || (instance.input_form as any)?.waiting_for;
       const hasEntityFields = (instance.input_form as any)?.fields?.some((field: any) =>
         field.type === 'entity_select' || field.type === 'entity_multi_select'
       );
       const isEntitySelection = waitingFor === 'entity_selection' || hasEntityFields;
+      const isAssertionReview = waitingFor === 'assertion_review';
 
       console.log('Data submission debug:', {
         hasInputForm: !!instance.input_form,
@@ -84,7 +86,19 @@ export const InstanceDetailContent: React.FC = () => {
         data
       });
 
-      if (isEntitySelection) {
+      if (isAssertionReview) {
+        const taskId = (instance.input_form as any)?.current_step_id || 'assertion_review';
+        const response = await workflowService.submitCitizenData(id, {
+          [`${taskId}_input`]: data
+        });
+        if (response.success) {
+          setSubmissionSuccess(response.message || 'Verificación enviada exitosamente');
+          setTimeout(() => {
+            fetchProgress();
+            setSubmissionSuccess(null);
+          }, 2000);
+        }
+      } else if (isEntitySelection) {
         const taskId = (instance.input_form as any)?.current_step_id || 'pick_required_documents';
         const selectionData = {
           [`${taskId}_selections`]: data
@@ -509,6 +523,33 @@ export const InstanceDetailContent: React.FC = () => {
                       loading={isSubmittingData}
                     />
                   </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Assertion Review Section */}
+        {instance.status === 'paused' &&
+         instance.waiting_for === 'assertion_review' && (
+          <section className="active-form-section">
+            <div className="container">
+              <div className="form-card action-required" style={{ borderColor: '#ff6d00' }}>
+                <h2>Verificación Requerida</h2>
+                {submissionSuccess ? (
+                  <div className="success-message">
+                    <h4>Verificación enviada exitosamente</h4>
+                    <p>{submissionSuccess}</p>
+                    <p>Su solicitud continuará procesándose.</p>
+                  </div>
+                ) : (
+                  <AssertionReview
+                    title={(instance.input_form as any)?.title || 'Verificación de Datos'}
+                    description={(instance.input_form as any)?.description || 'Revise y confirme los resultados de verificación'}
+                    assertions={(instance.input_form as any)?.assertions || []}
+                    onSubmit={handleDataSubmission}
+                    isSubmitting={isSubmittingData}
+                  />
                 )}
               </div>
             </div>

@@ -345,6 +345,7 @@ export interface StepProgress {
   completed_at?: string;
   requires_citizen_input?: boolean;
   input_form?: InputForm;
+  group?: string;
 }
 
 export interface InputForm {

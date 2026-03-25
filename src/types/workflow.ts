@@ -40,6 +40,7 @@ export interface WorkflowStep {
   type: 'action' | 'approval' | 'conditional' | 'integration';
   estimatedDuration?: string;
   requirements?: string[];
+  group?: string;
 }
 
 export interface WorkflowCategory {
