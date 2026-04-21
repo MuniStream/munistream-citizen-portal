@@ -20,7 +20,6 @@ import { useTheme } from '@mui/material/styles';
 import { useAuth } from '../../contexts/AuthContext';
 import { HeaderLogo } from './HeaderLogo';
 import { ProfileMenu } from './ProfileMenu';
-import { LanguageSwitcher } from '../LanguageSwitcher';
 import keycloakService from '../../services/keycloak';
 import { workflowService } from '../../services/workflowService';
 import type { WorkflowDefinition } from '../../types/workflow';
@@ -166,8 +165,6 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
 
           {/* Right Actions */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <LanguageSwitcher variant="compact" />
-
             {isAuthenticated ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ textAlign: 'right', mr: 1 }}>

@@ -14,7 +14,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { HeaderLogo } from './HeaderLogo';
 import { ProfileMenu } from './ProfileMenu';
 import { NavigationDrawer } from './NavigationDrawer';
-import { LanguageSwitcher } from '../LanguageSwitcher';
 import keycloakService from '../../services/keycloak';
 
 interface MobileHeaderProps {
@@ -75,9 +74,6 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
 
           {/* Actions - Right */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            {/* Language Switcher */}
-            <LanguageSwitcher variant="compact" />
-
             {/* Profile Menu or Login */}
             {isAuthenticated ? (
               <ProfileMenu isMobile={true} />

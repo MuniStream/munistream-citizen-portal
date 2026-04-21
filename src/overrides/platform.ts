@@ -5,7 +5,6 @@
 // Slot components
 export { SessionSlot } from '../components/HtmlInjector/slots/SessionSlot';
 export { NavSlot } from '../components/HtmlInjector/slots/NavSlot';
-export { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 // Auth
 export { useAuth } from '../contexts/AuthContext';
@@ -41,6 +40,7 @@ export { workflowService } from '../services/workflowService';
 export type { WorkflowDefinition, WorkflowInstanceProgress, StepProgress, InputForm, DataSubmissionResponse } from '../services/workflowService';
 export type { WorkflowStep } from '../types/workflow';
 export { default as keycloakService } from '../services/keycloak';
+export { profileService } from '../services/profileService';
 
 // Form components (for InstanceDetailContent override)
 export { DataCollectionForm } from '../components/DataCollectionForm';

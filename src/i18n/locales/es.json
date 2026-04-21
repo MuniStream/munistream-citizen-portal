@@ -185,7 +185,8 @@
     "sortByDuration": "Duración",
     "sortByPopularity": "Popularidad",
     "noDocumentWorkflows": "No hay servicios de documentos disponibles",
-    "noProcessWorkflows": "No hay trámites disponibles"
+    "noProcessWorkflows": "No hay trámites disponibles",
+    "puente_subtitle": "Portal de servicios y trámites digitales"
   },
   "applications": {
     "title": "Mis Solicitudes",

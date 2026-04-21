@@ -11,6 +11,8 @@ import { MyEntitiesPage } from './pages/MyEntitiesPage';
 import { MyInstancesPage } from './pages/MyInstancesPage';
 import { EntityDetailPage } from './pages/EntityDetailPage';
 import { VerificationPage } from './pages/VerificationPage';
+import { NotificationPreferencesPage } from './pages/NotificationPreferencesPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import './App.css';
 
@@ -59,6 +61,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <EntityDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <NotificationPreferencesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
                 </ProtectedRoute>
               }
             />

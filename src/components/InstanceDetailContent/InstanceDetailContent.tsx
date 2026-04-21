@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowInstanceProgress } from '../../services/workflowService';
+import { profileService } from '../../services/profileService';
 import { DataCollectionForm } from '../DataCollectionForm';
 import { CatalogSelector } from '../CatalogSelector';
 import { SelfieCapture, IDCapture } from '../capture';
@@ -20,6 +21,14 @@ export const InstanceDetailContent: React.FC = () => {
   const [isSubmittingData, setIsSubmittingData] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState<string | null>(null);
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+  const [profileValues, setProfileValues] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    profileService
+      .getProfile()
+      .then((p) => setProfileValues((p.data as Record<string, any>) || {}))
+      .catch(() => setProfileValues({}));
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -366,6 +375,7 @@ export const InstanceDetailContent: React.FC = () => {
                     <DataCollectionForm
                       title={instance.input_form.title || 'Proporcione la Información Requerida'}
                       description={instance.input_form.description || 'Complete los siguientes campos para continuar con su trámite.'}
+                      initialValues={profileValues}
                       sections={(instance.input_form as any).sections}
                       fields={instance.input_form.fields?.map((field: any) => ({
                         id: field.name,

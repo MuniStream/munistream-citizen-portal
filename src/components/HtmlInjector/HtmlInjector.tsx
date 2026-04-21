@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { LanguageSwitcher } from '../LanguageSwitcher';
 import { SessionSlot } from './slots/SessionSlot';
 import { NavSlot } from './slots/NavSlot';
 
@@ -11,7 +10,6 @@ interface HtmlInjectorProps {
 const SLOT_COMPONENTS: Record<string, React.FC> = {
   'session': SessionSlot,
   'nav': NavSlot,
-  'lang-switcher': () => <LanguageSwitcher variant="compact" />,
 };
 
 interface Slot {

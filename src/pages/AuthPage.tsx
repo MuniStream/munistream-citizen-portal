@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import tenantConfig from '../config/tenant';
 
 export const AuthPage: React.FC = () => {
   const { t } = useTranslation();
@@ -40,7 +41,7 @@ export const AuthPage: React.FC = () => {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <h1 className="logo">{t('app.title')}</h1>
+          <h1 className="logo">{tenantConfig.getDisplayName()}</h1>
           <p className="tagline">{t('workflows.title')}</p>
         </div>
 
@@ -79,7 +80,7 @@ export const AuthPage: React.FC = () => {
         </div>
 
         <div className="auth-footer">
-          <p>&copy; 2025 {t('app.organization')} - {t('app.title')}</p>
+          <p>&copy; 2025 {tenantConfig.getOrganization()} - {tenantConfig.getDisplayName()}</p>
         </div>
       </div>
     </div>

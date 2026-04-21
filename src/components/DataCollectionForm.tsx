@@ -71,6 +71,7 @@ export interface DataCollectionFormProps {
   onCancel?: () => void;
   isSubmitting?: boolean;
   submitButtonText?: string;
+  initialValues?: Record<string, any>;
 }
 
 export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
@@ -81,9 +82,10 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
   onSubmit,
   onCancel,
   isSubmitting = false,
-  submitButtonText = 'Submit Information'
+  submitButtonText = 'Submit Information',
+  initialValues
 }) => {
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<Record<string, any>>(() => ({ ...(initialValues || {}) }));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>({});
   const [suggestions, setSuggestions] = useState<Record<string, any>>({});
