@@ -99,6 +99,18 @@ export const TrackingPage: React.FC = () => {
             setSubmissionSuccess(null);
           }, 2000);
         }
+      } else if (data._use_json) {
+        // Nested arrays with base64 files require JSON transport.
+        const { _use_json, ...jsonBody } = data;
+        const response = await workflowService.submitCitizenData(instanceId, jsonBody);
+
+        if (response.success) {
+          setSubmissionSuccess(response.message);
+          setTimeout(() => {
+            fetchProgress();
+            setSubmissionSuccess(null);
+          }, 2000);
+        }
       } else {
         // Handle regular form submission with files
         const formData = new FormData();
@@ -323,30 +335,58 @@ export const TrackingPage: React.FC = () => {
                     title={progress.input_form.title || t('workflow.provide_required_info_title')}
                     description={progress.input_form.description || t('workflow.provide_required_info_desc')}
                     sections={(progress.input_form as any).sections}
-                    fields={progress.input_form.fields?.map((field: any) => ({
-                      id: field.name,
-                      name: field.name,
-                      label: field.label || field.name.charAt(0).toUpperCase() + field.name.slice(1),
-                      type: field.type,
-                      required: field.required,
-                      placeholder: field.placeholder,
-                      options: field.options ? (
-                        // For entity_select/entity_multi_select, pass full EntityOption objects
-                        field.type === 'entity_select' || field.type === 'entity_multi_select'
-                          ? field.options  // Keep full EntityOption structure
-                          : (
-                            // For regular select fields, handle string/object arrays
-                            typeof field.options[0] === 'string'
-                              ? field.options
-                              : field.options.map((opt: any) => opt.value || opt)
-                          )
-                      ) : undefined,
-                      // Pass through entity-specific fields
-                      entity_type: field.entity_type,
-                      min_count: field.min_count,
-                      max_count: field.max_count,
-                      description: field.description
-                    }))}
+                    fields={progress.input_form.fields?.map((field: any) => {
+                      const mapItemField = (it: any): any => ({
+                        id: it.name,
+                        name: it.name,
+                        label: it.label || it.name,
+                        type: it.type,
+                        required: !!it.required,
+                        placeholder: it.placeholder,
+                        validation: it.validation,
+                        accept: it.accept,
+                        multiple: it.multiple,
+                        helpText: it.helperText || it.helpText,
+                        options: it.options,
+                        show_if: it.show_if
+                      });
+                      return {
+                        id: field.name,
+                        name: field.name,
+                        label: field.label || field.name.charAt(0).toUpperCase() + field.name.slice(1),
+                        type: field.type,
+                        required: field.required,
+                        placeholder: field.placeholder,
+                        validation: field.validation,
+                        helpText: field.helperText || field.helpText,
+                        accept: field.accept,
+                        multiple: field.multiple,
+                        options: field.options ? (
+                          // For entity_select/entity_multi_select, pass full EntityOption objects
+                          field.type === 'entity_select' || field.type === 'entity_multi_select'
+                            ? field.options  // Keep full EntityOption structure
+                            : (
+                              // For regular select fields, handle string/object arrays
+                              typeof field.options[0] === 'string'
+                                ? field.options
+                                : field.options.map((opt: any) => opt.value || opt)
+                            )
+                        ) : undefined,
+                        // Entity selection
+                        entity_type: field.entity_type,
+                        min_count: field.min_count,
+                        max_count: field.max_count,
+                        description: field.description,
+                        // Array (repeating sub-form)
+                        item_fields: Array.isArray(field.item_fields) ? field.item_fields.map(mapItemField) : undefined,
+                        min_items: field.min_items,
+                        max_items: field.max_items,
+                        item_label_template: field.item_label_template,
+                        add_button_label: field.add_button_label,
+                        sum_field: field.sum_field,
+                        sum_equals: field.sum_equals
+                      };
+                    })}
                     onSubmit={handleDataSubmission}
                     isSubmitting={isSubmittingData}
                     submitButtonText={t('common.submit_information')}
