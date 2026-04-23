@@ -478,5 +478,30 @@
     "officially_verified": "Verificado Oficialmente",
     "not_verified": "No Verificado",
     "help_text": "Este sistema permite verificar la autenticidad de documentos oficiales mediante códigos QR. Los documentos válidos muestran una marca de verificación verde y han pasado todas las validaciones de seguridad."
+  },
+  "preferences": {
+    "notifications": {
+      "title": "Preferencias de notificaciones",
+      "subtitle": "Elige cómo quieres enterarte del avance de tus trámites. Esta configuración no afecta comunicaciones legales obligatorias.",
+      "loadError": "No se pudieron cargar tus preferencias.",
+      "saveError": "No se pudieron guardar tus preferencias.",
+      "savedOk": "Preferencias actualizadas.",
+      "updatedAt": "Última actualización:",
+      "masterEmail": "Correo electrónico",
+      "masterWhatsapp": "WhatsApp",
+      "channels": {
+        "title": "Canales",
+        "subtitle": "Interruptores generales. Si apagas un canal aquí, no se enviará nada por ese medio."
+      },
+      "perNotification": {
+        "title": "Notificaciones",
+        "subtitle": "Activa o desactiva cada aviso por canal.",
+        "empty": "Aún no hay notificaciones configuradas para tu cuenta."
+      },
+      "channel": {
+        "email": "Email",
+        "whatsapp": "WhatsApp"
+      }
+    }
   }
 }

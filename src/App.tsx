@@ -65,7 +65,7 @@ function App() {
               }
             />
             <Route
-              path="/notifications"
+              path="/settings"
               element={
                 <ProtectedRoute>
                   <NotificationPreferencesPage />

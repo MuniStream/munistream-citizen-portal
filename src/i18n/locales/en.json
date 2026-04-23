@@ -466,5 +466,30 @@
     "officially_verified": "Officially Verified",
     "not_verified": "Not Verified",
     "help_text": "This system allows verifying the authenticity of official documents through QR codes. Valid documents show a green checkmark and have passed all security validations."
+  },
+  "preferences": {
+    "notifications": {
+      "title": "Notification preferences",
+      "subtitle": "Choose how you want to stay informed about the progress of your requests. This does not affect mandatory legal communications.",
+      "loadError": "We could not load your preferences.",
+      "saveError": "We could not save your preferences.",
+      "savedOk": "Preferences updated.",
+      "updatedAt": "Last updated:",
+      "masterEmail": "Email",
+      "masterWhatsapp": "WhatsApp",
+      "channels": {
+        "title": "Channels",
+        "subtitle": "Master switches. Turning a channel off here blocks every message sent through that channel."
+      },
+      "perNotification": {
+        "title": "Notifications",
+        "subtitle": "Toggle each notice on or off per channel.",
+        "empty": "No notifications are configured for your account yet."
+      },
+      "channel": {
+        "email": "Email",
+        "whatsapp": "WhatsApp"
+      }
+    }
   }
 }
