@@ -48,6 +48,21 @@ export { CatalogSelector } from '../components/CatalogSelector';
 export { SelfieCapture, IDCapture } from '../components/capture';
 export { SigningForm } from '../components/signature/SigningForm';
 export { ConfirmationReview } from '../components/ConfirmationReview';
+export { AssertionReview } from '../components/AssertionReview';
+
+// Active-form orchestration: tenants render one component instead of a switch
+// over every waiting_for case, and call the hook for submit/rewind logic.
+export { ActiveWorkflowForm } from '../components/ActiveWorkflowForm';
+export type {
+  ActiveFormKind,
+  ActiveFormCardSlot,
+  ActiveWorkflowFormProps,
+} from '../components/ActiveWorkflowForm';
+export { useWorkflowFormSubmission } from '../hooks/useWorkflowFormSubmission';
+export type {
+  UseWorkflowFormSubmissionOptions,
+  UseWorkflowFormSubmissionResult,
+} from '../hooks/useWorkflowFormSubmission';
 
 // Locale helpers (for tenant overrides that need to format/localize content)
 export { getCurrentLocale } from '../utils/locale';

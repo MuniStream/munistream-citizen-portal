@@ -3,13 +3,8 @@ import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowInstanceProgress } from '../../services/workflowService';
 import { profileService } from '../../services/profileService';
-import { DataCollectionForm } from '../DataCollectionForm';
-import { CatalogSelector } from '../CatalogSelector';
-import { SelfieCapture, IDCapture } from '../capture';
-import { SigningForm } from '../signature/SigningForm';
-import { AssertionReview } from '../AssertionReview';
-import { ConfirmationReview } from '../ConfirmationReview';
-import { getCurrentLocale } from '../../utils/locale';
+import { ActiveWorkflowForm } from '../ActiveWorkflowForm';
+import { useWorkflowFormSubmission } from '../../hooks/useWorkflowFormSubmission';
 import '../../pages/InstanceDetail.css';
 
 export const InstanceDetailContent: React.FC = () => {
@@ -20,11 +15,25 @@ export const InstanceDetailContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [isSubmittingData, setIsSubmittingData] = useState(false);
-  const [submissionSuccess, setSubmissionSuccess] = useState<string | null>(null);
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
   const [profileValues, setProfileValues] = useState<Record<string, any>>({});
-  const [isRewinding, setIsRewinding] = useState(false);
+
+  const {
+    isSubmitting: isSubmittingData,
+    isRewinding,
+    submissionSuccess,
+    submissionError,
+    submit: handleDataSubmission,
+    rewind: handleRewindToTask,
+  } = useWorkflowFormSubmission(id, instance, {
+    onAfterSubmit: () => fetchProgress(),
+    onAfterRewind: () => fetchProgress(),
+  });
+
+  // Surface hook submission errors through the existing `error` UI.
+  useEffect(() => {
+    if (submissionError) setError(submissionError);
+  }, [submissionError]);
 
   useEffect(() => {
     profileService
@@ -73,163 +82,6 @@ export const InstanceDetailContent: React.FC = () => {
   const handleRefresh = () => {
     setIsLoading(true);
     fetchProgress();
-  };
-
-  const handleRewindToTask = async (toTaskId: string) => {
-    if (!id || !instance) return;
-    setIsRewinding(true);
-    setError(null);
-    try {
-      await workflowService.rewindInstanceToTask(id, toTaskId);
-      setSubmissionSuccess('Volviendo al paso seleccionado para que pueda editar...');
-      setTimeout(() => {
-        fetchProgress();
-        setSubmissionSuccess(null);
-      }, 1200);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'No fue posible regresar al paso seleccionado');
-    } finally {
-      setIsRewinding(false);
-    }
-  };
-
-  const handleDataSubmission = async (data: Record<string, any>) => {
-    if (!id || !instance) return;
-
-    setIsSubmittingData(true);
-    setError(null);
-
-    try {
-      const waitingFor = instance.waiting_for || (instance.input_form as any)?.waiting_for;
-      const hasEntityFields = (instance.input_form as any)?.fields?.some((field: any) =>
-        field.type === 'entity_select' || field.type === 'entity_multi_select'
-      );
-      const isEntitySelection = waitingFor === 'entity_selection' || hasEntityFields;
-      const isAssertionReview = waitingFor === 'assertion_review';
-      const isConfirmation = waitingFor === 'confirmation';
-
-      console.log('Data submission debug:', {
-        hasInputForm: !!instance.input_form,
-        waitingFor,
-        hasEntityFields,
-        isEntitySelection,
-        inputFormKeys: instance.input_form ? Object.keys(instance.input_form) : null,
-        data
-      });
-
-      if (isAssertionReview) {
-        const taskId = (instance.input_form as any)?.current_step_id || 'assertion_review';
-        const response = await workflowService.submitCitizenData(id, {
-          [`${taskId}_input`]: data
-        });
-        if (response.success) {
-          setSubmissionSuccess(response.message || 'Verificación enviada exitosamente');
-          setTimeout(() => {
-            fetchProgress();
-            setSubmissionSuccess(null);
-          }, 2000);
-        }
-      } else if (isConfirmation) {
-        // El endpoint submit-data guarda el body completo en context[`${task_id}_input`].
-        // Enviamos los datos directamente para que el operator los lea sin doble anidación.
-        const response = await workflowService.submitCitizenData(id, data);
-        if (response.success) {
-          setSubmissionSuccess(response.message || 'Confirmación registrada exitosamente');
-          setTimeout(() => {
-            fetchProgress();
-            setSubmissionSuccess(null);
-          }, 2000);
-        }
-      } else if (isEntitySelection) {
-        const taskId = (instance.input_form as any)?.current_step_id || 'pick_required_documents';
-        const selectionData = {
-          [`${taskId}_selections`]: data
-        };
-
-        console.log('Entity selection submission:', {
-          taskId,
-          waitingFor,
-          data,
-          selectionData
-        });
-
-        const response = await workflowService.submitCitizenData(id, selectionData);
-
-        if (response.success) {
-          setSubmissionSuccess(response.message || 'Entity selections submitted successfully');
-          setTimeout(() => {
-            fetchProgress();
-            setSubmissionSuccess(null);
-          }, 2000);
-        }
-      } else {
-        const hasEntitySelections = Object.keys(data).some(key => key.endsWith('_ids'));
-
-        if (hasEntitySelections) {
-          const taskId = (instance.input_form as any)?.current_step_id || 'pick_required_documents';
-          const transformedSelections: Record<string, string[]> = {};
-
-          Object.entries(data).forEach(([key, value]) => {
-            if (key.endsWith('_ids') && value && key !== '_files') {
-              const entityKey = key.replace('_ids', '_entities');
-              transformedSelections[entityKey] = Array.isArray(value) ? value : [value];
-            }
-          });
-
-          const selectionData = {
-            [`${taskId}_selections`]: transformedSelections
-          };
-
-          console.log('Entity selection submission (transformed):', {
-            taskId,
-            originalData: data,
-            transformedSelections,
-            finalSelectionData: selectionData
-          });
-
-          const response = await workflowService.submitCitizenData(id, selectionData);
-
-          if (response.success) {
-            setSubmissionSuccess(response.message || 'Entity selections submitted successfully');
-            setTimeout(() => {
-              fetchProgress();
-              setSubmissionSuccess(null);
-            }, 2000);
-          }
-        } else {
-          const formData = new FormData();
-
-          Object.entries(data).forEach(([key, value]) => {
-            if (key !== '_files' && value !== undefined && value !== null) {
-              const stringValue = typeof value === 'object' ? JSON.stringify(value) : value.toString();
-              formData.append(key, stringValue);
-            }
-          });
-
-          if (data._files) {
-            Object.entries(data._files).forEach(([key, file]) => {
-              if (file instanceof File) {
-                formData.append(key, file);
-              }
-            });
-          }
-
-          const response = await workflowService.submitCitizenData(id, formData);
-
-          if (response.success) {
-            setSubmissionSuccess(response.message);
-            setTimeout(() => {
-              fetchProgress();
-              setSubmissionSuccess(null);
-            }, 2000);
-          }
-        }
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit data');
-    } finally {
-      setIsSubmittingData(false);
-    }
   };
 
   const getStatusColor = (status: string) => {
@@ -379,257 +231,16 @@ export const InstanceDetailContent: React.FC = () => {
           </div>
         </section>
 
-        {/* Active Form Section - User Input & Entity Selection */}
-        {instance.status === 'paused' && instance.input_form &&
-         (instance.waiting_for === 'user_input' || instance.waiting_for === 'entity_selection') &&
-         ((instance.input_form as any).sections || (instance.input_form as any).fields) && (
-          <section className="active-form-section">
-            <div className="container">
-              <div className="form-card action-required">
-                <h2>Acción Requerida</h2>
-                {submissionSuccess ? (
-                  <div className="success-message">
-                    <h4>Datos enviados exitosamente</h4>
-                    <p>{submissionSuccess}</p>
-                    <p>Su solicitud continuará procesándose.</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="requirement-notice">
-                      <div className="requirement-icon">
-                        <i className="icon-info"></i>
-                      </div>
-                      <div className="requirement-content">
-                        <strong>Información Requerida</strong>
-                        <p>Complete la siguiente información para continuar con el proceso.</p>
-                      </div>
-                    </div>
-
-                    <DataCollectionForm
-                      title={instance.input_form.title || 'Proporcione la Información Requerida'}
-                      description={instance.input_form.description || 'Complete los siguientes campos para continuar con su trámite.'}
-                      initialValues={profileValues}
-                      sections={(instance.input_form as any).sections}
-                      fields={instance.input_form.fields?.map((field: any) => ({
-                        id: field.name,
-                        name: field.name,
-                        label: field.label || field.name.charAt(0).toUpperCase() + field.name.slice(1),
-                        type: field.type,
-                        required: field.required,
-                        placeholder: field.placeholder,
-                        options: field.options ? (
-                          field.type === 'entity_select' || field.type === 'entity_multi_select'
-                            ? field.options
-                            : (
-                              typeof field.options[0] === 'string'
-                                ? field.options
-                                : field.options.map((opt: any) => opt.value || opt)
-                            )
-                        ) : undefined,
-                        entity_type: field.entity_type,
-                        min_count: field.min_count,
-                        max_count: field.max_count,
-                        description: field.description
-                      }))}
-                      onSubmit={handleDataSubmission}
-                      isSubmitting={isSubmittingData}
-                      submitButtonText="Enviar Información"
-                    />
-                  </>
-                )}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Catalog Selection Section */}
-        {instance.status === 'paused' && instance.input_form &&
-         instance.waiting_for === 'catalog_selection' && (
-          <section className="active-form-section">
-            <div className="container">
-              <div className="form-card action-required" style={{ borderColor: '#4caf50' }}>
-                <h2>Selección de Catálogo Requerida</h2>
-                {submissionSuccess ? (
-                  <div className="success-message">
-                    <h4>Selección enviada exitosamente</h4>
-                    <p>{submissionSuccess}</p>
-                    <p>Su solicitud continuará procesándose.</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="requirement-notice">
-                      <div className="requirement-icon">
-                        <i className="icon-info"></i>
-                      </div>
-                      <div className="requirement-content">
-                        <strong>Selección Requerida</strong>
-                        <p>Seleccione los elementos del catálogo para continuar con el proceso.</p>
-                      </div>
-                    </div>
-
-                    <CatalogSelector
-                      title={instance.input_form.title || 'Seleccione del Catálogo'}
-                      description={instance.input_form.description || 'Seleccione los elementos necesarios del catálogo para continuar.'}
-                      catalog_config={(instance.input_form as any).catalog_config}
-                      validation_errors={(instance.input_form as any).validation_errors || []}
-                      previous_input={(instance.input_form as any).previous_input}
-                      onSubmit={handleDataSubmission}
-                    />
-                  </>
-                )}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Selfie Capture Section */}
-        {instance.status === 'paused' &&
-         instance.waiting_for === 'selfie' && (
-          <section className="active-form-section">
-            <div className="container">
-              <div className="form-card action-required" style={{ borderColor: '#2196f3' }}>
-                <h2>Verificación de Identidad Requerida</h2>
-                {submissionSuccess ? (
-                  <div className="success-message">
-                    <h4>Selfie enviado exitosamente</h4>
-                    <p>{submissionSuccess}</p>
-                    <p>Su solicitud continuará procesándose.</p>
-                  </div>
-                ) : (
-                  <SelfieCapture
-                    title={instance.input_form?.title || 'Verificación de Identidad - Selfie'}
-                    description={instance.input_form?.description || 'Toma una selfie para verificar tu identidad'}
-                    onSubmit={handleDataSubmission}
-                    isSubmitting={isSubmittingData}
-                  />
-                )}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ID Capture Section */}
-        {instance.status === 'paused' &&
-         instance.waiting_for === 'id_capture' && (
-          <section className="active-form-section">
-            <div className="container">
-              <div className="form-card action-required" style={{ borderColor: '#9c27b0' }}>
-                <h2>Captura de Documento Requerida</h2>
-                {submissionSuccess ? (
-                  <div className="success-message">
-                    <h4>Documento enviado exitosamente</h4>
-                    <p>{submissionSuccess}</p>
-                    <p>Su solicitud continuará procesándose.</p>
-                  </div>
-                ) : (
-                  <IDCapture
-                    title={instance.input_form?.title || 'Captura de Documento de Identidad'}
-                    description={instance.input_form?.description || 'Captura ambos lados de tu documento de identidad'}
-                    onSubmit={handleDataSubmission}
-                    isSubmitting={isSubmittingData}
-                  />
-                )}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Signature Section */}
-        {instance.status === 'paused' &&
-         instance.waiting_for === 'signature' && (
-          <section className="active-form-section">
-            <div className="container">
-              <div className="form-card action-required" style={{ borderColor: '#9c27b0' }}>
-                <h2>Firma Digital Requerida</h2>
-                {submissionSuccess ? (
-                  <div className="success-message">
-                    <h4>Firma enviada exitosamente</h4>
-                    <p>{submissionSuccess}</p>
-                    <p>Su solicitud continuará procesándose.</p>
-                  </div>
-                ) : (
-                  <div style={{ textAlign: 'center' }}>
-                    <p style={{ marginBottom: '2rem', color: '#666' }}>
-                      Se requiere una firma digital para continuar con el proceso.
-                    </p>
-                    <SigningForm
-                      instanceId={id!}
-                      documentToSign={instance.input_form?.signable_data || instance.input_form?.document_to_sign || instance.input_form}
-                      operatorConfig={{
-                        task_id: instance.input_form?.current_step_id || 'signature_step',
-                        certificate_field: instance.input_form?.certificate_field || 'digital_signature_certificate',
-                        private_key_field: instance.input_form?.private_key_field || 'digital_signature_private_key',
-                        password_field: instance.input_form?.password_field || 'digital_signature_password',
-                        document_type: instance.input_form?.document_type
-                      }}
-                      onSubmitSignature={handleDataSubmission}
-                      loading={isSubmittingData}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Confirmation Section */}
-        {instance.status === 'paused' &&
-         instance.waiting_for === 'confirmation' && (
-          <section className="active-form-section">
-            <div className="container">
-              <div className="form-card action-required" style={{ borderColor: '#1565c0' }}>
-                <h2>Confirmación requerida</h2>
-                {submissionSuccess ? (
-                  <div className="success-message">
-                    <h4>{submissionSuccess}</h4>
-                    <p>Su solicitud continuará procesándose.</p>
-                  </div>
-                ) : (
-                  <ConfirmationReview
-                    title={(instance.input_form as any)?.title || 'Confirmación y aceptación de términos'}
-                    description={(instance.input_form as any)?.description}
-                    summarySections={(instance.input_form as any)?.summary_sections || []}
-                    tosText={(instance.input_form as any)?.tos_text || ''}
-                    declarations={(instance.input_form as any)?.declarations || []}
-                    rewindableTaskIds={(instance.input_form as any)?.rewindable_task_ids || []}
-                    locale={getCurrentLocale()}
-                    isSubmitting={isSubmittingData}
-                    isRewinding={isRewinding}
-                    onSubmit={handleDataSubmission}
-                    onRewind={handleRewindToTask}
-                  />
-                )}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Assertion Review Section */}
-        {instance.status === 'paused' &&
-         instance.waiting_for === 'assertion_review' && (
-          <section className="active-form-section">
-            <div className="container">
-              <div className="form-card action-required" style={{ borderColor: '#ff6d00' }}>
-                <h2>Verificación Requerida</h2>
-                {submissionSuccess ? (
-                  <div className="success-message">
-                    <h4>Verificación enviada exitosamente</h4>
-                    <p>{submissionSuccess}</p>
-                    <p>Su solicitud continuará procesándose.</p>
-                  </div>
-                ) : (
-                  <AssertionReview
-                    title={(instance.input_form as any)?.title || 'Verificación de Datos'}
-                    description={(instance.input_form as any)?.description || 'Revise y confirme los resultados de verificación'}
-                    assertions={(instance.input_form as any)?.assertions || []}
-                    onSubmit={handleDataSubmission}
-                    isSubmitting={isSubmittingData}
-                  />
-                )}
-              </div>
-            </div>
-          </section>
-        )}
+        {/* Active form section — dispatcher for all waiting_for cases */}
+        <ActiveWorkflowForm
+          instance={instance}
+          isSubmitting={isSubmittingData}
+          isRewinding={isRewinding}
+          submissionSuccess={submissionSuccess}
+          profileValues={profileValues}
+          onSubmit={handleDataSubmission}
+          onRewind={handleRewindToTask}
+        />
 
         {/* Steps Timeline */}
         <section className="steps-timeline-section">
