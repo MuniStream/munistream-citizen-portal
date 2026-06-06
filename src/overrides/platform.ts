@@ -47,3 +47,7 @@ export { DataCollectionForm } from '../components/DataCollectionForm';
 export { CatalogSelector } from '../components/CatalogSelector';
 export { SelfieCapture, IDCapture } from '../components/capture';
 export { SigningForm } from '../components/signature/SigningForm';
+export { ConfirmationReview } from '../components/ConfirmationReview';
+
+// Locale helpers (for tenant overrides that need to format/localize content)
+export { getCurrentLocale } from '../utils/locale';

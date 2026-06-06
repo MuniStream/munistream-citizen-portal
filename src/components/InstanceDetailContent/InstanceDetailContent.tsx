@@ -8,6 +8,8 @@ import { CatalogSelector } from '../CatalogSelector';
 import { SelfieCapture, IDCapture } from '../capture';
 import { SigningForm } from '../signature/SigningForm';
 import { AssertionReview } from '../AssertionReview';
+import { ConfirmationReview } from '../ConfirmationReview';
+import { getCurrentLocale } from '../../utils/locale';
 import '../../pages/InstanceDetail.css';
 
 export const InstanceDetailContent: React.FC = () => {
@@ -22,6 +24,7 @@ export const InstanceDetailContent: React.FC = () => {
   const [submissionSuccess, setSubmissionSuccess] = useState<string | null>(null);
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
   const [profileValues, setProfileValues] = useState<Record<string, any>>({});
+  const [isRewinding, setIsRewinding] = useState(false);
 
   useEffect(() => {
     profileService
@@ -72,6 +75,24 @@ export const InstanceDetailContent: React.FC = () => {
     fetchProgress();
   };
 
+  const handleRewindToTask = async (toTaskId: string) => {
+    if (!id || !instance) return;
+    setIsRewinding(true);
+    setError(null);
+    try {
+      await workflowService.rewindInstanceToTask(id, toTaskId);
+      setSubmissionSuccess('Volviendo al paso seleccionado para que pueda editar...');
+      setTimeout(() => {
+        fetchProgress();
+        setSubmissionSuccess(null);
+      }, 1200);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No fue posible regresar al paso seleccionado');
+    } finally {
+      setIsRewinding(false);
+    }
+  };
+
   const handleDataSubmission = async (data: Record<string, any>) => {
     if (!id || !instance) return;
 
@@ -85,6 +106,7 @@ export const InstanceDetailContent: React.FC = () => {
       );
       const isEntitySelection = waitingFor === 'entity_selection' || hasEntityFields;
       const isAssertionReview = waitingFor === 'assertion_review';
+      const isConfirmation = waitingFor === 'confirmation';
 
       console.log('Data submission debug:', {
         hasInputForm: !!instance.input_form,
@@ -102,6 +124,17 @@ export const InstanceDetailContent: React.FC = () => {
         });
         if (response.success) {
           setSubmissionSuccess(response.message || 'Verificación enviada exitosamente');
+          setTimeout(() => {
+            fetchProgress();
+            setSubmissionSuccess(null);
+          }, 2000);
+        }
+      } else if (isConfirmation) {
+        // El endpoint submit-data guarda el body completo en context[`${task_id}_input`].
+        // Enviamos los datos directamente para que el operator los lea sin doble anidación.
+        const response = await workflowService.submitCitizenData(id, data);
+        if (response.success) {
+          setSubmissionSuccess(response.message || 'Confirmación registrada exitosamente');
           setTimeout(() => {
             fetchProgress();
             setSubmissionSuccess(null);
@@ -533,6 +566,38 @@ export const InstanceDetailContent: React.FC = () => {
                       loading={isSubmittingData}
                     />
                   </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Confirmation Section */}
+        {instance.status === 'paused' &&
+         instance.waiting_for === 'confirmation' && (
+          <section className="active-form-section">
+            <div className="container">
+              <div className="form-card action-required" style={{ borderColor: '#1565c0' }}>
+                <h2>Confirmación requerida</h2>
+                {submissionSuccess ? (
+                  <div className="success-message">
+                    <h4>{submissionSuccess}</h4>
+                    <p>Su solicitud continuará procesándose.</p>
+                  </div>
+                ) : (
+                  <ConfirmationReview
+                    title={(instance.input_form as any)?.title || 'Confirmación y aceptación de términos'}
+                    description={(instance.input_form as any)?.description}
+                    summarySections={(instance.input_form as any)?.summary_sections || []}
+                    tosText={(instance.input_form as any)?.tos_text || ''}
+                    declarations={(instance.input_form as any)?.declarations || []}
+                    rewindableTaskIds={(instance.input_form as any)?.rewindable_task_ids || []}
+                    locale={getCurrentLocale()}
+                    isSubmitting={isSubmittingData}
+                    isRewinding={isRewinding}
+                    onSubmit={handleDataSubmission}
+                    onRewind={handleRewindToTask}
+                  />
                 )}
               </div>
             </div>

@@ -250,6 +250,41 @@ class WorkflowService {
     return response.json();
   }
 
+  // Rebobinar la instancia a un paso anterior (sólo desde un paso de confirmación)
+  async rewindInstanceToTask(instanceId: string, toTaskId: string): Promise<{
+    success: boolean;
+    instance_id: string;
+    from_task_id?: string;
+    to_task_id: string;
+    current_step?: string;
+    status?: string;
+  }> {
+    const keycloakService = (await import('./keycloak')).default;
+    const token = keycloakService.getToken();
+    if (!token) {
+      throw new Error('Authentication required to edit a previous step. Please login first.');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/public/instances/${instanceId}/rewind`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ to_task_id: toTaskId }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Session expired. Please login again.');
+      }
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || 'Failed to rewind instance');
+    }
+
+    return response.json();
+  }
+
   // Get customer's workflow instances (requires authentication)
   async getCustomerWorkflows(): Promise<CustomerWorkflowsResponse> {
     const keycloakService = (await import('./keycloak')).default;
