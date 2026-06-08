@@ -236,7 +236,6 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
     if (files && files.length > 0) {
       const file = files[0];
       setUploadedFiles(prev => ({ ...prev, [fieldId]: file }));
-      setFormData(prev => ({ ...prev, [fieldId]: file.name }));
 
       // Clear error
       if (errors[fieldId]) {
@@ -342,7 +341,6 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
             reader.onload = () => {
               const fileWithDataURL = Object.assign(file, { dataURL: reader.result });
               setUploadedFiles(prev => ({ ...prev, [fieldId]: fileWithDataURL }));
-              setFormData(prev => ({ ...prev, [fieldId]: filename }));
 
               // Clear error
               if (errors[fieldId]) {
@@ -554,7 +552,12 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
       return '';
     }
 
-    if (field.required && (!value || value.toString().trim() === '')) {
+    if (
+      field.required &&
+      (value === undefined ||
+        value === null ||
+        (typeof value === 'string' && value.trim() === ''))
+    ) {
       return `${field.label} is required`;
     }
 
@@ -633,7 +636,11 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
 
     const newErrors: Record<string, string> = {};
     allFields.forEach(field => {
-      const error = validateField(field, formData[field.id]);
+      const value =
+        field.type === 'file' || field.type === 'camera'
+          ? uploadedFiles[field.id]
+          : formData[field.id];
+      const error = validateField(field, value);
       if (error) {
         newErrors[field.id] = error;
       }
