@@ -303,24 +303,52 @@ export const InstanceDetailContent: React.FC = () => {
         </section>
 
         {/* Current Status */}
-        {instance.current_step && !instance.requires_input && (
-          <section className="current-status-section">
-            <div className="container">
-              <div className="status-card">
-                <h2>Paso Actual</h2>
-                <div className="current-step">
-                  <div className="step-icon">
-                    <i className="icon-processing"></i>
-                  </div>
-                  <div className="step-info">
-                    <strong>Procesando: {instance.current_step}</strong>
-                    <p>Su solicitud está siendo procesada. La información se actualizará automáticamente.</p>
+        {instance.current_step && !instance.requires_input && (() => {
+          const currentStepProgress = instance.step_progress.find(
+            (s) => s.step_id === instance.current_step
+          );
+          const friendlyName = currentStepProgress?.name || instance.current_step;
+          const waitingForAdmin =
+            instance.waiting_for === 'child_workflow_completion' ||
+            (instance.waiting_for || '').includes('admin');
+          return (
+            <section className="current-status-section">
+              <div className="container">
+                <div className="status-card">
+                  <h2>{waitingForAdmin ? 'En revisión' : 'Paso Actual'}</h2>
+                  <div className="current-step">
+                    <div className="step-icon">
+                      <i className="icon-processing"></i>
+                    </div>
+                    <div className="step-info">
+                      <strong>{friendlyName}</strong>
+                      {waitingForAdmin ? (
+                        <>
+                          <p style={{ marginTop: '0.5rem' }}>
+                            Su solicitud fue recibida y está en revisión por un validador.
+                          </p>
+                          <p style={{ marginTop: '0.25rem' }}>
+                            <strong>Folio:</strong> <code>{id}</code>
+                          </p>
+                          <p style={{ marginTop: '0.25rem' }}>
+                            <strong>Plazo estimado de resolución:</strong> 21 días hábiles
+                          </p>
+                          <p style={{ marginTop: '0.25rem', color: '#666' }}>
+                            Recibirá notificación cuando la revisión se complete. Puede cerrar
+                            esta página; podrá consultar el estado en cualquier momento con
+                            este folio.
+                          </p>
+                        </>
+                      ) : (
+                        <p>Su solicitud está siendo procesada. La información se actualizará automáticamente.</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </section>
-        )}
+            </section>
+          );
+        })()}
       </main>
     </div>
   );

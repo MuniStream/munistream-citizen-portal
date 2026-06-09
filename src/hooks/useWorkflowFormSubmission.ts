@@ -26,6 +26,40 @@ export interface UseWorkflowFormSubmissionOptions {
 const DEFAULT_SUBMIT_CLEAR_MS = 2000;
 const DEFAULT_REWIND_CLEAR_MS = 1200;
 
+// Tras un submit exitoso, el executor del backend puede tardar en avanzar el
+// step (especialmente con S3UploadOperator que retorna PENDING_ASYNC). Si el
+// frontend dispara onAfterSubmit antes de que avance, el ciudadano percibe
+// "no pasó nada". Hacemos polling al endpoint de tracking hasta detectar
+// transición o agotar el presupuesto de tiempo.
+const POLL_INTERVAL_MS = 600;
+const POLL_TIMEOUT_MS = 12000;
+
+async function waitForStepTransition(
+  instanceId: string,
+  fromTaskId: string | undefined,
+  fromStatus: string | undefined
+): Promise<void> {
+  if (!instanceId || !fromTaskId) return;
+  const deadline = Date.now() + POLL_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    await new Promise((r) => window.setTimeout(r, POLL_INTERVAL_MS));
+    try {
+      const progress = await workflowService.trackWorkflowInstance(instanceId);
+      const currentStep =
+        (progress as any).current_step ||
+        ((progress as any).input_form as any)?.current_step_id;
+      const status = (progress as any).status;
+      // Avanzó al siguiente step o el status cambió de paused/waiting
+      if (currentStep && currentStep !== fromTaskId) return;
+      if (fromStatus && status && status !== fromStatus) return;
+    } catch {
+      // Si el polling falla, no bloqueamos; salimos para dejar que el
+      // refetch normal de la UI muestre lo que sea que haya en el backend.
+      return;
+    }
+  }
+}
+
 /**
  * Centraliza la lógica que decide cómo enviar `data` al backend según el
  * `waiting_for` del step actual. Reglas (primer match gana):
@@ -126,9 +160,21 @@ export function useWorkflowFormSubmission(
               [`${taskId}_selections`]: transformedSelections,
             });
           } else {
+            const fileKeys = new Set(
+              data._files && typeof data._files === 'object'
+                ? Object.keys(data._files)
+                : []
+            );
             const formData = new FormData();
             Object.entries(data).forEach(([key, value]) => {
               if (key === '_files' || value === undefined || value === null) return;
+              // Si el field ya tiene un File en _files, omitimos el value
+              // de data[key]. Si lo dejaramos, se appendería como segundo
+              // valor de la misma key (string JSON o filename) y el backend
+              // termina perdiendo el File real, dejando un dict
+              // {filename, content_type, size} sin contenido y los uploads
+              // a S3 fallan con "No valid file content or path provided".
+              if (fileKeys.has(key)) return;
               const stringValue =
                 typeof value === 'object' ? JSON.stringify(value) : value.toString();
               formData.append(key, stringValue);
@@ -146,6 +192,12 @@ export function useWorkflowFormSubmission(
 
         if (response?.success) {
           setSubmissionSuccess(response.message || defaultMessage);
+          // Esperar a que el backend efectivamente avance el step antes de
+          // pedirle a la UI que recargue. Sin esto, el executor async puede
+          // seguir procesando (S3UploadOperator → PENDING_ASYNC) y el
+          // refetch trae el mismo step, dándole al ciudadano la impresión
+          // de que "no pasó nada" hasta que aprieta Actualizar.
+          await waitForStepTransition(id, taskId, (inst as any)?.status);
           optionsRef.current.onAfterSubmit?.();
           if (successMs > 0) {
             window.setTimeout(() => setSubmissionSuccess(null), successMs);
