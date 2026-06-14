@@ -5,22 +5,45 @@ interface IDCaptureProps {
   description: string;
   onSubmit: (data: Record<string, any>) => void;
   isSubmitting?: boolean;
+  allowFileUpload?: boolean;
 }
 
 export const IDCapture: React.FC<IDCaptureProps> = ({
   title,
   description,
   onSubmit,
-  isSubmitting = false
+  isSubmitting = false,
+  allowFileUpload = false
 }) => {
   const [frontFile, setFrontFile] = useState<File | null>(null);
   const [backFile, setBackFile] = useState<File | null>(null);
+  const [frontUploaded, setFrontUploaded] = useState(false);
+  const [backUploaded, setBackUploaded] = useState(false);
   const [currentSide, setCurrentSide] = useState<'front' | 'back' | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<'unknown' | 'granted' | 'denied'>('unknown');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const videoRef = useRef<HTMLVideoElement>(null);
+  const frontInputRef = useRef<HTMLInputElement>(null);
+  const backInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  const handleFileUpload = useCallback((side: 'front' | 'back', e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setErrorMessage('');
+    if (!file.type.startsWith('image/')) {
+      setErrorMessage('El archivo debe ser una imagen (JPG, PNG).');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      (file as any).dataURL = reader.result as string;
+      if (side === 'front') { setFrontFile(file); setFrontUploaded(true); }
+      else { setBackFile(file); setBackUploaded(true); }
+    };
+    reader.readAsDataURL(file);
+  }, []);
 
   // Check camera permission status
   const checkCameraPermission = async () => {
@@ -181,25 +204,40 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
     e.preventDefault();
     if (frontFile && backFile) {
       const timestamp = new Date().toISOString();
-      const metadata = {
-        user_agent: navigator.userAgent,
-        platform: navigator.platform,
-        screen_resolution: `${window.screen.width}x${window.screen.height}`,
-        capture_method: 'getUserMedia',
-        capture_source: 'canvas',
-        media_devices_available: true,
-        captured_at: timestamp,
-        timestamp_unix: Date.now(),
-        stream_active: true,
-        live_capture: true,
-        document_sides: ['front', 'back'],
-        browser_fingerprint: {
-          language: navigator.language,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          color_depth: window.screen.colorDepth,
-          pixel_ratio: window.devicePixelRatio
-        }
-      };
+      const anyUploaded = frontUploaded || backUploaded;
+      // Si algún lado proviene de archivo subido no es captura en vivo; el
+      // backend (allow_file_upload) omite las validaciones de captura en vivo.
+      const metadata = anyUploaded
+        ? {
+            user_agent: navigator.userAgent,
+            platform: navigator.platform,
+            capture_method: 'file_upload',
+            capture_source: 'file',
+            media_devices_available: false,
+            captured_at: timestamp,
+            timestamp_unix: Date.now(),
+            live_capture: false,
+            document_sides: ['front', 'back']
+          }
+        : {
+            user_agent: navigator.userAgent,
+            platform: navigator.platform,
+            screen_resolution: `${window.screen.width}x${window.screen.height}`,
+            capture_method: 'getUserMedia',
+            capture_source: 'canvas',
+            media_devices_available: true,
+            captured_at: timestamp,
+            timestamp_unix: Date.now(),
+            stream_active: true,
+            live_capture: true,
+            document_sides: ['front', 'back'],
+            browser_fingerprint: {
+              language: navigator.language,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              color_depth: window.screen.colorDepth,
+              pixel_ratio: window.devicePixelRatio
+            }
+          };
 
       onSubmit({
         _files: {
@@ -214,8 +252,12 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
   const handleRetake = (side: 'front' | 'back') => {
     if (side === 'front') {
       setFrontFile(null);
+      setFrontUploaded(false);
+      if (frontInputRef.current) frontInputRef.current.value = '';
     } else {
       setBackFile(null);
+      setBackUploaded(false);
+      if (backInputRef.current) backInputRef.current.value = '';
     }
   };
 
@@ -341,7 +383,37 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
               >
                 📷 Activar Cámara (Frente)
               </button>
-            ) : (
+            ) : null}
+            {!frontFile && allowFileUpload && (
+              <div style={{ marginTop: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={() => frontInputRef.current?.click()}
+                  style={{
+                    padding: '0.85rem 1.5rem',
+                    backgroundColor: '#fff',
+                    color: '#ff9800',
+                    border: '2px solid #ff9800',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '0.95rem',
+                    fontWeight: 'bold',
+                    width: '100%',
+                    maxWidth: '250px'
+                  }}
+                >
+                  📁 Subir archivo (Frente)
+                </button>
+                <input
+                  ref={frontInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileUpload('front', e)}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            )}
+            {frontFile && (
               <div>
                 <img
                   src={(frontFile as any).dataURL}
@@ -396,7 +468,38 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
               >
                 📷 Activar Cámara (Reverso)
               </button>
-            ) : (
+            ) : null}
+            {!backFile && allowFileUpload && (
+              <div style={{ marginTop: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={() => backInputRef.current?.click()}
+                  disabled={!frontFile}
+                  style={{
+                    padding: '0.85rem 1.5rem',
+                    backgroundColor: '#fff',
+                    color: frontFile ? '#ff9800' : '#bdbdbd',
+                    border: `2px solid ${frontFile ? '#ff9800' : '#bdbdbd'}`,
+                    borderRadius: '8px',
+                    cursor: frontFile ? 'pointer' : 'not-allowed',
+                    fontSize: '0.95rem',
+                    fontWeight: 'bold',
+                    width: '100%',
+                    maxWidth: '250px'
+                  }}
+                >
+                  📁 Subir archivo (Reverso)
+                </button>
+                <input
+                  ref={backInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileUpload('back', e)}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            )}
+            {backFile && (
               <div>
                 <img
                   src={(backFile as any).dataURL}

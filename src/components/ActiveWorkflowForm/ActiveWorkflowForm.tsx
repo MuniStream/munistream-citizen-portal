@@ -240,6 +240,7 @@ function renderBody(
           description={
             inputForm.description || 'Toma una selfie para verificar tu identidad'
           }
+          allowFileUpload={!!inputForm.allow_file_upload}
           onSubmit={onSubmit}
           isSubmitting={isSubmitting}
         />
@@ -253,6 +254,7 @@ function renderBody(
             inputForm.description ||
             'Captura ambos lados de tu documento de identidad'
           }
+          allowFileUpload={!!inputForm.allow_file_upload}
           onSubmit={onSubmit}
           isSubmitting={isSubmitting}
         />
