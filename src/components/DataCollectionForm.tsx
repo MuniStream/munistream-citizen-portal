@@ -1,6 +1,28 @@
 import React, { useState, useCallback } from 'react';
 import { entityService } from '../services/entityService';
 
+// Aviso con las características que debe reunir un documento para cargarse
+// correctamente (formatos, tamaño y nombre sin acentos/caracteres especiales).
+const FileRequirementsNote: React.FC = () => (
+  <div className="file-requirements-note" style={{
+    marginTop: '0.5rem',
+    padding: '0.6rem 0.8rem',
+    backgroundColor: '#f1f8ff',
+    border: '1px solid #cfe3ff',
+    borderRadius: '6px',
+    fontSize: '0.8rem',
+    color: '#445',
+    textAlign: 'left'
+  }}>
+    <strong>📋 El documento debe cumplir:</strong>
+    <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.1rem' }}>
+      <li>Formato PDF, JPG o PNG.</li>
+      <li>Tamaño máximo: 100 MB.</li>
+      <li>Nombre del archivo sin acentos ni caracteres especiales (ej. "aviso_arribo.pdf", no "Avisó (1).pdf").</li>
+    </ul>
+  </div>
+);
+
 // Simple debounce function without external dependencies
 function debounce<T extends (...args: any[]) => any>(
   func: T,
@@ -485,6 +507,7 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
                 </div>
               )}
             </div>
+            <FileRequirementsNote />
           </div>
         );
       }
@@ -1003,10 +1026,11 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
                 <div className="upload-placeholder">
                   <span className="upload-icon">⬆️</span>
                   <span>Click to upload {field.label}</span>
-                  <small>PDF, JPG, PNG, DOC (max 10MB)</small>
+                  <small>PDF, JPG, PNG (máx 100MB)</small>
                 </div>
               )}
             </div>
+            <FileRequirementsNote />
           </div>
         );
 
