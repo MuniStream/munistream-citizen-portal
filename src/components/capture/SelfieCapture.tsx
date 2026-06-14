@@ -5,19 +5,23 @@ interface SelfieCaptureProps {
   description: string;
   onSubmit: (data: Record<string, any>) => void;
   isSubmitting?: boolean;
+  allowFileUpload?: boolean;
 }
 
 export const SelfieCapture: React.FC<SelfieCaptureProps> = ({
   title,
   description,
   onSubmit,
-  isSubmitting = false
+  isSubmitting = false,
+  allowFileUpload = false
 }) => {
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
+  const [isUploaded, setIsUploaded] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<'unknown' | 'granted' | 'denied'>('unknown');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const videoRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   // Check camera permission status
@@ -163,33 +167,66 @@ export const SelfieCapture: React.FC<SelfieCaptureProps> = ({
     }, 'image/jpeg', 0.98); // Maximum quality compression
   }, []);
 
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setErrorMessage('');
+    if (!file.type.startsWith('image/')) {
+      setErrorMessage('El archivo debe ser una imagen (JPG, PNG).');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      (file as any).dataURL = reader.result as string;
+      setCapturedFile(file);
+      setIsUploaded(true);
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
   const retakePhoto = useCallback(() => {
     setCapturedFile(null);
-    startCamera();
-  }, [startCamera]);
+    setIsUploaded(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (!allowFileUpload) startCamera();
+  }, [startCamera, allowFileUpload]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (capturedFile) {
       const timestamp = new Date().toISOString();
-      const metadata = {
-        user_agent: navigator.userAgent,
-        platform: navigator.platform,
-        screen_resolution: `${window.screen.width}x${window.screen.height}`,
-        capture_method: 'getUserMedia',
-        capture_source: 'canvas',
-        media_devices_available: true,
-        captured_at: timestamp,
-        timestamp_unix: Date.now(),
-        stream_active: true,
-        live_capture: true,
-        browser_fingerprint: {
-          language: navigator.language,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          color_depth: window.screen.colorDepth,
-          pixel_ratio: window.devicePixelRatio
-        }
-      };
+      // El archivo subido NO es captura en vivo: el backend (allow_file_upload)
+      // omite las validaciones de captura en vivo para esta fuente.
+      const metadata = isUploaded
+        ? {
+            user_agent: navigator.userAgent,
+            platform: navigator.platform,
+            capture_method: 'file_upload',
+            capture_source: 'file',
+            media_devices_available: false,
+            captured_at: timestamp,
+            timestamp_unix: Date.now(),
+            live_capture: false,
+            original_filename: capturedFile.name
+          }
+        : {
+            user_agent: navigator.userAgent,
+            platform: navigator.platform,
+            screen_resolution: `${window.screen.width}x${window.screen.height}`,
+            capture_method: 'getUserMedia',
+            capture_source: 'canvas',
+            media_devices_available: true,
+            captured_at: timestamp,
+            timestamp_unix: Date.now(),
+            stream_active: true,
+            live_capture: true,
+            browser_fingerprint: {
+              language: navigator.language,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              color_depth: window.screen.colorDepth,
+              pixel_ratio: window.devicePixelRatio
+            }
+          };
 
       onSubmit({
         _files: {
@@ -247,10 +284,42 @@ export const SelfieCapture: React.FC<SelfieCaptureProps> = ({
           >
             📷 Activar Cámara
           </button>
+
+          {allowFileUpload && (
+            <div style={{ marginTop: '0.5rem' }}>
+              <div style={{ color: '#999', fontSize: '0.85rem', margin: '0.5rem 0' }}>— o —</div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  padding: '0.85rem 1.75rem',
+                  backgroundColor: '#fff',
+                  color: '#2196f3',
+                  border: '2px solid #2196f3',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: 'bold'
+                }}
+              >
+                📁 Subir archivo
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+              />
+            </div>
+          )}
+
           <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '1rem' }}>
             {permissionStatus === 'denied'
               ? 'Los permisos están denegados. Haz clic en el candado 🔒 en la barra de direcciones para permitir el acceso.'
-              : 'Al hacer clic, tu navegador solicitará permiso para acceder a la cámara.'}
+              : allowFileUpload
+                ? 'Puedes subir un archivo de imagen o tomar la foto con la cámara.'
+                : 'Al hacer clic, tu navegador solicitará permiso para acceder a la cámara.'}
           </p>
         </div>
       )}
