@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { LoginDialogProvider } from './contexts/LoginDialogContext';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 import { Dashboard } from './pages/Dashboard';
 import { PublicWorkflowCatalog } from './pages/PublicWorkflowCatalog';
@@ -20,6 +21,7 @@ function App() {
   return (
     <CustomThemeProvider>
       <AuthProvider>
+        <LoginDialogProvider>
         <Router>
           <div className="app">
             <Routes>
@@ -89,6 +91,7 @@ function App() {
           </Routes>
         </div>
       </Router>
+        </LoginDialogProvider>
     </AuthProvider>
   </CustomThemeProvider>
   );

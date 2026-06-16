@@ -208,6 +208,33 @@ class WorkflowService {
     return response.json();
   }
 
+  // Fetch full detail of an entity emitted by a workflow (requires auth).
+  // Mirrors the endpoint used by EntityDetailPage so the trámite screen can
+  // render an emitted entity inline once the process concludes.
+  async getEntityDetail(entityId: string): Promise<any> {
+    const token = authService.getToken();
+    if (!token) {
+      throw new Error('Authentication required to load entity');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/public/entities/${entityId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error('Failed to load entity details');
+    }
+
+    return response.json();
+  }
+
   // Submit citizen data for a workflow step (requires authentication)
   async submitCitizenData(instanceId: string, data: FormData | Record<string, any>): Promise<DataSubmissionResponse> {
     const searchParams = new URLSearchParams();
@@ -367,15 +394,26 @@ export interface WorkflowInstanceProgress {
   requires_input: boolean;
   waiting_for?: string;
   input_form: InputForm;
+  // Branch label of the route the citizen took (e.g. "Persona Física"),
+  // derived from the workflow's branch gate. Absent for linear workflows.
+  route_label?: string;
+  // Entities emitted by the workflow (ids/types only). Full detail is fetched
+  // on demand via getEntityDetail(). Present once the trámite has emitted them.
+  emitted_entities?: EmittedEntity[];
   estimated_completion?: string;
   message: string;
+}
+
+export interface EmittedEntity {
+  entity_id: string;
+  entity_type?: string | null;
 }
 
 export interface StepProgress {
   step_id: string;
   name: string;
   description: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  status: 'pending' | 'executing' | 'in_progress' | 'running' | 'waiting' | 'completed' | 'failed' | 'skipped';
   started_at?: string;
   completed_at?: string;
   requires_citizen_input?: boolean;

@@ -289,6 +289,16 @@ export function CustomThemeProvider({ children }: { children: ReactNode }) {
         root.style.setProperty('--border-color', config.borders?.color || '#e0e0e0');
         root.style.setProperty('--border-radius', `${config.borders?.radius_md || 4}px`);
       }
+      if (config.typography) {
+        root.style.setProperty(
+          '--font-family',
+          config.typography.font_family || 'system-ui, sans-serif'
+        );
+        root.style.setProperty(
+          '--font-family-headings',
+          config.typography.font_family_headings || config.typography.font_family || 'system-ui, sans-serif'
+        );
+      }
 
       // Inject tenant style.css if available as HTML override
       if (config.html_overrides?.style) {

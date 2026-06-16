@@ -468,6 +468,104 @@
   color: var(--text-primary, #212529);
 }
 
+.route-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 2rem 0;
+  padding: 1rem 1.25rem;
+  background: var(--background-default, #f1f5f9);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-left: 4px solid var(--primary-color, #1976d2);
+  border-radius: 10px;
+}
+
+.route-banner-label {
+  font-weight: 600;
+  color: var(--text-primary, #212529);
+}
+
+.route-banner-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.route-banner .route-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  background: var(--primary-color, #1976d2);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.route-banner-note {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #6c757d);
+}
+
+.route-fork {
+  margin: 0 0 2rem 0;
+  padding: 1.25rem;
+  border: 1px dashed var(--primary-color, #1976d2);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--primary-color, #1976d2) 4%, transparent);
+}
+
+.route-fork .phase-title {
+  border-bottom: none;
+  padding-bottom: 0;
+  color: var(--primary-color, #1976d2);
+  margin-bottom: 0.75rem;
+}
+
+.route-fork-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.route-pill {
+  cursor: pointer;
+  border: 1px solid var(--primary-color, #1976d2);
+  background: #fff;
+  color: var(--primary-color, #1976d2);
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  transition: all 0.15s ease;
+}
+
+.route-pill.active {
+  background: var(--primary-color, #1976d2);
+  color: #fff;
+}
+
+.process-phase {
+  margin-bottom: 2rem;
+}
+
+.process-phase:last-child {
+  margin-bottom: 0;
+}
+
+.phase-title {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary, #6c757d);
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
 .process-timeline {
   position: relative;
   padding-left: 3rem;

@@ -5,7 +5,29 @@ import { workflowService, type WorkflowInstanceProgress } from '../../services/w
 import { profileService } from '../../services/profileService';
 import { ActiveWorkflowForm } from '../ActiveWorkflowForm';
 import { useWorkflowFormSubmission } from '../../hooks/useWorkflowFormSubmission';
+import StepTimeline from './StepTimeline';
+import EmittedEntitiesSection from './EmittedEntitiesSection';
+import { getStatusColor, statusI18nKey, isDoneStatus } from './statusHelpers';
 import '../../pages/InstanceDetail.css';
+
+// A citizen form is only rendered when paused on a form-kind wait with its
+// schema present (mirrors ActiveWorkflowForm.resolveKind). The backend sets
+// requires_input=true even for admin / child_workflow_completion waits with no
+// form, so the processing indicator must gate on "no form shown", not on
+// requires_input.
+const FORM_WAITS = ['user_input', 'entity_selection', 'catalog_selection', 'selfie', 'id_capture', 'signature', 'confirmation', 'assertion_review'];
+const hasActiveFormFor = (instance: WorkflowInstanceProgress | null): boolean => {
+  if (!instance || instance.status !== 'paused') return false;
+  const wf = instance.waiting_for || '';
+  if (!FORM_WAITS.includes(wf)) return false;
+  const form = (instance.input_form as any) || null;
+  const needsSchema = ['user_input', 'entity_selection', 'catalog_selection'].includes(wf);
+  const hasSchema = !!form && (form.sections || form.fields || wf === 'catalog_selection');
+  return !needsSchema || hasSchema;
+};
+const isAdminReviewFor = (instance: WorkflowInstanceProgress | null): boolean =>
+  !!instance &&
+  (instance.waiting_for === 'child_workflow_completion' || (instance.waiting_for || '').includes('admin'));
 
 export const InstanceDetailContent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,6 +78,16 @@ export const InstanceDetailContent: React.FC = () => {
     }
   }, [id]);
 
+  // Fast background refresh while processing between steps (no form rendered,
+  // not done, not the long admin review) so the next step's UI appears on its
+  // own without pressing Refresh.
+  useEffect(() => {
+    if (!id || !instance) return;
+    if (isDoneStatus(instance.status) || hasActiveFormFor(instance) || isAdminReviewFor(instance)) return;
+    const t = setInterval(() => fetchProgress(true), 2500);
+    return () => clearInterval(t);
+  }, [id, instance?.status, instance?.waiting_for, instance?.input_form]);
+
   const fetchProgress = async (silent: boolean = false) => {
     if (!id) return;
 
@@ -82,30 +114,6 @@ export const InstanceDetailContent: React.FC = () => {
   const handleRefresh = () => {
     setIsLoading(true);
     fetchProgress();
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return '#4caf50';
-      case 'in_progress':
-      case 'running': return '#2196f3';
-      case 'failed': return '#f44336';
-      case 'waiting': return '#ff9800';
-      case 'pending': return '#9e9e9e';
-      default: return '#757575';
-    }
-  };
-
-  const getStepStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return 'Completado';
-      case 'in_progress': return 'En Progreso';
-      case 'running': return 'En Progreso';
-      case 'waiting': return 'Esperando';
-      case 'failed': return 'Error';
-      case 'pending': return 'Pendiente';
-      default: return 'Pendiente';
-    }
   };
 
   const formatDate = (dateString: string) => {
@@ -166,22 +174,32 @@ export const InstanceDetailContent: React.FC = () => {
     );
   }
 
+  const isDone = isDoneStatus(instance.status);
+  const isCompleted = instance.status === 'completed';
+  // Show the processing indicator when the trámite is active but no citizen form
+  // is being rendered (between operators, or under admin review).
+  const hasActiveForm = hasActiveFormFor(instance);
+  const waitingForAdmin = isAdminReviewFor(instance);
+  const showProcessing = !isDone && !hasActiveForm;
+  const emittedEntities = instance.emitted_entities || [];
+
   return (
     <div className="instance-detail-container">
       <main className="instance-detail-main">
         {/* Instance Header */}
         <section className="instance-header">
           <div className="container">
-            <div className="instance-id">ID: {id.slice(0, 8)}...</div>
+            <div className="instance-id">{t('instances.instanceId')}: {id.slice(0, 8)}...</div>
             <h1 className="instance-title">{instance.workflow_name}</h1>
 
             <p className="instance-description">
-              Estado de la solicitud: <strong style={{ color: getStatusColor(instance.status) }}>
-                {getStepStatusIcon(instance.status)}
+              {t('instanceDetail.statusLabel')}:{' '}
+              <strong style={{ color: getStatusColor(instance.status) }}>
+                {t(statusI18nKey(instance.status))}
               </strong>.
-              {instance.progress_percentage === 100
-                ? ' Felicitaciones, su trámite ha sido completado.'
-                : ` Progreso: ${instance.progress_percentage.toFixed(0)}% completado.`
+              {isCompleted
+                ? ` ${t('instanceDetail.completedMessage')}`
+                : ` ${t('instanceDetail.progressMessage', { percent: instance.progress_percentage.toFixed(0) })}`
               }
             </p>
 
@@ -197,9 +215,9 @@ export const InstanceDetailContent: React.FC = () => {
                   />
                 </div>
                 <div className="progress-labels">
-                  <span>Iniciado</span>
-                  <span>{instance.progress_percentage.toFixed(1)}% Completado</span>
-                  <span>Finalizado</span>
+                  <span>{t('instanceDetail.started')}</span>
+                  <span>{instance.progress_percentage.toFixed(0)}% {t('workflow.complete')}</span>
+                  <span>{t('instanceDetail.finished')}</span>
                 </div>
               </div>
             </div>
@@ -207,26 +225,35 @@ export const InstanceDetailContent: React.FC = () => {
             <div className="instance-meta">
               <span className="meta-item">
                 <i className="icon-steps"></i>
-                Progreso: {instance.completed_steps} de {instance.total_steps} pasos
+                {t('instanceDetail.stepsProgress', { completed: instance.completed_steps, total: instance.total_steps })}
               </span>
               <span className="meta-item">
                 <i className="icon-calendar"></i>
-                Iniciado: {formatDate(instance.created_at)}
+                {t('workflow.started')}: {formatDate(instance.created_at)}
               </span>
               <span className="meta-item">
                 <i className="icon-update"></i>
-                Última actualización: {lastUpdated.toLocaleTimeString()}
+                {t('workflow.last_updated')}: {lastUpdated.toLocaleTimeString()}
               </span>
             </div>
 
             <div className="instance-actions">
-              <button
-                className="btn-refresh"
-                onClick={handleRefresh}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Actualizando...' : 'Actualizar'}
-              </button>
+              {!isDone ? (
+                <button
+                  className="btn-refresh"
+                  onClick={handleRefresh}
+                  disabled={isLoading}
+                >
+                  {isLoading ? t('instanceDetail.refreshing') : t('common.refresh')}
+                </button>
+              ) : (
+                <span className="instance-finished-note">
+                  <i className="icon-check"></i>
+                  {instance.completed_at
+                    ? t('instanceDetail.finishedOn', { date: formatDate(instance.completed_at) })
+                    : t('instanceDetail.finishedNote')}
+                </span>
+              )}
             </div>
           </div>
         </section>
@@ -242,113 +269,50 @@ export const InstanceDetailContent: React.FC = () => {
           onRewind={handleRewindToTask}
         />
 
-        {/* Steps Timeline */}
-        <section className="steps-timeline-section">
-          <div className="container">
-            <h2>Progreso del Trámite</h2>
+        {/* Emitted entity(ies) shown inline once the trámite concludes */}
+        {isDone && emittedEntities.length > 0 && (
+          <EmittedEntitiesSection entities={emittedEntities} />
+        )}
 
-            <div className="timeline">
-              {instance.step_progress.map((step, index) => (
-                <div key={step.step_id} className={`timeline-item ${step.status}`}>
-                  <div className="timeline-marker">
-                    <span
-                      className="marker-number"
-                      style={{ backgroundColor: getStatusColor(step.status) }}
-                    >
-                      {index + 1}
-                    </span>
-                    {index < instance.step_progress.length - 1 && (
-                      <div className="timeline-line" />
-                    )}
-                  </div>
-
-                  <div className="timeline-content">
-                    <div className="step-header">
-                      <h3>{step.name}</h3>
-                      <span
-                        className="step-status"
-                        style={{
-                          backgroundColor: getStatusColor(step.status),
-                          color: 'white',
-                          padding: '0.3rem 0.8rem',
-                          borderRadius: '4px',
-                          fontSize: '0.8rem'
-                        }}
-                      >
-                        {getStepStatusIcon(step.status)}
-                      </span>
-                    </div>
-
-                    <p className="step-description">{step.description}</p>
-
-                    <div className="step-details">
-                      {step.started_at && (
-                        <span className="step-time">
-                          <i className="icon-clock"></i>
-                          Iniciado: {formatDate(step.started_at)}
-                        </span>
-                      )}
-                      {step.completed_at && (
-                        <span className="step-time">
-                          <i className="icon-check"></i>
-                          Completado: {formatDate(step.completed_at)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Current Status */}
-        {instance.current_step && !instance.requires_input && (() => {
-          const currentStepProgress = instance.step_progress.find(
-            (s) => s.step_id === instance.current_step
-          );
-          const friendlyName = currentStepProgress?.name || instance.current_step;
-          const waitingForAdmin =
-            instance.waiting_for === 'child_workflow_completion' ||
-            (instance.waiting_for || '').includes('admin');
-          return (
-            <section className="current-status-section">
-              <div className="container">
-                <div className="status-card">
-                  <h2>{waitingForAdmin ? 'En revisión' : 'Paso Actual'}</h2>
-                  <div className="current-step">
-                    <div className="step-icon">
-                      <i className="icon-processing"></i>
-                    </div>
-                    <div className="step-info">
-                      <strong>{friendlyName}</strong>
-                      {waitingForAdmin ? (
-                        <>
-                          <p style={{ marginTop: '0.5rem' }}>
-                            Su solicitud fue recibida y está en revisión por un validador.
-                          </p>
-                          <p style={{ marginTop: '0.25rem' }}>
-                            <strong>Folio:</strong> <code>{id}</code>
-                          </p>
-                          <p style={{ marginTop: '0.25rem' }}>
-                            <strong>Plazo estimado de resolución:</strong> 21 días hábiles
-                          </p>
-                          <p style={{ marginTop: '0.25rem', color: '#666' }}>
-                            Recibirá notificación cuando la revisión se complete. Puede cerrar
-                            esta página; podrá consultar el estado en cualquier momento con
-                            este folio.
-                          </p>
-                        </>
-                      ) : (
-                        <p>Su solicitud está siendo procesada. La información se actualizará automáticamente.</p>
-                      )}
-                    </div>
-                  </div>
+        {/* Admin review notice (static; no live timer) */}
+        {showProcessing && waitingForAdmin && (
+          <section className="current-status-section">
+            <div className="container">
+              <div className="status-card review">
+                <h2>{t('instanceDetail.underReviewTitle')}</h2>
+                <div className="review-details">
+                  <p>{t('instanceDetail.underReviewBody')}</p>
+                  <p><strong>{t('instanceDetail.folio')}:</strong> <code>{id}</code></p>
+                  <p><strong>{t('instanceDetail.resolutionTime')}:</strong> {t('instanceDetail.resolutionTimeValue')}</p>
+                  <p className="review-hint">{t('instanceDetail.underReviewHint')}</p>
                 </div>
               </div>
-            </section>
-          );
-        })()}
+            </div>
+          </section>
+        )}
+
+        {/* Processing between steps: spinner + background auto-refresh */}
+        {showProcessing && !waitingForAdmin && (
+          <section className="current-status-section">
+            <div className="container">
+              <div className="processing-card" role="status" aria-live="polite">
+                <div className="spinner" aria-hidden="true"></div>
+                <div>
+                  <strong>{t('instanceDetail.processingTitle')}</strong>
+                  <p>{t('instanceDetail.processingBody')}</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Steps Timeline — branch-aware, grouped by phase */}
+        <StepTimeline
+          steps={instance.step_progress}
+          routeLabel={instance.route_label}
+          currentStepId={instance.current_step}
+          formatDate={formatDate}
+        />
       </main>
     </div>
   );

@@ -11,10 +11,10 @@ import {
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLoginDialog } from '../../contexts/LoginDialogContext';
 import { HeaderLogo } from './HeaderLogo';
 import { ProfileMenu } from './ProfileMenu';
 import { NavigationDrawer } from './NavigationDrawer';
-import keycloakService from '../../services/keycloak';
 
 interface MobileHeaderProps {
   showBackLink?: boolean;
@@ -28,6 +28,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
 }) => {
   const theme = useTheme() as any;
   const { isAuthenticated } = useAuth();
+  const { openLogin } = useLoginDialog();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const headerTheme = theme.header || {};
@@ -80,7 +81,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
             ) : (
               <IconButton
                 color="inherit"
-                onClick={() => keycloakService.login()}
+                onClick={openLogin}
                 size="medium"
               >
                 <LoginIcon />

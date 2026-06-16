@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useLoginDialog } from '../../../contexts/LoginDialogContext';
 
 const menuItemStyle: React.CSSProperties = {
   display: 'block',
@@ -18,7 +19,8 @@ const menuItemStyle: React.CSSProperties = {
 
 export const SessionSlot: React.FC = () => {
   const { t } = useTranslation();
-  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { openLogin } = useLoginDialog();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -27,7 +29,7 @@ export const SessionSlot: React.FC = () => {
   if (!isAuthenticated || !user) {
     return (
       <button
-        onClick={() => login()}
+        onClick={openLogin}
         style={{
           background: 'rgba(255,255,255,0.15)',
           color: '#fff',

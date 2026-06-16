@@ -45,6 +45,7 @@ replace_env_vars() {
             sed -i "s|__VITE_ENABLE_FILE_UPLOAD__|${VITE_ENABLE_FILE_UPLOAD}|g" "$file"
             sed -i "s|__VITE_MAX_FILE_SIZE__|${VITE_MAX_FILE_SIZE}|g" "$file"
             sed -i "s|__VITE_ALLOWED_FILE_TYPES__|${VITE_ALLOWED_FILE_TYPES}|g" "$file"
+            sed -i "s|__VITE_LOGIN_HIDE_PASSWORD_WITH_IDP__|${VITE_LOGIN_HIDE_PASSWORD_WITH_IDP}|g" "$file"
         fi
     done
 }

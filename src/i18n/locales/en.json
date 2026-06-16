@@ -95,6 +95,30 @@
     "congratulations_completed": "Congratulations! Your application has been completed.",
     "progress_percentage_message": "You are {{percentage}}% through the process."
   },
+  "instanceDetail": {
+    "statusLabel": "Application status",
+    "completedMessage": "Congratulations, your application has been completed.",
+    "progressMessage": "Progress: {{percent}}% complete.",
+    "started": "Started",
+    "finished": "Finished",
+    "stepsProgress": "Progress: {{completed}} of {{total}} steps",
+    "refreshing": "Refreshing...",
+    "finishedNote": "Application finished",
+    "finishedOn": "Application finished on {{date}}",
+    "progressTitle": "Application Progress",
+    "routeLabel": "Application route",
+    "processingTitle": "Processing your application",
+    "processingBody": "Preparing the next step… the page will refresh automatically.",
+    "underReviewTitle": "Under review",
+    "underReviewBody": "Your application was received and is under review by a validator.",
+    "folio": "Reference",
+    "resolutionTime": "Estimated resolution time",
+    "resolutionTimeValue": "21 business days",
+    "underReviewHint": "You will be notified when the review is complete. You can close this page; you may check the status at any time with this reference.",
+    "emittedEntityTitle": "Issued document",
+    "emittedEntitiesTitle": "Issued documents",
+    "emittedEntityError": "The issued entity detail could not be loaded."
+  },
   "auth": {
     "title": "Citizen Portal",
     "subtitle": "Access government services online",
@@ -124,7 +148,18 @@
     "invalidCredentials": "Invalid username or password",
     "accountLocked": "Account is locked. Please contact support.",
     "emailExists": "An account with this email already exists",
-    "loginRequired": "Please log in to view your applications"
+    "loginRequired": "Please log in to view your applications",
+    "loginDialog": {
+      "title": "Sign in",
+      "subtitle": "Choose how you want to access",
+      "emailPassword": "Sign in with email and password",
+      "continueWith": "Continue with {{provider}}",
+      "or": "or",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account",
+      "forgotPassword": "Forgot your password?",
+      "providersError": "Could not load sign-in options"
+    }
   },
   "dashboard": {
     "title": "Dashboard",

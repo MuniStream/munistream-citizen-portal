@@ -490,3 +490,194 @@
   border-radius: 8px;
   padding: 1.5rem;
 }
+
+/* ── Timeline heading + route chip ───────────────────────────────────────── */
+.timeline-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0 0 2rem 0;
+}
+
+.timeline-heading h2 {
+  margin: 0;
+}
+
+.route-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.85rem;
+  background: var(--primary-color, #1976d2);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* ── Phase grouping ──────────────────────────────────────────────────────── */
+.timeline-phase {
+  margin-bottom: 2rem;
+}
+
+.timeline-phase:last-child {
+  margin-bottom: 0;
+}
+
+.phase-title {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary, #6c757d);
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.step-header h4 {
+  margin: 0;
+  color: var(--text-primary, #212529);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+/* step-status pill (color comes from inline style) */
+.step-status {
+  color: #fff;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Highlight the step currently being processed */
+.timeline-item.active .timeline-content {
+  background: var(--background-paper, #f5f7fa);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-top: -0.35rem;
+  box-shadow: inset 0 0 0 1px var(--border-color, #e0e0e0);
+}
+
+/* ── Processing card (spinner + background auto-refresh) ──────────────────── */
+.processing-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--background-paper, #f5f7fa);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-left: 4px solid var(--primary-color, #1976d2);
+  border-radius: 12px;
+}
+
+.processing-card .spinner {
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.processing-card strong {
+  display: block;
+  color: var(--text-primary, #212529);
+  margin-bottom: 0.25rem;
+}
+
+.processing-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #6c757d);
+}
+
+/* ── Review card + finished note ─────────────────────────────────────────── */
+.status-card.review {
+  background: #fff8e1;
+  border-color: var(--warning-color, #ffc107);
+}
+
+.status-card.review h2 {
+  color: #8a6d00;
+}
+
+.review-details {
+  margin-top: 1rem;
+}
+
+.review-details p {
+  margin: 0 0 0.35rem 0;
+  color: var(--text-secondary, #555);
+}
+
+.review-hint {
+  color: var(--text-disabled, #888) !important;
+  font-size: 0.9rem;
+}
+
+.instance-finished-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--success-color, #2e7d32);
+  font-weight: 600;
+}
+
+/* ── Emitted entities (inline) ───────────────────────────────────────────── */
+.emitted-entities-section {
+  background: #e8f5e9;
+  padding: 3rem 0;
+  border-top: 3px solid var(--success-color, #4caf50);
+}
+
+.emitted-entities-section h2 {
+  font-size: 1.6rem;
+  margin: 0 0 1.5rem 0;
+  color: var(--success-color, #2e7d32);
+}
+
+.emitted-entity-card {
+  margin-bottom: 1.5rem;
+}
+
+.emitted-entity-card:last-child {
+  margin-bottom: 0;
+}
+
+.emitted-entities-loading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-secondary, #555);
+}
+
+.emitted-entities-loading .spinner {
+  width: 28px;
+  height: 28px;
+  margin: 0;
+}
+
+.emitted-entities-error {
+  color: var(--error-color, #b71c1c);
+}
+
+/* ── Responsive (mobile) ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .timeline-heading {
+    margin-bottom: 1.5rem;
+  }
+
+  .emitted-entities-section h2 {
+    font-size: 1.3rem;
+  }
+
+  .waiting-clock {
+    align-items: flex-start;
+  }
+
+  .instance-finished-note {
+    font-size: 0.95rem;
+  }
+}
