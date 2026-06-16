@@ -22,6 +22,8 @@ export interface WorkflowDefinition {
   requirements: string[];
   entity_requirements?: EntityRequirement[];  // New field for entity requirements with workflow links
   steps: WorkflowStep[];
+  branches?: string[];  // Route names when the workflow forks (e.g. Persona Física / Moral)
+  step_flow?: StepFlowSegment[];  // Ordered segments: common-step runs + interactive fork zones
   isActive?: boolean;  // Legacy field
   available?: boolean;  // New field from backend
   cost?: number;  // Cost in currency units
@@ -41,7 +43,26 @@ export interface WorkflowStep {
   estimatedDuration?: string;
   requirements?: string[];
   group?: string;
+  branch?: string;  // Route this step is exclusive to; absent for common steps
 }
+
+// Slim step used inside step_flow (id/name/group only)
+export interface FlowStep {
+  id: string;
+  name: string;
+  group?: string;
+}
+
+export interface FlowRoute {
+  label: string;
+  steps: FlowStep[];
+}
+
+// A segment of the preview stepper: either a run of common steps, or a fork
+// zone whose routes the citizen can expand.
+export type StepFlowSegment =
+  | { type: 'steps'; steps: FlowStep[] }
+  | { type: 'fork'; routes: FlowRoute[] };
 
 export interface WorkflowCategory {
   id: string;
