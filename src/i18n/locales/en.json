@@ -124,7 +124,18 @@
     "invalidCredentials": "Invalid username or password",
     "accountLocked": "Account is locked. Please contact support.",
     "emailExists": "An account with this email already exists",
-    "loginRequired": "Please log in to view your applications"
+    "loginRequired": "Please log in to view your applications",
+    "loginDialog": {
+      "title": "Sign in",
+      "subtitle": "Choose how you want to access",
+      "emailPassword": "Sign in with email and password",
+      "continueWith": "Continue with {{provider}}",
+      "or": "or",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account",
+      "forgotPassword": "Forgot your password?",
+      "providersError": "Could not load sign-in options"
+    }
   },
   "dashboard": {
     "title": "Dashboard",

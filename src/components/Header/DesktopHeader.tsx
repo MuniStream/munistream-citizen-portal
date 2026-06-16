@@ -18,9 +18,9 @@ import {
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLoginDialog } from '../../contexts/LoginDialogContext';
 import { HeaderLogo } from './HeaderLogo';
 import { ProfileMenu } from './ProfileMenu';
-import keycloakService from '../../services/keycloak';
 import { workflowService } from '../../services/workflowService';
 import type { WorkflowDefinition } from '../../types/workflow';
 
@@ -39,6 +39,7 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
   const navigate = useNavigate();
   const theme = useTheme() as any;
   const { isAuthenticated, user } = useAuth();
+  const { openLogin } = useLoginDialog();
   const [documentsAnchor, setDocumentsAnchor] = useState<null | HTMLElement>(null);
   const [workflowsAnchor, setWorkflowsAnchor] = useState<null | HTMLElement>(null);
   const [documentWorkflows, setDocumentWorkflows] = useState<WorkflowDefinition[]>([]);
@@ -179,7 +180,7 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
               </Box>
             ) : (
               <Button
-                onClick={() => keycloakService.login()}
+                onClick={openLogin}
                 variant="outlined"
                 color="inherit"
               >

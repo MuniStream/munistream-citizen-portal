@@ -125,7 +125,18 @@
     "invalidCredentials": "Usuario o contraseña inválidos",
     "accountLocked": "La cuenta está bloqueada. Contacte soporte.",
     "emailExists": "Ya existe una cuenta con este email",
-    "loginRequired": "Por favor inicia sesión para ver tus solicitudes"
+    "loginRequired": "Por favor inicia sesión para ver tus solicitudes",
+    "loginDialog": {
+      "title": "Iniciar sesión",
+      "subtitle": "Elige cómo quieres acceder",
+      "emailPassword": "Entrar con correo y contraseña",
+      "continueWith": "Continuar con {{provider}}",
+      "or": "o",
+      "noAccount": "¿No tienes cuenta?",
+      "createAccount": "Crear cuenta",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "providersError": "No se pudieron cargar las opciones de inicio de sesión"
+    }
   },
   "dashboard": {
     "title": "Panel Principal",

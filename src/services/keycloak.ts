@@ -304,6 +304,36 @@ class KeycloakService {
   }
 
   /**
+   * Login with a specific identity provider - redirects straight to the IdP,
+   * skipping the Keycloak login page (uses kc_idp_hint).
+   */
+  async loginWithIdp(alias: string): Promise<void> {
+    if (!this.keycloak) {
+      await this.init();
+    }
+
+    if (this.keycloak) {
+      console.log(`[Keycloak.loginWithIdp] Redirecting via idpHint=${alias}`);
+      await this.keycloak.login({
+        redirectUri: window.location.origin + '/',
+        locale: 'es',
+        idpHint: alias,
+      });
+    }
+  }
+
+  /**
+   * Reset password - sends the user to Keycloak's reset-credentials flow.
+   */
+  async resetPassword(): Promise<void> {
+    const { url, realm, clientId } = KEYCLOAK_CONFIG;
+    const redirectUri = encodeURIComponent(window.location.origin + '/');
+    window.location.href =
+      `${url}/realms/${realm}/login-actions/reset-credentials` +
+      `?client_id=${encodeURIComponent(clientId)}&redirect_uri=${redirectUri}`;
+  }
+
+  /**
    * Register - redirects to Keycloak registration
    */
   async register(): Promise<void> {

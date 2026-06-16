@@ -64,4 +64,25 @@ api.interceptors.response.use(
   }
 );
 
+export interface IdentityProvider {
+  alias: string;
+  displayName: string;
+}
+
+/**
+ * Fetch the identity providers configured for the realm (public endpoint).
+ * Returns an empty list if none are configured or the request fails.
+ */
+export const getIdentityProviders = async (): Promise<IdentityProvider[]> => {
+  try {
+    const { data } = await api.get<{ identity_providers: IdentityProvider[] }>(
+      '/public/identity-providers'
+    );
+    return data.identity_providers || [];
+  } catch (error) {
+    console.error('[API] Failed to load identity providers', error);
+    return [];
+  }
+};
+
 export default api;
