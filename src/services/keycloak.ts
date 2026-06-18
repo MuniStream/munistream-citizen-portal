@@ -437,6 +437,10 @@ class KeycloakService {
       roles: this.getUserRoles(),
       emailVerified: tokenParsed.email_verified,
       locale: tokenParsed.locale || 'es',
+      // Llave MX identity claims
+      curp: tokenParsed.curp,
+      rfc: tokenParsed.rfc,
+      tipoPersona: tokenParsed.tipo_persona,
     };
   }
 

@@ -14,8 +14,13 @@ import {
 } from '@mui/material';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import PersonIcon from '@mui/icons-material/Person';
+import BusinessIcon from '@mui/icons-material/Business';
 import { useAuth } from '../../contexts/AuthContext';
-import profileService, { type ProfileField } from '../../services/profileService';
+import profileService, {
+  type ProfileField,
+  type LlaveMxProfile,
+  type PersonaMoral,
+} from '../../services/profileService';
 
 type FormValues = Record<string, string>;
 
@@ -23,6 +28,7 @@ export const ProfileContent: React.FC = () => {
   const { user } = useAuth();
   const [fields, setFields] = useState<ProfileField[]>([]);
   const [values, setValues] = useState<FormValues>({});
+  const [llavemx, setLlavemx] = useState<LlaveMxProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -30,11 +36,14 @@ export const ProfileContent: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [schema, profile] = await Promise.all([
+        const [schema, profile, llavemxProfile] = await Promise.all([
           profileService.getSchema(),
           profileService.getProfile(),
+          // Best-effort: a portal without Llave MX still shows the rest.
+          profileService.getLlaveMxProfile().catch(() => null),
         ]);
         setFields(schema);
+        setLlavemx(llavemxProfile);
         const initial: FormValues = {};
         for (const f of schema) {
           const v = profile.data?.[f.field_id];
@@ -52,6 +61,13 @@ export const ProfileContent: React.FC = () => {
     };
     load();
   }, []);
+
+  // CURP/RFC may arrive from the synced Llave MX profile or directly from the
+  // token claims exposed in the auth context.
+  const curp = llavemx?.curp || user?.curp || '';
+  const rfc = llavemx?.rfc || user?.rfc || '';
+  const personasMorales = llavemx?.personas_morales ?? [];
+  const hasLlaveMxData = Boolean(curp || rfc || personasMorales.length);
 
   const handleChange = (fieldId: string, value: string) => {
     setValues((prev) => ({ ...prev, [fieldId]: value }));
@@ -153,8 +169,56 @@ export const ProfileContent: React.FC = () => {
             InputProps={{ readOnly: true }}
             variant="filled"
           />
+          {curp && (
+            <TextField
+              fullWidth
+              label="CURP"
+              value={curp}
+              InputProps={{ readOnly: true }}
+              variant="filled"
+            />
+          )}
+          {rfc && (
+            <TextField
+              fullWidth
+              label="RFC"
+              value={rfc}
+              InputProps={{ readOnly: true }}
+              variant="filled"
+            />
+          )}
         </Box>
       </Paper>
+
+      {/* Personas morales (Llave MX) — solo se muestra para portales con Llave MX */}
+      {hasLlaveMxData && (
+        <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 }, mb: 3, borderRadius: 2 }}>
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
+            <BusinessIcon color="primary" />
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Personas morales
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Empresas asociadas a tu cuenta Llave MX
+              </Typography>
+            </Box>
+          </Stack>
+          <Divider sx={{ mb: 2 }} />
+
+          {personasMorales.length === 0 && (
+            <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
+              No tienes personas morales asociadas a tu cuenta.
+            </Typography>
+          )}
+
+          <Stack spacing={2}>
+            {personasMorales.map((pm, idx) => (
+              <PersonaMoralCard key={pm.rfc || idx} persona={pm} />
+            ))}
+          </Stack>
+        </Paper>
+      )}
 
       {/* Campos configurables */}
       <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 2 }}>
@@ -279,5 +343,52 @@ const ProfileFieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
     />
   );
 };
+
+const PersonaMoralCard: React.FC<{ persona: PersonaMoral }> = ({ persona }) => {
+  const dom = persona.domicilioFiscal;
+  const domicilio = dom
+    ? [dom.calle, dom.numExterior && `#${dom.numExterior}`, dom.numInterior, dom.colonia, dom.codigoPostal, dom.municipio, dom.estado]
+        .filter(Boolean)
+        .join(', ')
+    : '';
+
+  return (
+    <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+        {persona.razonSocial || 'Persona moral'}
+      </Typography>
+      <Box
+        sx={{
+          mt: 1,
+          display: 'grid',
+          gap: 1,
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+        }}
+      >
+        {persona.rfc && <Detail label="RFC" value={persona.rfc} />}
+        {persona.regimenFiscal && <Detail label="Régimen fiscal" value={persona.regimenFiscal} />}
+        {persona.correoEmpresa && <Detail label="Correo" value={persona.correoEmpresa} />}
+        {persona.folioMercantil && <Detail label="Folio mercantil" value={persona.folioMercantil} />}
+        {persona.vigenciaCertificado && (
+          <Detail label="Vigencia certificado" value={persona.vigenciaCertificado} />
+        )}
+        {domicilio && <Detail label="Domicilio fiscal" value={domicilio} fullWidth />}
+      </Box>
+    </Box>
+  );
+};
+
+const Detail: React.FC<{ label: string; value: string; fullWidth?: boolean }> = ({
+  label,
+  value,
+  fullWidth,
+}) => (
+  <Box sx={{ gridColumn: fullWidth ? { md: 'span 2' } : undefined }}>
+    <Typography variant="caption" color="text.secondary">
+      {label}
+    </Typography>
+    <Typography variant="body2">{value}</Typography>
+  </Box>
+);
 
 export default ProfileContent;

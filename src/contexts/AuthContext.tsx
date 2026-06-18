@@ -16,6 +16,8 @@ export interface User {
   address?: string;
   municipality?: string;
   curp?: string; // Mexican citizen ID
+  rfc?: string; // RFC (persona física o moral)
+  tipoPersona?: string; // "fisica" | "moral"
   locale: 'es' | 'en';
   emailVerified: boolean;
   roles: string[];
@@ -94,6 +96,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               address: userInfo.address,
               municipality: userInfo.municipality,
               curp: userInfo.curp,
+              rfc: userInfo.rfc,
+              tipoPersona: userInfo.tipoPersona,
               locale: userInfo.locale || 'es',
               emailVerified: userInfo.emailVerified || false,
               roles: userInfo.roles || [],
