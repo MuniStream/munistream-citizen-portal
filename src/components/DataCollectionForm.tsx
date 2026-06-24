@@ -50,6 +50,16 @@ export interface FormField {
     min?: number;
     max?: number;
   };
+  // Root-level constraints (convention used by backend workflows for top-level
+  // fields). Read in addition to `validation` for enforcement and live input attrs.
+  min?: number;
+  max?: number;
+  step?: number;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  // Date fields: disallow dates before today (no retroactive dates)
+  minToday?: boolean;
   helpText?: string;
   autoCompleteConfig?: {
     triggerOnLength?: number;
@@ -584,28 +594,43 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
       return `${field.label} is required`;
     }
 
-    if (value && field.validation) {
-      const { pattern, minLength, maxLength, min, max } = field.validation;
+    if (value !== undefined && value !== null && value !== '') {
+      // Constraints can be declared at the field root (backend workflow
+      // convention) or under `field.validation`; read both, root takes priority.
+      const pattern = field.pattern ?? field.validation?.pattern;
+      const minLength = field.minLength ?? field.validation?.minLength;
+      const maxLength = field.maxLength ?? field.validation?.maxLength;
+      const min = field.min ?? field.validation?.min;
+      const max = field.max ?? field.validation?.max;
 
       if (pattern && !new RegExp(pattern).test(value)) {
         return `${field.label} format is invalid`;
       }
 
-      if (minLength && value.length < minLength) {
+      if (minLength !== undefined && value.length < minLength) {
         return `${field.label} must be at least ${minLength} characters`;
       }
 
-      if (maxLength && value.length > maxLength) {
+      if (maxLength !== undefined && value.length > maxLength) {
         return `${field.label} must be no more than ${maxLength} characters`;
       }
 
       if (field.type === 'number') {
         const numValue = parseFloat(value);
         if (min !== undefined && numValue < min) {
-          return `${field.label} must be at least ${min}`;
+          return `${field.label} debe ser al menos ${min}`;
         }
         if (max !== undefined && numValue > max) {
-          return `${field.label} must be no more than ${max}`;
+          return `${field.label} no debe ser mayor que ${max}`;
+        }
+      }
+
+      if (field.type === 'date' && field.minToday) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selected = new Date(value);
+        if (!Number.isNaN(selected.getTime()) && selected < today) {
+          return `${field.label} no puede ser anterior a la fecha actual`;
         }
       }
     }
@@ -1133,7 +1158,31 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
           </div>
         );
 
-      default:
+      default: {
+        // Apply constraints declared at the field root or under `validation`
+        // so the browser enforces them live (HTML5) in addition to validateField.
+        const todayIso = (() => {
+          const d = new Date();
+          d.setHours(0, 0, 0, 0);
+          return d.toISOString().slice(0, 10);
+        })();
+        const numberAttrs = field.type === 'number'
+          ? {
+              min: field.min ?? field.validation?.min,
+              max: field.max ?? field.validation?.max,
+              step: field.step ?? 'any',
+            }
+          : {};
+        const dateAttrs = field.type === 'date' && field.minToday
+          ? { min: todayIso }
+          : {};
+        const textAttrs = field.type === 'text' || field.type === 'email' || field.type === 'phone'
+          ? {
+              maxLength: field.maxLength ?? field.validation?.maxLength,
+              minLength: field.minLength ?? field.validation?.minLength,
+              pattern: field.pattern ?? field.validation?.pattern,
+            }
+          : {};
         return (
           <input
             {...commonProps}
@@ -1142,8 +1191,12 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
             value={formData[field.id] || ''}
             onChange={(e) => handleInputChange(field.id, e.target.value)}
             className="form-input"
+            {...numberAttrs}
+            {...dateAttrs}
+            {...textAttrs}
           />
         );
+      }
     }
   };
 
