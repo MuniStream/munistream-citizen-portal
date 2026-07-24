@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SelfieCaptureProps {
   title: string;
@@ -15,6 +16,7 @@ export const SelfieCapture: React.FC<SelfieCaptureProps> = ({
   isSubmitting = false,
   allowFileUpload = false
 }) => {
+  const { t } = useTranslation();
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
   const [isUploaded, setIsUploaded] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -369,7 +371,7 @@ export const SelfieCapture: React.FC<SelfieCaptureProps> = ({
           <div style={{ marginBottom: '2rem' }}>
             <img
               src={(capturedFile as any).dataURL}
-              alt="Selfie captured"
+              alt={t('viewers.selfieCaptured')}
               style={{
                 maxWidth: '300px',
                 maxHeight: '300px',

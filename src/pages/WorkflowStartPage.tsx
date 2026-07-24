@@ -17,7 +17,7 @@ export const WorkflowStartPage: React.FC = () => {
 
   useEffect(() => {
     if (!workflowId) {
-      setError('Workflow ID is required');
+      setError(t('workflowStart.workflowIdRequired'));
       setIsLoading(false);
       return;
     }
@@ -27,7 +27,7 @@ export const WorkflowStartPage: React.FC = () => {
         const workflowData = await workflowService.getWorkflowById(workflowId);
         setWorkflow(workflowData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load workflow');
+        setError(err instanceof Error ? err.message : t('workflowStart.loadFailed'));
       } finally {
         setIsLoading(false);
       }
@@ -44,10 +44,10 @@ export const WorkflowStartPage: React.FC = () => {
       const instance = await workflowService.startWorkflow(workflow.id);
       
       // Show success message and redirect
-      alert(`${t('workflow.started_successfully')} Tracking ID: ${instance.instance_id}`);
+      alert(`${t('workflow.started_successfully')} ${t('workflow.instance_id')}: ${instance.instance_id}`);
       navigate(`/instances/${instance.instance_id}`);
     } catch (err) {
-      alert(`Error: ${err instanceof Error ? err.message : 'Failed to start workflow'}`);
+      alert(`${t('common.error')}: ${err instanceof Error ? err.message : t('workflowStart.startFailed')}`);
     } finally {
       setIsStarting(false);
     }
@@ -68,8 +68,8 @@ export const WorkflowStartPage: React.FC = () => {
     return (
       <div className="workflow-detail">
         <div className="error-state">
-          <h2>Application Not Found</h2>
-          <p>{error || 'The requested application could not be found.'}</p>
+          <h2>{t('workflowStart.notFoundTitle')}</h2>
+          <p>{error || t('workflowStart.notFoundBody')}</p>
           <Link to="/services" className="btn-primary">{t('workflows.title')}</Link>
         </div>
       </div>
@@ -97,8 +97,7 @@ export const WorkflowStartPage: React.FC = () => {
               <span className="category-badge">{workflow.category}</span>
               <h2>{t('workflow.start_title')}: {workflow.name}</h2>
               <p className="description">
-                You're about to start your application for {workflow.name.toLowerCase()}. 
-                Review the requirements below and click "Start Application" when ready.
+                {t('workflowStart.intro', { name: workflow.name })}
               </p>
             </div>
 
@@ -112,34 +111,34 @@ export const WorkflowStartPage: React.FC = () => {
               </button>
               
               <p className="auth-note">
-                {t('auth.noAccount')} • Instant tracking ID • Takes {workflow.estimatedDuration}
+                {t('workflowStart.authNote', { duration: workflow.estimatedDuration })}
               </p>
             </div>
           </section>
 
           {/* Important Notice */}
           <section className="requirements-section">
-            <h3>📋 Before You Start</h3>
+            <h3>📋 {t('workflowStart.beforeYouStart')}</h3>
             <div className="requirements-list">
               <div className="requirement-item">
                 <span className="check">💡</span>
                 <div>
-                  <strong>No Account Required</strong>
-                  <p>You can start this application without creating an account. You'll receive a tracking ID to monitor your progress.</p>
+                  <strong>{t('workflowStart.noAccountTitle')}</strong>
+                  <p>{t('workflowStart.noAccountBody')}</p>
                 </div>
               </div>
               <div className="requirement-item">
                 <span className="check">⏱️</span>
                 <div>
-                  <strong>Estimated Time</strong>
-                  <p>This process typically takes {workflow.estimatedDuration} from start to completion.</p>
+                  <strong>{t('workflowStart.estimatedTimeTitle')}</strong>
+                  <p>{t('workflowStart.estimatedTimeBody', { duration: workflow.estimatedDuration })}</p>
                 </div>
               </div>
               <div className="requirement-item">
                 <span className="check">📄</span>
                 <div>
-                  <strong>Prepare Your Documents</strong>
-                  <p>Make sure you have all required documents ready before starting.</p>
+                  <strong>{t('workflowStart.prepareDocsTitle')}</strong>
+                  <p>{t('workflowStart.prepareDocsBody')}</p>
                 </div>
               </div>
             </div>
@@ -181,7 +180,7 @@ export const WorkflowStartPage: React.FC = () => {
                   <div className="step-number">...</div>
                   <div className="step-content">
                     <h4>{t('workflow.and_more_steps', { count: workflow.steps.length - 6 })}</h4>
-                    <p>Complete process details will be shown during your application.</p>
+                    <p>{t('workflowStart.completeDetailsNote')}</p>
                   </div>
                 </div>
               )}
@@ -194,18 +193,18 @@ export const WorkflowStartPage: React.FC = () => {
             <div className="help-grid">
               <div className="help-card">
                 <h4>📞 {t('common.contact_support')}</h4>
-                <p>Call for immediate assistance</p>
+                <p>{t('workflowStart.callAssistance')}</p>
                 <span className="phone">(555) 123-4567</span>
               </div>
               <div className="help-card">
-                <h4>📧 Email {t('navigation.support')}</h4>
-                <p>Send your questions via email</p>
+                <h4>📧 {t('workflowStart.emailSupport')}</h4>
+                <p>{t('workflowStart.sendQuestionsEmail')}</p>
                 <span className="email">support@munistream.com</span>
               </div>
               <div className="help-card">
-                <h4>💬 Live Chat</h4>
-                <p>Chat with our support team</p>
-                <button className="btn-secondary">Start Chat</button>
+                <h4>💬 {t('workflowStart.liveChat')}</h4>
+                <p>{t('workflowStart.chatWithTeam')}</p>
+                <button className="btn-secondary">{t('workflowStart.startChat')}</button>
               </div>
             </div>
           </section>
@@ -216,10 +215,9 @@ export const WorkflowStartPage: React.FC = () => {
       {showConfirmDialog && (
         <div className="dialog-overlay" onClick={() => setShowConfirmDialog(false)}>
           <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
-            <h3>🚀 Ready to Start?</h3>
+            <h3>🚀 {t('workflowStart.readyToStart')}</h3>
             <p>
-              You're about to start your <strong>{workflow.name}</strong> application. 
-              This will create a new application instance and provide you with a tracking ID.
+              {t('workflowStart.readyToStartBody', { name: workflow.name })}
             </p>
             <div className="dialog-meta">
               <div className="meta-item">
@@ -232,12 +230,11 @@ export const WorkflowStartPage: React.FC = () => {
               </div>
               <div className="meta-item">
                 <span className="label">{t('applications.status')}:</span>
-                <span className="value">✅ Ready to start</span>
+                <span className="value">✅ {t('workflowStart.readyStatus')}</span>
               </div>
             </div>
             <p>
-              <strong>💡 Important:</strong> Save your tracking ID once the application starts. 
-              You'll need it to check your progress.
+              <strong>💡 {t('workflowStart.important')}:</strong> {t('workflowStart.saveTrackingNote')}
             </p>
             <div className="dialog-actions">
               <button 

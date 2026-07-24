@@ -176,7 +176,7 @@ export const TrackingPage: React.FC = () => {
     return (
       <div className="workflow-detail">
         <div className="error-state">
-          <h2>Tracking Error</h2>
+          <h2>{t('workflow.tracking_error')}</h2>
           <p>{error}</p>
           <button onClick={handleRefresh} className="btn-primary">{t('common.retry')}</button>
         </div>
@@ -188,8 +188,8 @@ export const TrackingPage: React.FC = () => {
     return (
       <div className="workflow-detail">
         <div className="error-state">
-          <h2>Application Not Found</h2>
-          <p>No application found with this tracking ID.</p>
+          <h2>{t('workflowStart.notFoundTitle')}</h2>
+          <p>{t('workflow.no_application_found')}</p>
           <Link to="/services" className="btn-primary">{t('workflows.title')}</Link>
         </div>
       </div>

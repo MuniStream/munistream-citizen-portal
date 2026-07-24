@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Typography, IconButton, Collapse, Paper } from '@mui/material';
 import { ExpandMore, ExpandLess, ContentCopy, GetApp } from '@mui/icons-material';
 import type { DetectedField } from '../../../utils/entityFieldDetector';
@@ -18,6 +19,7 @@ export const TextViewer: React.FC<TextViewerProps> = ({
   fieldValue,
   structured = false
 }) => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -66,13 +68,13 @@ export const TextViewer: React.FC<TextViewerProps> = ({
       <Paper variant="outlined" sx={{ p: 2, mt: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
           <Typography variant="subtitle2" color="text.secondary">
-            Structured Data
+            {t('viewers.structuredData')}
           </Typography>
           <Box>
-            <IconButton size="small" onClick={handleCopy} title={copied ? 'Copied!' : 'Copy'}>
+            <IconButton size="small" onClick={handleCopy} title={copied ? t('viewers.copied') : t('viewers.copy')}>
               <ContentCopy fontSize="small" />
             </IconButton>
-            <IconButton size="small" onClick={handleDownload} title="Download as JSON">
+            <IconButton size="small" onClick={handleDownload} title={t('viewers.downloadJson')}>
               <GetApp fontSize="small" />
             </IconButton>
             {isLongText && (
@@ -116,7 +118,7 @@ export const TextViewer: React.FC<TextViewerProps> = ({
     return (
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <IconButton size="small" onClick={handleCopy} title={copied ? 'Copied!' : 'Copy'}>
+          <IconButton size="small" onClick={handleCopy} title={copied ? t('viewers.copied') : t('viewers.copy')}>
             <ContentCopy fontSize="small" />
           </IconButton>
           {isLongText && (
@@ -155,7 +157,7 @@ export const TextViewer: React.FC<TextViewerProps> = ({
       <Typography variant="body2">
         {formattedValue}
       </Typography>
-      <IconButton size="small" onClick={handleCopy} title={copied ? 'Copied!' : 'Copy'}>
+      <IconButton size="small" onClick={handleCopy} title={copied ? t('viewers.copied') : t('viewers.copy')}>
         <ContentCopy fontSize="small" />
       </IconButton>
     </Box>

@@ -476,7 +476,7 @@ export const EntityDetailPage: React.FC = () => {
                   <thead>
                     <tr>
                       <th>{t('entity.workflow')}</th>
-                      <th>{t('entity.status')}</th>
+                      <th>{t('entity.statusLabel')}</th>
                       <th>{t('entity.started')}</th>
                       <th>{t('entity.completed')}</th>
                       <th>{t('entity.actions')}</th>

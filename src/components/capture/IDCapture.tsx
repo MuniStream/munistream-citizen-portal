@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface IDCaptureProps {
   title: string;
@@ -15,6 +16,7 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
   isSubmitting = false,
   allowFileUpload = false
 }) => {
+  const { t } = useTranslation();
   const [frontFile, setFrontFile] = useState<File | null>(null);
   const [backFile, setBackFile] = useState<File | null>(null);
   const [frontUploaded, setFrontUploaded] = useState(false);
@@ -417,7 +419,7 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
               <div>
                 <img
                   src={(frontFile as any).dataURL}
-                  alt="Document front"
+                  alt={t('viewers.documentFront')}
                   style={{
                     maxWidth: '300px',
                     maxHeight: '200px',
@@ -503,7 +505,7 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
               <div>
                 <img
                   src={(backFile as any).dataURL}
-                  alt="Document back"
+                  alt={t('viewers.documentBack')}
                   style={{
                     maxWidth: '300px',
                     maxHeight: '200px',

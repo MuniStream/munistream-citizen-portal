@@ -291,7 +291,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
         }}
       >
         <Typography variant="caption" sx={{ opacity: 0.6 }}>
-          © 2024 {t('app.name')}
+          {t('footer.copyright')}
         </Typography>
       </Box>
     </DrawerComponent>

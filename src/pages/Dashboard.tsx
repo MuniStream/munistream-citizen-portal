@@ -1,9 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { MainLayout } from '../components/Layout/MainLayout';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <MainLayout>
@@ -12,45 +14,45 @@ export const Dashboard: React.FC = () => {
       <main className="dashboard-main">
         <div className="container">
           <section className="welcome-section">
-            <h2>Welcome back, {user?.firstName}!</h2>
-            <p>Access government services and track your applications</p>
+            <h2>{t('dashboardPage.welcomeBack', { name: user?.firstName })}</h2>
+            <p>{t('dashboardPage.welcomeSubtitle')}</p>
           </section>
 
           <section className="services">
-            <h3>Available Services</h3>
+            <h3>{t('dashboardPage.availableServices')}</h3>
             <div className="service-grid">
               <div className="service-card">
-                <h4>Building Permits</h4>
-                <p>Apply for and track building permit applications</p>
-                <button className="btn-primary">Apply Now</button>
+                <h4>{t('dashboardPage.buildingPermitsTitle')}</h4>
+                <p>{t('dashboardPage.buildingPermitsDesc')}</p>
+                <button className="btn-primary">{t('dashboardPage.applyNow')}</button>
               </div>
-              
+
               <div className="service-card">
-                <h4>Business License</h4>
-                <p>Start your business license application</p>
-                <button className="btn-primary">Apply Now</button>
+                <h4>{t('dashboardPage.businessLicenseTitle')}</h4>
+                <p>{t('dashboardPage.businessLicenseDesc')}</p>
+                <button className="btn-primary">{t('dashboardPage.applyNow')}</button>
               </div>
-              
+
               <div className="service-card">
-                <h4>Citizen Registration</h4>
-                <p>Update your citizen registration information</p>
-                <button className="btn-primary">Update</button>
+                <h4>{t('dashboardPage.citizenRegistrationTitle')}</h4>
+                <p>{t('dashboardPage.citizenRegistrationDesc')}</p>
+                <button className="btn-primary">{t('dashboardPage.update')}</button>
               </div>
-              
+
               <div className="service-card">
-                <h4>Submit Complaint</h4>
-                <p>Report issues or submit complaints</p>
-                <button className="btn-primary">Submit</button>
+                <h4>{t('dashboardPage.submitComplaintTitle')}</h4>
+                <p>{t('dashboardPage.submitComplaintDesc')}</p>
+                <button className="btn-primary">{t('dashboardPage.submit')}</button>
               </div>
             </div>
           </section>
 
           <section className="my-applications">
-            <h3>My Applications</h3>
+            <h3>{t('dashboardPage.myApplications')}</h3>
             <div className="applications-list">
               <div className="application-card">
-                <h4>No applications yet</h4>
-                <p>Start your first application by selecting a service above.</p>
+                <h4>{t('dashboardPage.noApplicationsTitle')}</h4>
+                <p>{t('dashboardPage.noApplicationsDesc')}</p>
               </div>
             </div>
           </section>

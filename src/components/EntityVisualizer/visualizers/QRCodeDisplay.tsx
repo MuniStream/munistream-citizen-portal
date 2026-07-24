@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Typography, Paper, IconButton, CircularProgress } from '@mui/material';
 import { GetApp, ContentCopy } from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';
@@ -19,6 +20,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   detectedField,
   options = {}
 }) => {
+  const { t } = useTranslation();
   const [qrData, setQrData] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -86,7 +88,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <CircularProgress size={20} />
         <Typography variant="body2" color="text.secondary">
-          Generating QR code...
+          {t('viewers.generatingQr')}
         </Typography>
       </Box>
     );
@@ -96,7 +98,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
     <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', maxWidth: qrSize + 50 }}>
       <Box sx={{ mb: 1 }}>
         <Typography variant="subtitle2" color="text.secondary">
-          {detectedField.type === 'signature' ? 'Signature QR' : 'Verification QR'}
+          {detectedField.type === 'signature' ? t('viewers.signatureQr') : t('viewers.verificationQr')}
         </Typography>
       </Box>
 
@@ -115,10 +117,10 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
       </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mb: 1 }}>
-        <IconButton size="small" onClick={handleCopy} title={copied ? 'Copied!' : 'Copy data'}>
+        <IconButton size="small" onClick={handleCopy} title={copied ? t('viewers.copied') : t('viewers.copyData')}>
           <ContentCopy fontSize="small" />
         </IconButton>
-        <IconButton size="small" onClick={handleDownload} title="Download QR image">
+        <IconButton size="small" onClick={handleDownload} title={t('viewers.downloadQr')}>
           <GetApp fontSize="small" />
         </IconButton>
       </Box>

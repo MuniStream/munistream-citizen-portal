@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Typography, Paper, IconButton, Chip } from '@mui/material';
 import { LocationOn, OpenInNew, ContentCopy } from '@mui/icons-material';
 import type { DetectedField } from '../../../utils/entityFieldDetector';
@@ -15,6 +16,7 @@ export const MapViewer: React.FC<MapViewerProps> = ({
   fieldValue,
   options = {}
 }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -46,9 +48,9 @@ export const MapViewer: React.FC<MapViewerProps> = ({
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <LocationOn color="primary" fontSize="small" />
         <Typography variant="subtitle2" color="text.secondary">
-          Address
+          {t('viewers.address')}
         </Typography>
-        <Chip label="Geocoded" size="small" variant="outlined" color="primary" />
+        <Chip label={t('viewers.geocoded')} size="small" variant="outlined" color="primary" />
       </Box>
 
       <Box sx={{ mb: 2 }}>
@@ -57,15 +59,15 @@ export const MapViewer: React.FC<MapViewerProps> = ({
         </Typography>
 
         <Typography variant="caption" color="text.secondary">
-          Click to view on map
+          {t('viewers.clickToViewOnMap')}
         </Typography>
       </Box>
 
       <Box sx={{ display: 'flex', gap: 1 }}>
-        <IconButton size="small" onClick={handleOpenInMaps} title="Open in Google Maps">
+        <IconButton size="small" onClick={handleOpenInMaps} title={t('viewers.openInGoogleMaps')}>
           <OpenInNew fontSize="small" />
         </IconButton>
-        <IconButton size="small" onClick={handleCopy} title={copied ? 'Copied!' : 'Copy address'}>
+        <IconButton size="small" onClick={handleCopy} title={copied ? t('viewers.copied') : t('viewers.copyAddress')}>
           <ContentCopy fontSize="small" />
         </IconButton>
       </Box>
@@ -73,7 +75,7 @@ export const MapViewer: React.FC<MapViewerProps> = ({
       {options.showCoordinates && options.coordinates && (
         <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-            Coordinates: {options.coordinates.lat}, {options.coordinates.lng}
+            {t('viewers.coordinates')}: {options.coordinates.lat}, {options.coordinates.lng}
           </Typography>
         </Box>
       )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Typography, Paper, IconButton, CircularProgress } from '@mui/material';
 import { GetApp, OpenInNew, PictureAsPdf } from '@mui/icons-material';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -28,6 +29,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
   fieldName,
   fieldValue
 }) => {
+  const { t } = useTranslation();
   const [pdfData, setPdfData] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +52,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
         setPdfData(url);
       } catch (err) {
         console.error('Failed to fetch PDF:', err);
-        setError('Failed to load PDF');
+        setError(t('viewers.pdfLoadError'));
       } finally {
         setLoading(false);
       }
@@ -95,7 +97,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
       <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
         <CircularProgress size={40} />
         <Typography variant="body2" sx={{ mt: 1 }}>
-          Loading PDF...
+          {t('viewers.loadingPdf')}
         </Typography>
       </Paper>
     );
@@ -106,7 +108,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
       <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
         <PictureAsPdf color="error" sx={{ fontSize: 48 }} />
         <Typography variant="subtitle2" color="error" gutterBottom>
-          PDF Error
+          {t('viewers.pdfError')}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {error}
@@ -119,13 +121,13 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
     <Paper variant="outlined" sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="subtitle2" color="text.secondary">
-          PDF Document
+          {t('viewers.pdfDocument')}
         </Typography>
         <Box>
-          <IconButton onClick={handleOpen} title="Open PDF" size="small">
+          <IconButton onClick={handleOpen} title={t('viewers.openPdf')} size="small">
             <OpenInNew />
           </IconButton>
-          <IconButton onClick={handleDownload} title="Download PDF" size="small">
+          <IconButton onClick={handleDownload} title={t('viewers.downloadPdf')} size="small">
             <GetApp />
           </IconButton>
         </Box>
@@ -157,7 +159,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
 
       {numPages > 1 && (
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, textAlign: 'center' }}>
-          Page 1 of {numPages}
+          {t('viewers.pageOf', { page: 1, total: numPages })}
         </Typography>
       )}
     </Paper>

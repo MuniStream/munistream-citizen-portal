@@ -351,7 +351,7 @@ export const MyInstancesPage: React.FC = () => {
                       </Box>
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="caption" color="text.secondary" display="block">
-                          {t('workflow.lastUpdated')}
+                          {t('workflow.last_updated')}
                         </Typography>
                         <Typography variant="body2">
                           {new Date(instance.updated_at).toLocaleDateString()}

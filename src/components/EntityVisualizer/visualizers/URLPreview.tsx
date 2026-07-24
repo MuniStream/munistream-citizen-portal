@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Typography, Paper, IconButton, Chip } from '@mui/material';
 import { OpenInNew, Link as LinkIcon, ContentCopy } from '@mui/icons-material';
 import type { DetectedField } from '../../../utils/entityFieldDetector';
@@ -14,6 +15,7 @@ interface URLPreviewProps {
 export const URLPreview: React.FC<URLPreviewProps> = ({
   fieldValue
 }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [urlInfo, setUrlInfo] = useState<{
     hostname: string;
@@ -58,7 +60,7 @@ export const URLPreview: React.FC<URLPreviewProps> = ({
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <LinkIcon color="primary" fontSize="small" />
         <Typography variant="subtitle2" color="text.secondary">
-          URL Link
+          {t('viewers.urlLink')}
         </Typography>
         {urlInfo && (
           <Chip
@@ -87,16 +89,16 @@ export const URLPreview: React.FC<URLPreviewProps> = ({
 
         {urlInfo && (
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-            Domain: {urlInfo.hostname}
+            {t('viewers.domain')}: {urlInfo.hostname}
           </Typography>
         )}
       </Box>
 
       <Box sx={{ display: 'flex', gap: 1 }}>
-        <IconButton size="small" onClick={handleOpen} title="Open in new tab">
+        <IconButton size="small" onClick={handleOpen} title={t('viewers.openInNewTab')}>
           <OpenInNew fontSize="small" />
         </IconButton>
-        <IconButton size="small" onClick={handleCopy} title={copied ? 'Copied!' : 'Copy URL'}>
+        <IconButton size="small" onClick={handleCopy} title={copied ? t('viewers.copied') : t('viewers.copyUrl')}>
           <ContentCopy fontSize="small" />
         </IconButton>
       </Box>
