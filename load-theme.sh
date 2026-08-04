@@ -21,6 +21,52 @@ fi
 
 echo "🎨 Loading theme for tenant: $TENANT_ID"
 
+# ---------------------------------------------------------------------------
+# Inyectar el tema resuelto dentro de index.html.
+#
+# Sin esto el portal tiene que pedir /themes/theme-config.json por fetch durante
+# el montaje, y ese fetch compite con la navegacion que dispara el arranque de
+# Keycloak: si pierde la carrera se cancela, la app se queda con el tema MUI por
+# defecto y solo se recupera si algun remount reintenta. Inyectado, el tema ya
+# esta disponible de forma sincrona en el primer render.
+#
+# Se define aqui arriba porque hay que llamarlo tanto en la salida temprana (el
+# tenant sin directorio de tema, que recibe el tema por defecto) como al final.
+# ---------------------------------------------------------------------------
+inject_theme_into_index() {
+    INDEX_FILE="/usr/share/nginx/html/index.html"
+    if [ ! -f "$INDEX_FILE" ] || [ ! -f "$THEME_TARGET_DIR/theme-config.json" ]; then
+        echo "ℹ️  Sin index.html o sin theme-config.json; el portal usara el fetch de respaldo"
+        return 0
+    fi
+    node -e "
+        const fs = require('fs');
+        const indexFile = '$INDEX_FILE';
+        try {
+            const config = JSON.parse(fs.readFileSync('$THEME_TARGET_DIR/theme-config.json', 'utf8'));
+            let html = fs.readFileSync(indexFile, 'utf8');
+
+            // Idempotente: el contenedor puede reiniciarse y volver a ejecutar esto.
+            html = html.replace(/\s*<script data-theme-config>[\s\S]*?<\/script>/g, '');
+
+            // Escapar '<' evita que un '</script>' dentro del JSON cierre la etiqueta.
+            const json = JSON.stringify(config).replace(/</g, '\\\\u003c');
+            const tag = '\n    <script data-theme-config>window.__THEME_CONFIG__=' + json + ';</script>';
+
+            if (/<head[^>]*>/i.test(html)) {
+                html = html.replace(/<head[^>]*>/i, (m) => m + tag);
+            } else {
+                html = tag + html;
+            }
+            fs.writeFileSync(indexFile, html);
+            console.log('✅ Tema inyectado en index.html (window.__THEME_CONFIG__)');
+        } catch (error) {
+            // No es fatal: el portal cae al fetch de respaldo.
+            console.error('⚠️  No se pudo inyectar el tema en index.html:', error.message);
+        }
+    "
+}
+
 # Create target theme directory
 mkdir -p "$THEME_TARGET_DIR"
 
@@ -56,6 +102,7 @@ if [ ! -d "$THEME_SOURCE_DIR" ]; then
 }
 EOF
     echo "✅ Created default theme configuration"
+    inject_theme_into_index
     exit 0
 fi
 
@@ -101,6 +148,23 @@ if [ -f "$THEME_SOURCE_DIR/theme.yaml" ]; then
                     });
                 } catch(e) {}
                 themeConfig.html_overrides = htmlOverrides;
+
+                // Descartar referencias a assets que el tenant no trae. Si se dejan,
+                // ThemeContext apunta el favicon a /themes/assets/<archivo> y produce
+                // un 404 garantizado en cada carga de pagina.
+                if (themeConfig.assets) {
+                    const missing = [];
+                    for (const [key, file] of Object.entries(themeConfig.assets)) {
+                        if (typeof file !== 'string' || !file) continue;
+                        if (!fs.existsSync(path.join('$THEME_SOURCE_DIR', 'assets', file))) {
+                            delete themeConfig.assets[key];
+                            missing.push(key + '=' + file);
+                        }
+                    }
+                    if (missing.length > 0) {
+                        console.log('⚠️  Assets declarados pero ausentes, se omiten:', missing.join(', '));
+                    }
+                }
 
                 fs.writeFileSync('$THEME_TARGET_DIR/theme-config.json', JSON.stringify(themeConfig, null, 2));
                 console.log('✅ Theme configuration converted successfully');
@@ -327,5 +391,7 @@ if [ -d "$THEME_SOURCE_DIR/assets" ]; then
 else
     echo "ℹ️  No assets directory found"
 fi
+
+inject_theme_into_index
 
 echo "🎨 Theme loading completed for $TENANT_ID"
