@@ -427,6 +427,7 @@ export const WorkflowDetailContent: React.FC = () => {
   // ── Data derivations ───────────────────────────────────────────────────────
 
   const requirements: string[] = workflow.requirements ?? [];
+  const customFields: Array<{ label: string; value: string }> = (workflow as any)?.customFields ?? [];
   const duration = workflow.estimated_duration || (workflow as any).estimatedDuration;
   const cost = workflow.cost;
 
@@ -700,6 +701,25 @@ export const WorkflowDetailContent: React.FC = () => {
             />
             <InfoCard label="Modalidad" value="En línea" />
           </Box>
+
+          {/* Campos de metadatos dinámicos (definidos desde el admin) */}
+          {customFields.length > 0 && (
+            <Box sx={{ background: 'var(--background-paper)', borderRadius: '12px', border: '1px solid #e2e8f0', mb: 3, overflow: 'hidden' }}>
+              <Box sx={{ px: 3, py: 2, borderBottom: '1px solid #e2e8f0' }}>
+                <Typography sx={{ fontSize: '1.1em', fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-family-headings)' }}>
+                  Información del trámite
+                </Typography>
+              </Box>
+              <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {customFields.map((f, i) => (
+                  <Box key={i} sx={{ display: 'flex', gap: 1.5, px: 2, py: 1.25, background: 'var(--background-default)', borderRadius: '8px' }}>
+                    <Typography sx={{ fontWeight: 600, color: 'var(--text-secondary)', minWidth: 160 }}>{f.label}</Typography>
+                    <Typography sx={{ color: 'var(--text-primary)' }}>{f.value}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          )}
 
           {/* Documents required */}
           {requirements.length > 0 && (
