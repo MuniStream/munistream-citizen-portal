@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { humanizeKey } from '../utils/humanize';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowInstanceProgress } from '../services/workflowService';
@@ -524,7 +525,7 @@ export const TrackingPage: React.FC = () => {
                           padding: '0.3rem 0.8rem'
                         }}
                       >
-                        {step.status.replace('_', ' ').toUpperCase()}
+                        {humanizeKey(step.status).toUpperCase()}
                       </span>
                       
                       {step.started_at && (

@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { humanizeKey } from '../../utils/humanize';
 import {
   Card,
   CardContent,
@@ -222,7 +223,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
     catalogKeys.forEach(key => {
       const data = entity.data[key];
       if (data && typeof data === 'object') {
-        const title = key.replace('_data', '').replace('_', ' ').toUpperCase();
+        const title = humanizeKey(key.replace(/_data$/, '')).toUpperCase();
         catalogSections.push({ title, data });
       }
     });
@@ -241,7 +242,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
     relatedKeys.forEach(key => {
       const ids = entity.data[key];
       if (ids.length > 0) {
-        const type = key.replace('_ids', '').replace('_', ' ');
+        const type = humanizeKey(key.replace(/_ids$/, ''));
         relatedEntities.push({ type, ids });
       }
     });
@@ -479,7 +480,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
                         {Object.entries(section.data).map(([field, value]) => (
                           <TableRow key={field}>
                             <TableCell component="th" scope="row" sx={{ fontWeight: 'medium' }}>
-                              {field.replace('_', ' ').toUpperCase()}
+                              {humanizeKey(field).toUpperCase()}
                             </TableCell>
                             <TableCell>
                               {String(value)}

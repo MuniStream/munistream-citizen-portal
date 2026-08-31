@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { humanizeKey } from '../utils/humanize';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -314,7 +315,7 @@ export const MyInstancesPage: React.FC = () => {
                     {/* Current Step */}
                     {instance.current_step && (
                       <Typography variant="body2" color="text.secondary" gutterBottom>
-                        {t('instances.currentStep')}: {instance.current_step.replace('_', ' ')}
+                        {t('instances.currentStep')}: {humanizeKey(instance.current_step)}
                       </Typography>
                     )}
 
