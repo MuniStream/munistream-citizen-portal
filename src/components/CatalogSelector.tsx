@@ -231,6 +231,8 @@ export interface CatalogConfig {
   pagination_enabled: boolean;
   page_size: number;
   default_filters?: Record<string, any>;
+  hierarchical_columns?: string[];
+  postal_code_column?: string;
 }
 
 export interface CatalogSelectorProps {
@@ -259,6 +261,271 @@ interface CatalogSchema {
   searchable_columns: string[];
   filterable_columns: string[];
 }
+
+// ---------------------------------------------------------------------------
+// Selección jerárquica en cascada (p. ej. Estado -> Municipio -> Localidad)
+// con búsqueda opcional por código postal. Cada nivel consulta los valores
+// distintos filtrados por los niveles superiores (endpoint /distinct), por lo
+// que no descarga todo el catálogo.
+// ---------------------------------------------------------------------------
+interface HierarchicalCatalogFormProps {
+  title: string;
+  description: string;
+  catalog_config: CatalogConfig;
+  validation_errors?: string[];
+  onSubmit: (data: { selected_items: any[] }) => void;
+}
+
+const humanizeCol = (c: string): string =>
+  c.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+
+const HierarchicalCatalogForm: React.FC<HierarchicalCatalogFormProps> = ({
+  title,
+  description,
+  catalog_config,
+  validation_errors = [],
+  onSubmit,
+}) => {
+  const levels = catalog_config.hierarchical_columns || [];
+  const cpColumn = catalog_config.postal_code_column;
+  const baseFilters = catalog_config.default_filters || {};
+
+  const [selected, setSelected] = useState<Record<string, string>>({});
+  const [options, setOptions] = useState<Record<number, string[]>>({});
+  const [loadingLevel, setLoadingLevel] = useState<number | null>(null);
+  const [cp, setCp] = useState('');
+  const [cpMsg, setCpMsg] = useState<string | null>(null);
+  const [cpSearching, setCpSearching] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const filtersUpTo = useCallback(
+    (levelIndex: number, override?: Record<string, string>): Record<string, any> => {
+      const src = override || selected;
+      const f: Record<string, any> = { ...baseFilters };
+      for (let i = 0; i < levelIndex; i++) {
+        const col = levels[i];
+        if (src[col]) f[col] = src[col];
+      }
+      return f;
+    },
+    [selected, levels, baseFilters]
+  );
+
+  const fetchLevel = useCallback(
+    async (levelIndex: number, override?: Record<string, string>) => {
+      if (levelIndex >= levels.length) return;
+      const column = levels[levelIndex];
+      setLoadingLevel(levelIndex);
+      try {
+        const params = new URLSearchParams();
+        params.append('column', column);
+        const f = filtersUpTo(levelIndex, override);
+        if (Object.keys(f).length > 0) params.append('filters', JSON.stringify(f));
+        const resp = await api.get(
+          `/catalogs/${catalog_config.catalog_id}/distinct?${params.toString()}`
+        );
+        setOptions((prev) => ({ ...prev, [levelIndex]: resp.data.values || [] }));
+      } catch (err) {
+        console.error('Error fetching hierarchical level', column, err);
+        setOptions((prev) => ({ ...prev, [levelIndex]: [] }));
+      } finally {
+        setLoadingLevel(null);
+      }
+    },
+    [levels, filtersUpTo, catalog_config.catalog_id]
+  );
+
+  // Cargar el primer nivel al montar.
+  useEffect(() => {
+    if (levels.length > 0) fetchLevel(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalog_config.catalog_id]);
+
+  const handleSelectLevel = (levelIndex: number, value: string) => {
+    setLocalError(null);
+    setCpMsg(null);
+    // Fijar este nivel y limpiar los inferiores.
+    const next: Record<string, string> = {};
+    for (let i = 0; i < levelIndex; i++) next[levels[i]] = selected[levels[i]];
+    if (value) next[levels[levelIndex]] = value;
+    setSelected(next);
+    setOptions((prev) => {
+      const copy = { ...prev };
+      for (let i = levelIndex + 1; i < levels.length; i++) delete copy[i];
+      return copy;
+    });
+    if (value && levelIndex + 1 < levels.length) fetchLevel(levelIndex + 1, next);
+  };
+
+  const handleCpSearch = async () => {
+    const term = cp.trim();
+    if (!term || !cpColumn) return;
+    setCpSearching(true);
+    setCpMsg(null);
+    setLocalError(null);
+    try {
+      const params = new URLSearchParams();
+      params.append('filters', JSON.stringify({ ...baseFilters, [cpColumn]: term }));
+      params.append('page', '0');
+      params.append('page_size', '1');
+      const resp = await api.get(
+        `/catalogs/${catalog_config.catalog_id}/data?${params.toString()}`
+      );
+      const rows = resp.data?.data || [];
+      if (rows.length === 0) {
+        setCpMsg(`No se encontró el código postal ${term}.`);
+        return;
+      }
+      const row = rows[0];
+      // Rellenar la cascada desde la fila encontrada.
+      const next: Record<string, string> = {};
+      levels.forEach((col) => {
+        if (row[col] !== undefined && row[col] !== null) next[col] = String(row[col]);
+      });
+      setSelected(next);
+      // Poblar las opciones de cada nivel para que los selects muestren el valor.
+      for (let i = 0; i < levels.length; i++) {
+        await fetchLevel(i, next);
+      }
+      setCpMsg(
+        `Código postal ${term}: ${levels.map((c) => next[c]).filter(Boolean).join(', ')}`
+      );
+    } catch (err) {
+      console.error('Error buscando código postal', err);
+      setCpMsg('Error al buscar el código postal. Intente de nuevo.');
+    } finally {
+      setCpSearching(false);
+    }
+  };
+
+  const allSelected = levels.length > 0 && levels.every((c) => !!selected[c]);
+
+  const handleSubmit = async () => {
+    if (!allSelected) {
+      setLocalError('Seleccione todos los niveles para continuar.');
+      return;
+    }
+    setSubmitting(true);
+    setLocalError(null);
+    try {
+      const params = new URLSearchParams();
+      params.append('filters', JSON.stringify(filtersUpTo(levels.length)));
+      params.append('page', '0');
+      params.append('page_size', '1');
+      const resp = await api.get(
+        `/catalogs/${catalog_config.catalog_id}/data?${params.toString()}`
+      );
+      const rows = resp.data?.data || [];
+      const row = rows.length > 0 ? rows[0] : { ...selected };
+      onSubmit({
+        selected_items: catalog_config.selection_mode === 'single' ? row : [row],
+      });
+    } catch (err) {
+      console.error('Error al enviar selección jerárquica', err);
+      setLocalError('No se pudo confirmar la selección. Intente de nuevo.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block', marginBottom: '0.4rem', fontWeight: 600, color: '#333',
+  };
+  const controlStyle: React.CSSProperties = {
+    width: '100%', maxWidth: 500, padding: '0.6rem', borderRadius: 4,
+    border: '1px solid #ccc', fontSize: '1rem', background: '#fff',
+  };
+
+  return (
+    <div style={{ padding: '1rem' }}>
+      <h3 style={{ marginBottom: '0.5rem' }}>{title}</h3>
+      <p style={{ color: '#666', marginBottom: '1rem' }}>{description}</p>
+
+      {(validation_errors.length > 0 || localError) && (
+        <div style={{
+          backgroundColor: '#f8d7da', border: '1px solid #f5c6cb', color: '#721c24',
+          padding: '0.75rem', borderRadius: 4, marginBottom: '1rem',
+        }}>
+          {validation_errors.map((e, i) => <div key={i}>{e}</div>)}
+          {localError && <div>{localError}</div>}
+        </div>
+      )}
+
+      {cpColumn && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <label style={labelStyle}>Buscar por código postal</label>
+          <div style={{ display: 'flex', gap: '0.5rem', maxWidth: 500 }}>
+            <input
+              type="text"
+              value={cp}
+              inputMode="numeric"
+              placeholder="Ej. 80000"
+              onChange={(e) => setCp(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCpSearch(); } }}
+              style={{ ...controlStyle, flex: 1 }}
+            />
+            <button
+              type="button"
+              onClick={handleCpSearch}
+              disabled={cpSearching || !cp.trim()}
+              style={{
+                padding: '0.6rem 1rem', borderRadius: 4, border: 'none',
+                background: '#9d2449', color: '#fff', cursor: 'pointer', fontWeight: 600,
+              }}
+            >
+              {cpSearching ? 'Buscando…' : 'Buscar'}
+            </button>
+          </div>
+          {cpMsg && <div style={{ marginTop: '0.4rem', color: '#555' }}>{cpMsg}</div>}
+          <div style={{ marginTop: '0.75rem', color: '#999', fontSize: '0.85rem' }}>
+            o seleccione manualmente:
+          </div>
+        </div>
+      )}
+
+      {levels.map((col, i) => {
+        const enabled = i === 0 || !!selected[levels[i - 1]];
+        const opts = options[i] || [];
+        return (
+          <div key={col} style={{ marginBottom: '1rem' }}>
+            <label style={labelStyle}>
+              {humanizeCol(col)}<span style={{ color: '#dc3545', marginLeft: 4 }}>*</span>
+            </label>
+            <select
+              value={selected[col] || ''}
+              disabled={!enabled || loadingLevel === i}
+              onChange={(e) => handleSelectLevel(i, e.target.value)}
+              style={{ ...controlStyle, opacity: enabled ? 1 : 0.6 }}
+            >
+              <option value="">
+                {loadingLevel === i ? 'Cargando…' : `Seleccione ${humanizeCol(col).toLowerCase()}…`}
+              </option>
+              {opts.map((v) => (
+                <option key={String(v)} value={String(v)}>{String(v)}</option>
+              ))}
+            </select>
+          </div>
+        );
+      })}
+
+      <div style={{ marginTop: '1.5rem' }}>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={!allSelected || submitting}
+          style={{
+            padding: '0.7rem 1.5rem', borderRadius: 4, border: 'none',
+            background: allSelected ? '#9d2449' : '#ccc',
+            color: '#fff', cursor: allSelected ? 'pointer' : 'not-allowed', fontWeight: 600,
+          }}
+        >
+          {submitting ? 'Enviando…' : 'Continuar'}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export const CatalogSelector: React.FC<CatalogSelectorProps> = ({
   title,
@@ -309,6 +576,9 @@ export const CatalogSelector: React.FC<CatalogSelectorProps> = ({
     if (!catalog_config?.catalog_id) return;
     // Don't fetch data for exact match mode - only fetch on user submission
     if (catalog_config.interface_mode === 'exact_match') return;
+    // Hierarchical mode carga sus niveles bajo demanda (endpoint /distinct),
+    // no descarga todo el catálogo.
+    if (catalog_config.interface_mode === 'hierarchical') return;
 
     setLoading(true);
     setError(null);
@@ -376,6 +646,19 @@ export const CatalogSelector: React.FC<CatalogSelectorProps> = ({
         </div>
         <div style={{ color: '#666' }}>La configuración del catálogo no está disponible</div>
       </div>
+    );
+  }
+
+  // Render selección jerárquica en cascada (Estado -> Municipio -> Localidad)
+  if (catalog_config.interface_mode === 'hierarchical') {
+    return (
+      <HierarchicalCatalogForm
+        title={title}
+        description={description}
+        catalog_config={catalog_config}
+        validation_errors={validation_errors}
+        onSubmit={onSubmit}
+      />
     );
   }
 
