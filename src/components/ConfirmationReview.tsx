@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { humanizeKey } from '../utils/humanize';
 import './ConfirmationReview.css';
 
 export interface ConfirmationField {
@@ -199,7 +200,7 @@ export const ConfirmationReview: React.FC<ConfirmationReviewProps> = ({
                 <dl className="confirmation-section__fields">
                   {(section.fields || []).map((field) => (
                     <div key={field.key} className="confirmation-section__field">
-                      <dt>{localized(field.label, field.label_translations, locale)}</dt>
+                      <dt>{localized(field.label, field.label_translations, locale) || humanizeKey(field.key)}</dt>
                       <dd>{formatValue(field.value, field.format)}</dd>
                     </div>
                   ))}

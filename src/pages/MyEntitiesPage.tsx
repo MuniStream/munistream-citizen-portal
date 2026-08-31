@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { humanizeKey } from '../utils/humanize';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
@@ -220,7 +221,7 @@ export const MyEntitiesPage: React.FC = () => {
 
   const getEntityDisplayName = (entityType: string) => {
     const type = entityTypes.find(t => t.type_id === entityType);
-    return type?.name || entityType.replace('_', ' ').charAt(0).toUpperCase() + entityType.slice(1);
+    return type?.name || humanizeKey(entityType);
   };
 
   const formatEntityData = (data: Record<string, any>) => {
@@ -230,7 +231,7 @@ export const MyEntitiesPage: React.FC = () => {
     
     for (const field of importantFields) {
       if (data[field]) {
-        displayData.push(`${field.replace('_', ' ')}: ${data[field]}`);
+        displayData.push(`${humanizeKey(field)}: ${data[field]}`);
       }
     }
     
