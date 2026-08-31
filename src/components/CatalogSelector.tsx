@@ -359,6 +359,13 @@ export const CatalogSelector: React.FC<CatalogSelectorProps> = ({
     currentPage
   ]);
 
+  // Cargar los datos del catálogo al montar y cada vez que cambian la búsqueda,
+  // el orden o la página. Sin esto el selector se quedaba en "Cargando catálogo…"
+  // (fetchData estaba definido pero nunca se invocaba en un efecto).
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
 
   // Early return if no catalog config
   if (!catalog_config) {
