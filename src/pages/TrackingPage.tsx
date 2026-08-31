@@ -373,6 +373,8 @@ export const TrackingPage: React.FC = () => {
                                 : field.options.map((opt: any) => opt.value || opt)
                             )
                         ) : undefined,
+                        // Geo (mapa punto/polígono)
+                        geo_mode: field.geo_mode,
                         // Entity selection
                         entity_type: field.entity_type,
                         min_count: field.min_count,

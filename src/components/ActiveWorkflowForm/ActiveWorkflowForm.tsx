@@ -197,6 +197,7 @@ function renderBody(
                   ? field.options
                   : field.options.map((opt: any) => opt.value || opt)
               : undefined,
+            geo_mode: field.geo_mode,
             entity_type: field.entity_type,
             min_count: field.min_count,
             max_count: field.max_count,

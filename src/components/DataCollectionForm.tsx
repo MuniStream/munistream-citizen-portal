@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { entityService } from '../services/entityService';
+import { GeoField } from './GeoField';
 
 // Aviso con las características que debe reunir un documento para cargarse
 // correctamente (formatos, tamaño y nombre sin acentos/caracteres especiales).
@@ -39,7 +40,7 @@ export interface FormField {
   id: string;
   name: string;
   label: string;
-  type: 'text' | 'email' | 'phone' | 'date' | 'number' | 'select' | 'textarea' | 'file' | 'camera' | 'entity_select' | 'entity_multi_select' | 'array';
+  type: 'text' | 'email' | 'phone' | 'date' | 'number' | 'select' | 'textarea' | 'file' | 'camera' | 'entity_select' | 'entity_multi_select' | 'array' | 'geo';
   required: boolean;
   placeholder?: string;
   options?: string[] | EntityOption[];
@@ -66,6 +67,8 @@ export interface FormField {
     triggerOnPattern?: string;
     triggerOnValue?: string;
   };
+  // Geo field: captura de punto o polígono en un mapa (GeoJSON)
+  geo_mode?: 'point' | 'polygon';
   // Entity selection specific fields
   entity_type?: string;
   min_count?: number;
@@ -1004,6 +1007,15 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
             onChange={(e) => handleInputChange(field.id, e.target.value)}
             rows={4}
             className="form-input"
+          />
+        );
+
+      case 'geo':
+        return (
+          <GeoField
+            value={formData[field.id]}
+            onChange={(v) => handleInputChange(field.id, v)}
+            mode={field.geo_mode || 'point'}
           />
         );
 
