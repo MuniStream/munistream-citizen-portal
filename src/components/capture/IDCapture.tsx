@@ -34,8 +34,8 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
     setErrorMessage('');
-    if (!file.type.startsWith('image/')) {
-      setErrorMessage('El archivo debe ser una imagen (JPG, PNG).');
+    if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
+      setErrorMessage('El archivo debe ser una imagen (JPG, PNG) o un PDF.');
       return;
     }
     const reader = new FileReader();
@@ -409,7 +409,7 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
                 <input
                   ref={frontInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/*,application/pdf,.pdf"
                   onChange={(e) => handleFileUpload('front', e)}
                   style={{ display: 'none' }}
                 />
@@ -417,16 +417,24 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
             )}
             {frontFile && (
               <div>
-                <img
-                  src={(frontFile as any).dataURL}
-                  alt={t('viewers.documentFront')}
-                  style={{
-                    maxWidth: '300px',
-                    maxHeight: '200px',
-                    borderRadius: '8px',
-                    border: '2px solid #4caf50'
-                  }}
-                />
+                {frontFile.type === 'application/pdf' ? (
+                  <div style={{ padding: '24px 32px', borderRadius: '8px', border: '2px solid #4caf50', textAlign: 'center', color: '#2e7d32' }}>
+                    <div style={{ fontSize: 32 }}>📄</div>
+                    <div style={{ fontSize: 12, marginTop: 6, wordBreak: 'break-all' }}>{frontFile.name}</div>
+                    <div style={{ fontSize: 11, marginTop: 2 }}>PDF cargado</div>
+                  </div>
+                ) : (
+                  <img
+                    src={(frontFile as any).dataURL}
+                    alt={t('viewers.documentFront')}
+                    style={{
+                      maxWidth: '300px',
+                      maxHeight: '200px',
+                      borderRadius: '8px',
+                      border: '2px solid #4caf50'
+                    }}
+                  />
+                )}
                 <div style={{ marginTop: '1rem' }}>
                   <button
                     type="button"
@@ -495,7 +503,7 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
                 <input
                   ref={backInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/*,application/pdf,.pdf"
                   onChange={(e) => handleFileUpload('back', e)}
                   style={{ display: 'none' }}
                 />
@@ -503,16 +511,24 @@ export const IDCapture: React.FC<IDCaptureProps> = ({
             )}
             {backFile && (
               <div>
-                <img
-                  src={(backFile as any).dataURL}
-                  alt={t('viewers.documentBack')}
-                  style={{
-                    maxWidth: '300px',
-                    maxHeight: '200px',
-                    borderRadius: '8px',
-                    border: '2px solid #4caf50'
-                  }}
-                />
+                {backFile.type === 'application/pdf' ? (
+                  <div style={{ padding: '24px 32px', borderRadius: '8px', border: '2px solid #4caf50', textAlign: 'center', color: '#2e7d32' }}>
+                    <div style={{ fontSize: 32 }}>📄</div>
+                    <div style={{ fontSize: 12, marginTop: 6, wordBreak: 'break-all' }}>{backFile.name}</div>
+                    <div style={{ fontSize: 11, marginTop: 2 }}>PDF cargado</div>
+                  </div>
+                ) : (
+                  <img
+                    src={(backFile as any).dataURL}
+                    alt={t('viewers.documentBack')}
+                    style={{
+                      maxWidth: '300px',
+                      maxHeight: '200px',
+                      borderRadius: '8px',
+                      border: '2px solid #4caf50'
+                    }}
+                  />
+                )}
                 <div style={{ marginTop: '1rem' }}>
                   <button
                     type="button"
