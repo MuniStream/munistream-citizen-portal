@@ -30,7 +30,6 @@ import {
 } from '@mui/material';
 import {
   PictureAsPdf,
-  Download,
   Verified,
   Warning,
   Error as ErrorIcon,
@@ -113,41 +112,6 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
   }, []);
 
   // Download PDF
-  const handleDownload = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await axios.get(
-        `${apiBaseUrl}/signatures/entities/${entity.id}/pdf`,
-        {
-          responseType: 'blob',
-          params: {
-            include_signatures: entity.has_signature,
-          },
-        }
-      );
-
-      // Create download link
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${entity.name || entity.type}_${entity.id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      const errorMessage = axios.isAxiosError(error)
-        ? error.response?.data?.detail || error.message
-        : 'Failed to download PDF';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [entity.id, entity.name, entity.type, entity.has_signature, apiBaseUrl]);
-
   // Verify signature
   const handleVerifySignature = useCallback(async () => {
     if (!entity.has_signature) return;
@@ -602,14 +566,8 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
             </Button>
           )}
 
-          <Button
-            startIcon={<Download />}
-            onClick={handleDownload}
-            disabled={loading}
-            variant="contained"
-          >
-            Descargar PDF
-          </Button>
+          {/* "Descargar PDF" se retiró: "Imprimir/Guardar PDF" ya permite guardar
+             e imprimir. Menos opciones confusas (feedback fila 69). */}
 
           {entity.has_signature && (
             <Button
