@@ -15,7 +15,7 @@ import '../../pages/InstanceDetail.css';
 // requires_input=true even for admin / child_workflow_completion waits with no
 // form, so the processing indicator must gate on "no form shown", not on
 // requires_input.
-const FORM_WAITS = ['user_input', 'entity_selection', 'catalog_selection', 'selfie', 'id_capture', 'signature', 'confirmation', 'assertion_review'];
+const FORM_WAITS = ['user_input', 'entity_selection', 'catalog_selection', 'selfie', 'id_capture', 'signature', 'confirmation', 'assertion_review', 'missing_entities'];
 const hasActiveFormFor = (instance: WorkflowInstanceProgress | null): boolean => {
   if (!instance || instance.status !== 'paused') return false;
   const wf = instance.waiting_for || '';

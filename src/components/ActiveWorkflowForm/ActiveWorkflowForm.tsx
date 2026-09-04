@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import type { WorkflowInstanceProgress } from '../../services/workflowService';
 import { DataCollectionForm } from '../DataCollectionForm';
 import { CatalogSelector } from '../CatalogSelector';
@@ -16,7 +17,8 @@ export type ActiveFormKind =
   | 'id_capture'
   | 'signature'
   | 'confirmation'
-  | 'assertion_review';
+  | 'assertion_review'
+  | 'missing_entities';
 
 export interface ActiveFormCardSlot {
   /** Form body (DataCollectionForm, ConfirmationReview, etc.) — never null when this slot is invoked. */
@@ -108,6 +110,13 @@ function metaForKind(kind: ActiveFormKind, instance: WorkflowInstanceProgress): 
         accentColor: '#ff6d00',
         successTitle: 'Verificación enviada exitosamente',
       };
+    case 'missing_entities':
+      return {
+        waitingFor: kind,
+        title: inputForm.title || 'Te faltan requisitos para este trámite',
+        accentColor: '#e0a800',
+        successTitle: '',
+      };
   }
 }
 
@@ -137,6 +146,10 @@ function resolveKind(instance: WorkflowInstanceProgress): ActiveFormKind | null 
     case 'signature':
     case 'confirmation':
     case 'assertion_review':
+      return waitingFor;
+    case 'missing_entities':
+      // Only render if the backend actually attached the missing list.
+      if (!inputForm.missing_requirements) return null;
       return waitingFor;
     default:
       return null;
@@ -315,6 +328,59 @@ function renderBody(
           isSubmitting={isSubmitting}
         />
       );
+
+    case 'missing_entities': {
+      const missing: any[] = inputForm.missing_requirements || [];
+      return (
+        <div className="missing-requirements">
+          <p>
+            {inputForm.description ||
+              'Para continuar necesitas obtener primero lo siguiente:'}
+          </p>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            {missing.map((req, i) => (
+              <li
+                key={i}
+                style={{
+                  border: '1px solid #e0a800',
+                  borderLeft: '6px solid #e0a800',
+                  borderRadius: 6,
+                  background: '#fff7e6',
+                  padding: '1rem 1.25rem',
+                  marginBottom: '0.75rem',
+                }}
+              >
+                <strong style={{ color: '#5c4400' }}>
+                  {req.display_name || req.title || req.entity_type}
+                </strong>
+                {req.description ? (
+                  <div style={{ color: '#5c4400', marginTop: 4 }}>
+                    {req.description}
+                  </div>
+                ) : null}
+                {req.action_url ? (
+                  <Link
+                    to={req.action_url}
+                    style={{
+                      display: 'inline-block',
+                      marginTop: '0.75rem',
+                      padding: '0.5rem 1rem',
+                      background: '#9d2449',
+                      color: '#fff',
+                      borderRadius: 4,
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    Obtener {req.display_name || 'requisito'} →
+                  </Link>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
   }
 }
 
