@@ -373,8 +373,20 @@ export const WorkflowDetailContent: React.FC = () => {
       setIsStarting(true);
       const response = await workflowService.startWorkflow(workflow.workflow_id!, {});
       navigate(`/instances/${response.instance_id}`);
-    } catch {
-      alert('No se pudo iniciar el trámite. Intente nuevamente.');
+    } catch (err: any) {
+      // The backend blocks starting when a prerequisite entity is missing
+      // (HTTP 409). Surface exactly what's missing and re-run the pre-check so
+      // the requirement CTAs render, instead of a generic error.
+      const detail = err?.response?.data?.detail;
+      if (err?.response?.status === 409 && detail?.missing?.length) {
+        const names = detail.missing
+          .map((m: any) => m.display_name || m.entity_type)
+          .join(', ');
+        alert(`Para iniciar este trámite primero necesitas: ${names}.`);
+        if (workflow.workflow_id) runPreCheck(workflow.workflow_id);
+      } else {
+        alert('No se pudo iniciar el trámite. Intente nuevamente.');
+      }
     } finally {
       setIsStarting(false);
     }
