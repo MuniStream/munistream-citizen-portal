@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { entityService } from '../services/entityService';
 import { GeoField } from './GeoField';
+import { AddressField } from './AddressField';
+import type { AddressValue } from './AddressField';
 
 // Aviso con las características que debe reunir un documento para cargarse
 // correctamente (formatos, tamaño y nombre sin acentos/caracteres especiales).
@@ -40,7 +42,7 @@ export interface FormField {
   id: string;
   name: string;
   label: string;
-  type: 'text' | 'email' | 'phone' | 'date' | 'number' | 'select' | 'textarea' | 'file' | 'camera' | 'entity_select' | 'entity_multi_select' | 'array' | 'geo';
+  type: 'text' | 'email' | 'phone' | 'date' | 'number' | 'select' | 'textarea' | 'file' | 'camera' | 'entity_select' | 'entity_multi_select' | 'array' | 'geo' | 'address';
   required: boolean;
   placeholder?: string;
   options?: string[] | EntityOption[];
@@ -91,6 +93,12 @@ export interface FormField {
   // Conditional visibility (only meaningful inside item_fields; refers to
   // sibling fields in the same array item)
   show_if?: { field: string; value: string | string[] };
+  // Address field: catálogo geográfico y columnas para el autofill por CP.
+  catalog_id?: string;
+  cp_column?: string;
+  colonia_column?: string;
+  municipio_column?: string;
+  estado_column?: string;
 }
 
 export interface EntityOption {
@@ -588,6 +596,26 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
       return '';
     }
 
+    if (field.type === 'address') {
+      if (!field.required) return '';
+      const addr = (value || {}) as Record<string, any>;
+      const req: Array<[string, string]> = [
+        ['calle', 'Calle'],
+        ['no_ext', 'No. Ext'],
+        ['cp', 'Código Postal'],
+        ['colonia', 'Colonia'],
+        ['municipio', 'Municipio'],
+        ['estado', 'Estado'],
+      ];
+      for (const [key, label] of req) {
+        const val = addr[key];
+        if (val === undefined || val === null || String(val).trim() === '') {
+          return `${field.label}: ${label} es requerido`;
+        }
+      }
+      return '';
+    }
+
     if (
       field.required &&
       (value === undefined ||
@@ -1016,6 +1044,22 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
             value={formData[field.id]}
             onChange={(v) => handleInputChange(field.id, v)}
             mode={field.geo_mode || 'point'}
+          />
+        );
+
+      case 'address':
+        return (
+          <AddressField
+            value={formData[field.id] as AddressValue}
+            onChange={(v) => handleInputChange(field.id, v)}
+            disabled={isSubmitting}
+            config={{
+              catalog_id: field.catalog_id,
+              cp_column: field.cp_column,
+              colonia_column: field.colonia_column,
+              municipio_column: field.municipio_column,
+              estado_column: field.estado_column,
+            }}
           />
         );
 
