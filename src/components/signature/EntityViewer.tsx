@@ -39,6 +39,7 @@ import {
   Schedule,
 } from '@mui/icons-material';
 import axios from 'axios';
+import { entityAddressSubtitle } from '../../utils/address';
 
 interface EntityData {
   id: string;
@@ -336,6 +337,11 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
               <Typography variant="h5" gutterBottom>
                 {entity.name || `${entity.type} ${entity.id}`}
               </Typography>
+              {entityAddressSubtitle(entity.data) && (
+                <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                  {entityAddressSubtitle(entity.data)}
+                </Typography>
+              )}
               <Typography variant="body2" color="text.secondary">
                 Tipo: {entity.type} • Creado: {new Date(entity.created_at).toLocaleDateString()}
               </Typography>

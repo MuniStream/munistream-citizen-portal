@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { MainLayout } from '../components/Layout/MainLayout';
 import { authService } from '../services/authService';
+import { entityAddressSubtitle } from '../utils/address';
 import './MyEntitiesPage.css';
 
 interface Entity {
@@ -321,7 +322,7 @@ export const MyEntitiesPage: React.FC = () => {
                     <span className="entity-icon">{getEntityIcon(entity.entity_type)}</span>
                     <div className="entity-info">
                       <h3>{entity.name}</h3>
-                      <span className="entity-type">{getEntityDisplayName(entity.entity_type)}</span>
+                      <span className="entity-type">{entityAddressSubtitle(entity.data) || getEntityDisplayName(entity.entity_type)}</span>
                     </div>
                     {entity.verified && (
                       <span className="verified-badge" title={t('my_entities.verified')}>✅</span>
