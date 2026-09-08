@@ -37,6 +37,11 @@ interface AddressFieldProps {
   onChange: (value: AddressValue) => void;
   disabled?: boolean;
   config?: AddressFieldConfig;
+  // "Igual a …": cuando se define una etiqueta y un valor fuente, se muestra un
+  // checkbox que copia esa dirección (p. ej. el domicilio del solicitante) y
+  // bloquea la edición mientras esté marcado.
+  sameAsLabel?: string;
+  sameAsValue?: AddressValue;
 }
 
 const OTRA = '__otra__';
@@ -46,6 +51,8 @@ export const AddressField: React.FC<AddressFieldProps> = ({
   onChange,
   disabled,
   config,
+  sameAsLabel,
+  sameAsValue,
 }) => {
   const catalogId = config?.catalog_id || 'geografia_mx';
   const cpCol = config?.cp_column || 'codigo_postal';
@@ -60,8 +67,18 @@ export const AddressField: React.FC<AddressFieldProps> = ({
   const [cpLoading, setCpLoading] = useState(false);
   // Último CP consultado, para no repetir la búsqueda en cada render/foco.
   const [lookedUpCp, setLookedUpCp] = useState<string>('');
+  const [sameChecked, setSameChecked] = useState(false);
 
   const set = (patch: Partial<AddressValue>) => onChange({ ...v, ...patch });
+
+  // "Igual a …": al marcar, copia la dirección fuente y bloquea la edición;
+  // mientras esté marcado, se mantiene sincronizado con la fuente.
+  useEffect(() => {
+    if (sameChecked && sameAsValue) onChange({ ...sameAsValue });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sameChecked, JSON.stringify(sameAsValue || {})]);
+
+  const locked = disabled || sameChecked;
 
   const lookupCp = async (rawCp: string) => {
     const cp = (rawCp || '').trim();
@@ -158,17 +175,28 @@ export const AddressField: React.FC<AddressFieldProps> = ({
       className="address-field"
       style={{ border: '1px solid #e2e8f0', borderRadius: 8, padding: '1rem', background: '#fafafa' }}
     >
+      {sameAsLabel && (
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.75rem', cursor: disabled ? 'default' : 'pointer', color: '#334155' }}>
+          <input
+            type="checkbox"
+            checked={sameChecked}
+            disabled={disabled}
+            onChange={(e) => setSameChecked(e.target.checked)}
+          />
+          <span>{sameAsLabel}</span>
+        </label>
+      )}
       {cell('Calle *', (
-        <input style={inputStyle} value={v.calle || ''} disabled={disabled}
+        <input style={inputStyle} value={v.calle || ''} disabled={locked}
           onChange={(e) => set({ calle: e.target.value })} />
       ))}
       <div style={{ display: 'flex', gap: '0.75rem' }}>
         <div style={{ flex: 1 }}>{cell('No. Ext *', (
-          <input style={inputStyle} value={v.no_ext || ''} disabled={disabled}
+          <input style={inputStyle} value={v.no_ext || ''} disabled={locked}
             onChange={(e) => set({ no_ext: e.target.value })} />
         ))}</div>
         <div style={{ flex: 1 }}>{cell('No. Int', (
-          <input style={inputStyle} value={v.no_int || ''} disabled={disabled}
+          <input style={inputStyle} value={v.no_int || ''} disabled={locked}
             onChange={(e) => set({ no_int: e.target.value })} />
         ))}</div>
       </div>
@@ -177,7 +205,7 @@ export const AddressField: React.FC<AddressFieldProps> = ({
           <input
             style={inputStyle}
             value={v.cp || ''}
-            disabled={disabled}
+            disabled={locked}
             inputMode="numeric"
             maxLength={5}
             placeholder="5 dígitos"
@@ -192,11 +220,11 @@ export const AddressField: React.FC<AddressFieldProps> = ({
       {cell('Colonia *', (
         manualColonia ? (
           <div>
-            <input style={inputStyle} value={v.colonia || ''} disabled={disabled}
+            <input style={inputStyle} value={v.colonia || ''} disabled={locked}
               placeholder="Escriba su colonia"
               onChange={(e) => set({ colonia: e.target.value })} />
             {coloniaOptions.length > 0 && (
-              <button type="button" disabled={disabled}
+              <button type="button" disabled={locked}
                 onClick={() => { setManualColonia(false); set({ colonia: '' }); }}
                 style={{ marginTop: 4, background: 'none', border: 'none', color: '#9d2449', cursor: 'pointer', textDecoration: 'underline', padding: 0, fontSize: '0.85em' }}>
                 Elegir de la lista
@@ -222,13 +250,13 @@ export const AddressField: React.FC<AddressFieldProps> = ({
       <div style={{ display: 'flex', gap: '0.75rem' }}>
         <div style={{ flex: 1 }}>{cell('Municipio *', (
           <input style={roStyle} value={v.municipio || ''}
-            readOnly={!!v.municipio} disabled={disabled}
+            readOnly={!!v.municipio} disabled={locked}
             placeholder="Se llena con el CP"
             onChange={(e) => set({ municipio: e.target.value })} />
         ))}</div>
         <div style={{ flex: 1 }}>{cell('Estado *', (
           <input style={roStyle} value={v.estado || ''}
-            readOnly={!!v.estado} disabled={disabled}
+            readOnly={!!v.estado} disabled={locked}
             placeholder="Se llena con el CP"
             onChange={(e) => set({ estado: e.target.value })} />
         ))}</div>

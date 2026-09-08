@@ -99,6 +99,10 @@ export interface FormField {
   colonia_column?: string;
   municipio_column?: string;
   estado_column?: string;
+  // Address field: nombre de otro campo address del mismo formulario para ofrecer
+  // "Igual a …" (copia esa dirección), p. ej. same_as: "domicilio_solicitante".
+  same_as?: string;
+  same_as_label?: string;
 }
 
 export interface EntityOption {
@@ -1060,6 +1064,8 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
               municipio_column: field.municipio_column,
               estado_column: field.estado_column,
             }}
+            sameAsLabel={field.same_as_label}
+            sameAsValue={field.same_as ? (formData[field.same_as] as AddressValue) : undefined}
           />
         );
 
