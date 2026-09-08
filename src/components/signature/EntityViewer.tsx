@@ -112,6 +112,36 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
     }
   }, []);
 
+  // Descargar el PDF renderizado por el servidor (mismo visualizador/plantilla/
+  // datos que el preview del EntityViewer, con la foto embebida). Reemplaza el
+  // "print" del navegador, que con @page 130x90mm recortaba/movía el layout y
+  // dejaba la credencial descargada distinta al preview.
+  const handleDownloadPdf = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axios.get(
+        `${apiBaseUrl}/signatures/entities/${entity.id}/pdf`,
+        { responseType: 'blob' }
+      );
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${entity.name || entity.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      const msg = axios.isAxiosError(err)
+        ? err.response?.data?.detail || err.message
+        : 'No se pudo descargar el PDF';
+      setError(typeof msg === 'string' ? msg : 'No se pudo descargar el PDF');
+    } finally {
+      setLoading(false);
+    }
+  }, [entity.id, entity.name, apiBaseUrl]);
+
   // Download PDF
   // Verify signature
   const handleVerifySignature = useCallback(async () => {
@@ -564,16 +594,27 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
           {htmlContent && (
             <Button
               startIcon={<PictureAsPdf />}
+              onClick={handleDownloadPdf}
+              disabled={loading}
+              variant="contained"
+            >
+              Descargar PDF
+            </Button>
+          )}
+          {htmlContent && (
+            <Button
+              startIcon={<PictureAsPdf />}
               onClick={handlePrintHtml}
               disabled={loading}
               variant="outlined"
             >
-              Imprimir/Guardar PDF
+              Imprimir
             </Button>
           )}
 
-          {/* "Descargar PDF" se retiró: "Imprimir/Guardar PDF" ya permite guardar
-             e imprimir. Menos opciones confusas (feedback fila 69). */}
+          {/* "Descargar PDF" ahora baja el PDF renderizado por el servidor (mismo
+             visualizador/plantilla/datos que el preview, con foto). "Imprimir"
+             queda como opción para imprimir el preview desde el navegador. */}
 
           {entity.has_signature && (
             <Button
