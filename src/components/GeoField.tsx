@@ -79,6 +79,10 @@ export const GeoField: React.FC<GeoFieldProps> = ({
   disabled = false,
 }) => {
   const [points, setPoints] = useState<LatLng[]>(() => pointsFromValue(value, mode));
+  // Entrada manual de coordenadas (para quien ya tiene lat/long exactas y no
+  // quiere navegar el mapa).
+  const [latInput, setLatInput] = useState<string>('');
+  const [lngInput, setLngInput] = useState<string>('');
 
   // Sincronizar si el valor externo cambia (p.ej. reset del formulario).
   useEffect(() => {
@@ -88,6 +92,25 @@ export const GeoField: React.FC<GeoFieldProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
+
+  // En modo punto, reflejar en los inputs el punto colocado en el mapa.
+  useEffect(() => {
+    if (mode === 'point' && points.length) {
+      setLatInput(points[0][0].toFixed(6));
+      setLngInput(points[0][1].toFixed(6));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [points, mode]);
+
+  const parseCoords = (): LatLng | null => {
+    const lat = parseFloat(latInput);
+    const lng = parseFloat(lngInput);
+    if (
+      Number.isFinite(lat) && Number.isFinite(lng) &&
+      lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180
+    ) return [lat, lng];
+    return null;
+  };
 
   const emit = (pts: LatLng[]) => {
     setPoints(pts);
@@ -128,6 +151,37 @@ export const GeoField: React.FC<GeoFieldProps> = ({
           )}
         </MapContainer>
       </div>
+
+      {!disabled && (
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.75rem', color: '#555' }}>Latitud</label>
+            <input
+              type="number" step="any" inputMode="decimal" placeholder="19.4326"
+              value={latInput}
+              onChange={(e) => setLatInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); const ll = parseCoords(); if (ll) emit(mode === 'point' ? [ll] : [...points, ll]); } }}
+              style={{ width: 130, padding: '4px 6px', border: '1px solid #cbd5e1', borderRadius: 4 }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.75rem', color: '#555' }}>Longitud</label>
+            <input
+              type="number" step="any" inputMode="decimal" placeholder="-99.1332"
+              value={lngInput}
+              onChange={(e) => setLngInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); const ll = parseCoords(); if (ll) emit(mode === 'point' ? [ll] : [...points, ll]); } }}
+              style={{ width: 130, padding: '4px 6px', border: '1px solid #cbd5e1', borderRadius: 4 }}
+            />
+          </div>
+          <button
+            type="button" className="btn-secondary" style={{ padding: '5px 10px' }}
+            onClick={() => { const ll = parseCoords(); if (ll) emit(mode === 'point' ? [ll] : [...points, ll]); }}
+          >
+            {mode === 'point' ? 'Colocar en el mapa' : 'Agregar vértice'}
+          </button>
+        </div>
+      )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
         <span style={{ fontSize: '0.85rem', color: '#555' }}>
