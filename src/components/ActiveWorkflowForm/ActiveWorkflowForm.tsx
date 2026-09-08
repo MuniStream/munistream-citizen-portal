@@ -211,6 +211,14 @@ function renderBody(
                   : field.options.map((opt: any) => opt.value || opt)
               : undefined,
             geo_mode: field.geo_mode,
+            // Address field: catálogo geográfico y columnas para el autofill por CP.
+            catalog_id: field.catalog_id,
+            cp_column: field.cp_column,
+            colonia_column: field.colonia_column,
+            municipio_column: field.municipio_column,
+            estado_column: field.estado_column,
+            same_as: field.same_as,
+            same_as_label: field.same_as_label,
             entity_type: field.entity_type,
             min_count: field.min_count,
             max_count: field.max_count,

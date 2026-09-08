@@ -68,6 +68,22 @@ function formatValue(value: any, format?: string): string {
     if (format === 'file' && (value as any).filename) {
       return (value as any).filename as string;
     }
+    if (format === 'address') {
+      const a = value as Record<string, any>;
+      const l1 = [
+        a.calle,
+        a.no_ext ? `No. Ext ${a.no_ext}` : '',
+        a.no_int ? `No. Int ${a.no_int}` : '',
+      ].filter(Boolean).join(' ');
+      const l2 = [
+        a.colonia ? `Col. ${a.colonia}` : '',
+        a.municipio,
+        a.estado,
+        a.cp ? `C.P. ${a.cp}` : '',
+      ].filter(Boolean).join(', ');
+      const out = [l1, l2].filter(Boolean).join(', ');
+      return out || '—';
+    }
     if ((value as any).url) {
       return (value as any).url as string;
     }
