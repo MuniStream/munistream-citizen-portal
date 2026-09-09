@@ -6,6 +6,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { humanizeKey } from '../../utils/humanize';
+import { authService } from '../../services/authService';
 import {
   Card,
   CardContent,
@@ -245,41 +246,48 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
     return relatedEntities;
   };
 
-  // Helper function to detect and format S3 file URLs
+  /**
+   * Archivos de la entidad, identificados por su `s3_key`.
+   *
+   * Antes se construía aquí la URL de descarga directa. Esa ruta no exigía
+   * ninguna credencial: quien conociera la llave bajaba cualquier objeto del
+   * bucket. Ahora se guarda la llave y el token se pide al descargar, contra
+   * un endpoint que sí comprueba que el archivo sea de esta entidad y de quien
+   * lo pide.
+   */
   const getS3Files = () => {
-    const fileGroups: { title: string; files: Array<{ name: string; url: string; size?: number }> }[] = [];
+    const fileGroups: { title: string; files: Array<{ name: string; s3Key: string; size?: number }> }[] = [];
 
-    // Look for S3 URLs in various fields
     const data = entity.data;
 
-    // Check for uploaded_files array
     if (data.uploaded_files && Array.isArray(data.uploaded_files)) {
-      const files = data.uploaded_files.map((file: any) => ({
-        name: file.filename || 'Archivo',
-        url: `/files/download/${file.s3_key}`,
-        size: file.size
-      }));
+      const files = data.uploaded_files
+        .filter((file: any) => file?.s3_key)
+        .map((file: any) => ({
+          name: file.filename || 'Archivo',
+          s3Key: file.s3_key,
+          size: file.size,
+        }));
 
       if (files.length > 0) {
-        fileGroups.push({
-          title: 'ARCHIVOS SUBIDOS',
-          files
-        });
+        fileGroups.push({ title: 'ARCHIVOS SUBIDOS', files });
       }
     }
 
-    // Check for files in signable_data (admin workflow files)
+    // Archivos producidos por el flujo. El validador persiste `s3_key` junto a
+    // la `download_url` heredada, así que no hace falta migrar datos viejos:
+    // basta con leer la llave en vez de la URL.
     if (data.signable_data?.data) {
-      const signableFiles: Array<{ name: string; url: string; size?: number }> = [];
+      const signableFiles: Array<{ name: string; s3Key: string; size?: number }> = [];
 
       Object.keys(data.signable_data.data).forEach(key => {
         if (key.includes('_result') && Array.isArray(data.signable_data.data[key])) {
           data.signable_data.data[key].forEach((file: any) => {
-            if (file.download_url) {
+            if (file?.s3_key) {
               signableFiles.push({
                 name: file.filename || 'Archivo',
-                url: file.download_url,
-                size: file.size
+                s3Key: file.s3_key,
+                size: file.size,
               });
             }
           });
@@ -287,30 +295,68 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
       });
 
       if (signableFiles.length > 0) {
-        fileGroups.push({
-          title: 'ARCHIVOS DEL FLUJO',
-          files: signableFiles
-        });
+        fileGroups.push({ title: 'ARCHIVOS DEL FLUJO', files: signableFiles });
       }
     }
 
-    // Check for direct s3_urls and s3_keys
-    if (data.s3_urls && Array.isArray(data.s3_urls) && data.s3_keys && Array.isArray(data.s3_keys)) {
-      const directFiles = data.s3_keys.map((key: string, index: number) => ({
-        name: key.split('/').pop() || `Archivo ${index + 1}`,
-        url: `/files/download/${key}`,
-        size: undefined
-      }));
+    if (data.s3_keys && Array.isArray(data.s3_keys)) {
+      const directFiles = data.s3_keys
+        .filter((key: any) => typeof key === 'string' && key)
+        .map((key: string, index: number) => ({
+          name: key.split('/').pop() || `Archivo ${index + 1}`,
+          s3Key: key,
+          size: undefined,
+        }));
 
       if (directFiles.length > 0) {
-        fileGroups.push({
-          title: 'DOCUMENTOS',
-          files: directFiles
-        });
+        fileGroups.push({ title: 'DOCUMENTOS', files: directFiles });
       }
     }
 
     return fileGroups;
+  };
+
+  /**
+   * Descarga un archivo de la entidad.
+   *
+   * Pide primero un permiso de descarga de vida corta y sólo entonces baja el
+   * objeto. El permiso se emite contra la sesión del ciudadano y únicamente
+   * para llaves que pertenecen a esta entidad.
+   */
+  const downloadEntityFile = async (s3Key: string, filename: string) => {
+    const token = authService.getToken();
+
+    const grantRes = await fetch(`${apiBaseUrl}/files/grant`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ scope: { entity_id: entity.id }, s3_keys: [s3Key] }),
+    });
+    if (!grantRes.ok) throw new Error('No se pudo autorizar la descarga');
+
+    const { grants } = await grantRes.json();
+    const grant = (grants || []).find((g: any) => g.s3_key === s3Key);
+    if (!grant) throw new Error('El archivo no pertenece a esta entidad');
+
+    const res = await fetch(
+      `${apiBaseUrl}/files/download/${s3Key}?t=${encodeURIComponent(grant.token)}`,
+    );
+    if (!res.ok) throw new Error('Error al descargar archivo');
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    try {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      window.URL.revokeObjectURL(url);
+    }
   };
 
   return (
@@ -559,19 +605,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
                           size="small"
                           onClick={async () => {
                             try {
-                              const response = await fetch(`${apiBaseUrl}${file.url}`);
-                              if (!response.ok) {
-                                throw new Error('Error al descargar archivo');
-                              }
-                              const blob = await response.blob();
-                              const url = window.URL.createObjectURL(blob);
-                              const link = document.createElement('a');
-                              link.href = url;
-                              link.download = file.name;
-                              document.body.appendChild(link);
-                              link.click();
-                              document.body.removeChild(link);
-                              window.URL.revokeObjectURL(url);
+                              await downloadEntityFile(file.s3Key, file.name);
                             } catch (err) {
                               console.error('Error downloading file:', err);
                               setError('Error al descargar el archivo');
