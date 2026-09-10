@@ -71,6 +71,26 @@ interface VerificationResult {
   overall_valid: boolean;
 }
 
+/**
+ * Un valor de la entidad, siempre como texto.
+ *
+ * React revienta la pagina entera —error #31, pantalla en blanco— si le llega un
+ * objeto donde espera un nodo, y aqui los valores vienen de `entity.data`, que es
+ * lo que cada tramite haya guardado: no hay forma de garantizar su forma desde
+ * este lado. Un campo con una forma inesperada tiene que verse raro, no dejar al
+ * ciudadano sin documento.
+ */
+function texto(valor: unknown): string {
+  if (valor === null || valor === undefined) return '';
+  if (typeof valor === 'string') return valor;
+  if (typeof valor === 'number' || typeof valor === 'boolean') return String(valor);
+  try {
+    return JSON.stringify(valor);
+  } catch {
+    return String(valor);
+  }
+}
+
 export const EntityViewer: React.FC<EntityViewerProps> = ({
   entity,
   apiBaseUrl = '/api/v1',
@@ -228,15 +248,38 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
   };
 
   // Helper function to detect related entities
+  /**
+   * Entidades relacionadas, a partir de los campos `*_ids` de la entidad.
+   *
+   * El nombre de la clave promete identificadores, pero según el operador que la
+   * escriba lo que hay dentro es la entidad entera. Al pintar el elemento tal
+   * cual, React se encontraba un objeto donde esperaba texto y tiraba la página
+   * entera: el ciudadano veía su credencial en blanco.
+   *
+   * Aquí se normaliza a `{ id, etiqueta }` sea cual sea la forma, y de paso el
+   * enlace deja de apuntar a `/entity/[object Object]`.
+   */
   const getRelatedEntities = () => {
     const relatedKeys = Object.keys(entity.data).filter(key =>
       key.includes('_ids') && Array.isArray(entity.data[key])
     );
 
-    const relatedEntities: { type: string; ids: string[] }[] = [];
+    const relatedEntities: { type: string; ids: { id: string; etiqueta: string }[] }[] = [];
 
     relatedKeys.forEach(key => {
-      const ids = entity.data[key];
+      const crudos = entity.data[key] as unknown[];
+      const ids = crudos
+        .map((v: any) => {
+          if (typeof v === 'string') return { id: v, etiqueta: v };
+          if (v && typeof v === 'object') {
+            const id = v.entity_id || v.id;
+            if (!id) return null;
+            return { id: String(id), etiqueta: texto(v.name) || String(id) };
+          }
+          return null;
+        })
+        .filter((v): v is { id: string; etiqueta: string } => v !== null);
+
       if (ids.length > 0) {
         const type = humanizeKey(key.replace(/_ids$/, ''));
         relatedEntities.push({ type, ids });
@@ -411,15 +454,15 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
                 📊 Información de la Entidad
               </Typography>
               <Typography variant="h5" gutterBottom>
-                {entity.name || `${entity.type} ${entity.id}`}
+                {texto(entity.name) || `${texto(entity.type)} ${texto(entity.id)}`}
               </Typography>
               {entityAddressSubtitle(entity.data) && (
                 <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                  {entityAddressSubtitle(entity.data)}
+                  {texto(entityAddressSubtitle(entity.data))}
                 </Typography>
               )}
               <Typography variant="body2" color="text.secondary">
-                Tipo: {entity.type} • Creado: {new Date(entity.created_at).toLocaleDateString()}
+                Tipo: {texto(entity.type)} • Creado: {new Date(entity.created_at).toLocaleDateString()}
               </Typography>
             </Box>
 
@@ -453,7 +496,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
                   </ListItemIcon>
                   <ListItemText
                     primary="Algoritmo"
-                    secondary={entity.signature_info.algorithm}
+                    secondary={texto(entity.signature_info.algorithm)}
                   />
                 </ListItem>
                 <ListItem>
@@ -462,7 +505,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
                   </ListItemIcon>
                   <ListItemText
                     primary="Firmante"
-                    secondary={entity.signature_info.signer}
+                    secondary={texto(entity.signature_info.signer)}
                   />
                 </ListItem>
                 <ListItem>
@@ -553,7 +596,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
                     {relation.type.toUpperCase()}
                   </Typography>
                   <List dense>
-                    {relation.ids.map((entityId, i) => (
+                    {relation.ids.map((relacionada, i) => (
                       <ListItem key={i}>
                         <ListItemIcon>
                           📄
@@ -561,12 +604,12 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
                         <ListItemText
                           primary={
                             <Link
-                              href={`/entity/${entityId}`}
+                              href={`/entity/${relacionada.id}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               underline="hover"
                             >
-                              {entityId}
+                              {relacionada.etiqueta}
                             </Link>
                           }
                           secondary={`${relation.type} relacionado`}
