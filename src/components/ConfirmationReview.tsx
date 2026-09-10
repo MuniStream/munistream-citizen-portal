@@ -68,7 +68,9 @@ function formatValue(value: any, format?: string): string {
     if (format === 'file' && (value as any).filename) {
       return (value as any).filename as string;
     }
-    if (format === 'address') {
+    const looksLikeAddress = (v: any) =>
+      v && typeof v === 'object' && (v.calle !== undefined || v.cp !== undefined || (v.colonia !== undefined && v.municipio !== undefined));
+    if (format === 'address' || looksLikeAddress(value)) {
       const a = value as Record<string, any>;
       const l1 = [
         a.calle,
