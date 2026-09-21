@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Polygon, Polyline, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Polygon, Polyline, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 /**
@@ -67,6 +67,30 @@ const ClickCapture: React.FC<{ onClick: (latlng: LatLng) => void; disabled?: boo
       onClick([e.latlng.lat, e.latlng.lng]);
     },
   });
+  return null;
+};
+
+/**
+ * El mapa suele montarse dentro de un paso del formulario que estaba oculto o
+ * con tamaño 0 (formularios multi-paso). Sin invalidar el tamaño, Leaflet pinta
+ * tiles grises o el contenedor en blanco ("no hay mapa"). Se invalida al montar,
+ * unos milisegundos después, y ante cualquier cambio de tamaño del contenedor.
+ */
+const ResizeInvalidate: React.FC = () => {
+  const map = useMap();
+  useEffect(() => {
+    const invalidate = () => { try { map.invalidateSize(); } catch { /* aún desmontado */ } };
+    const timers = [0, 150, 400, 900].map((ms) => setTimeout(invalidate, ms));
+    const container = map.getContainer();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(invalidate) : null;
+    if (ro && container) ro.observe(container);
+    window.addEventListener('resize', invalidate);
+    return () => {
+      timers.forEach(clearTimeout);
+      if (ro) ro.disconnect();
+      window.removeEventListener('resize', invalidate);
+    };
+  }, [map]);
   return null;
 };
 
@@ -140,6 +164,7 @@ export const GeoField: React.FC<GeoFieldProps> = ({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <ClickCapture onClick={handleClick} disabled={disabled} />
+          <ResizeInvalidate />
           {points.map((p, i) => (
             <CircleMarker key={i} center={p} radius={6} pathOptions={{ color: '#9b1c31', fillColor: '#9b1c31', fillOpacity: 0.9 }} />
           ))}

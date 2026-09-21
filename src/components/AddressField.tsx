@@ -21,6 +21,10 @@ export interface AddressValue {
   municipio?: string;
   estado?: string;
   cp?: string;
+  // Medios de contacto (opcionales; solo si el field pide `with_contact`).
+  telefono?: string;
+  movil?: string;
+  correo?: string;
 }
 
 interface AddressFieldConfig {
@@ -42,6 +46,8 @@ interface AddressFieldProps {
   // bloquea la edición mientras esté marcado.
   sameAsLabel?: string;
   sameAsValue?: AddressValue;
+  // Pide medios de contacto (teléfono fijo, móvil y correo) bajo el domicilio.
+  withContact?: boolean;
 }
 
 const OTRA = '__otra__';
@@ -53,6 +59,7 @@ export const AddressField: React.FC<AddressFieldProps> = ({
   config,
   sameAsLabel,
   sameAsValue,
+  withContact,
 }) => {
   const catalogId = config?.catalog_id || 'geografia_mx';
   const cpCol = config?.cp_column || 'codigo_postal';
@@ -261,6 +268,26 @@ export const AddressField: React.FC<AddressFieldProps> = ({
             onChange={(e) => set({ estado: e.target.value })} />
         ))}</div>
       </div>
+
+      {withContact && (
+        <div style={{ marginTop: '0.75rem', borderTop: '1px dashed #cbd5e1', paddingTop: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div style={{ flex: 1 }}>{cell('Teléfono fijo', (
+              <input style={inputStyle} value={v.telefono || ''} disabled={locked} inputMode="tel"
+                placeholder="Para oír o recibir notificaciones"
+                onChange={(e) => set({ telefono: e.target.value })} />
+            ))}</div>
+            <div style={{ flex: 1 }}>{cell('Teléfono móvil', (
+              <input style={inputStyle} value={v.movil || ''} disabled={locked} inputMode="tel"
+                onChange={(e) => set({ movil: e.target.value })} />
+            ))}</div>
+          </div>
+          {cell('Correo electrónico', (
+            <input style={inputStyle} value={v.correo || ''} disabled={locked} type="email" inputMode="email"
+              onChange={(e) => set({ correo: e.target.value })} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
