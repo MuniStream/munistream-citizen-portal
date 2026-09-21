@@ -83,7 +83,12 @@ function formatValue(value: any, format?: string): string {
         a.estado,
         a.cp ? `C.P. ${a.cp}` : '',
       ].filter(Boolean).join(', ');
-      const out = [l1, l2].filter(Boolean).join(', ');
+      const contacto = [
+        a.telefono ? `Tel. ${a.telefono}` : '',
+        a.movil ? `Cel. ${a.movil}` : '',
+        a.correo,
+      ].filter(Boolean).join(' · ');
+      const out = [[l1, l2].filter(Boolean).join(', '), contacto].filter(Boolean).join(' — ');
       return out || '—';
     }
     if ((value as any).url) {

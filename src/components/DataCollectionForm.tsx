@@ -103,6 +103,9 @@ export interface FormField {
   // "Igual a …" (copia esa dirección), p. ej. same_as: "domicilio_solicitante".
   same_as?: string;
   same_as_label?: string;
+  // Address field: pide medios de contacto (teléfono fijo, móvil, correo) bajo el
+  // domicilio; solo en domicilios de persona.
+  with_contact?: boolean;
 }
 
 export interface EntityOption {
@@ -1066,6 +1069,7 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
             }}
             sameAsLabel={field.same_as_label}
             sameAsValue={field.same_as ? (formData[field.same_as] as AddressValue) : undefined}
+            withContact={field.with_contact}
           />
         );
 

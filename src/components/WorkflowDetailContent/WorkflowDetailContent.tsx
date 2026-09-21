@@ -708,7 +708,7 @@ export const WorkflowDetailContent: React.FC = () => {
             <InfoCard label="Tiempo estimado" value={duration || 'Por determinar'} />
             <InfoCard
               label="Costo"
-              value={cost ? `$${cost} MXN` : 'Sin costo'}
+              value={cost ? `$${Number(cost).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN` : 'Sin costo'}
               valueColor={cost ? 'var(--primary-color)' : 'var(--text-primary)'}
             />
             <InfoCard label="Modalidad" value="En línea" />
