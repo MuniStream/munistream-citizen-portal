@@ -223,6 +223,7 @@ function renderBody(
             same_as: field.same_as,
             same_as_label: field.same_as_label,
             with_contact: field.with_contact,
+            region_only: field.region_only,
             entity_type: field.entity_type,
             min_count: field.min_count,
             max_count: field.max_count,

@@ -106,6 +106,8 @@ export interface FormField {
   // Address field: pide medios de contacto (teléfono fijo, móvil, correo) bajo el
   // domicilio; solo en domicilios de persona.
   with_contact?: boolean;
+  // Address field: solo Código Postal, Municipio y Estado (sin calle/número/colonia).
+  region_only?: boolean;
 }
 
 export interface EntityOption {
@@ -1070,6 +1072,7 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
             sameAsLabel={field.same_as_label}
             sameAsValue={field.same_as ? (formData[field.same_as] as AddressValue) : undefined}
             withContact={field.with_contact}
+            regionOnly={field.region_only}
           />
         );
 
