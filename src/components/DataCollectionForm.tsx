@@ -108,6 +108,8 @@ export interface FormField {
   with_contact?: boolean;
   // Address field: solo Código Postal, Municipio y Estado (sin calle/número/colonia).
   region_only?: boolean;
+  // Entity select: campos de la entidad a mostrar en cada tarjeta de la lista.
+  display_fields?: string[];
 }
 
 export interface EntityOption {
@@ -765,7 +767,34 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
   };
 
   // Entity Card Component
-  const EntityCard: React.FC<{ entity: EntityOption; isSelected: boolean; onToggle: () => void }> = ({ entity, isSelected, onToggle }) => {
+  // Etiquetas legibles para los campos que se muestran en la tarjeta de entidad.
+  const humanizeFieldKey = (k: string): string => {
+    const map: Record<string, string> = {
+      embarcacion: 'Embarcación',
+      embarcacion_matricula: 'Matrícula',
+      matricula: 'Matrícula',
+      especies: 'Especies',
+      especies_capturadas: 'Especies',
+      fecha: 'Fecha',
+      fecha_arribo: 'Fecha de arribo',
+      fecha_salida: 'Fecha de salida',
+      pesqueria: 'Pesquería',
+      status: 'Estado',
+      folio: 'Folio',
+      numero_rnpa: 'RNPA',
+      nombre_completo: 'Nombre',
+    };
+    return map[k] || k.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+  };
+
+  const renderFieldValue = (val: any): string => {
+    if (val === undefined || val === null) return '';
+    if (Array.isArray(val)) return val.map((x) => (typeof x === 'object' ? (x.nombre_comun || x.especie || x.nombre || JSON.stringify(x)) : x)).join(', ');
+    if (typeof val === 'object') return val.nombre || val.nombre_comun || JSON.stringify(val);
+    return String(val);
+  };
+
+  const EntityCard: React.FC<{ entity: EntityOption; isSelected: boolean; onToggle: () => void; displayFields?: string[] }> = ({ entity, isSelected, onToggle, displayFields }) => {
     const entityData = entity.entity_data;
 
     return (
@@ -811,20 +840,32 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
               gap: '0.25rem',
               fontSize: '0.875rem'
             }}>
-              <div style={{ color: '#666' }}>
-                <strong>Tipo:</strong> {entityData.entity_type}
-              </div>
-              {entityData.data.document_type && (
+              {displayFields && displayFields.length > 0 ? (
+                displayFields.map((k) => {
+                  const val = renderFieldValue(entityData.data?.[k]);
+                  if (!val) return null;
+                  return (
+                    <div key={k} style={{ color: '#666' }}>
+                      <strong>{humanizeFieldKey(k)}:</strong> {val}
+                    </div>
+                  );
+                })
+              ) : (
+                <div style={{ color: '#666' }}>
+                  <strong>Tipo:</strong> {entityData.entity_type}
+                </div>
+              )}
+              {(!displayFields || displayFields.length === 0) && entityData.data.document_type && (
                 <div style={{ color: '#666' }}>
                   <strong>Documento:</strong> {entityData.data.document_type}
                 </div>
               )}
-              {entityData.data.upload_date && (
+              {(!displayFields || displayFields.length === 0) && entityData.data.upload_date && (
                 <div style={{ color: '#888' }}>
                   <strong>Subido:</strong> {new Date(entityData.data.upload_date).toLocaleDateString('es-MX')}
                 </div>
               )}
-              {entityData.data.file_size && (
+              {(!displayFields || displayFields.length === 0) && entityData.data.file_size && (
                 <div style={{ color: '#888' }}>
                   <strong>Tamaño:</strong> {Math.round(entityData.data.file_size / 1024)} KB
                 </div>
@@ -937,6 +978,7 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
                     entity={entity}
                     isSelected={selectedValues.includes(entity.value)}
                     onToggle={() => handleEntityToggle(entity.value)}
+                    displayFields={field.display_fields}
                   />
                 ))
               )}

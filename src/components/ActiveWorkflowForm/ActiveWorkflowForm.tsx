@@ -225,6 +225,7 @@ function renderBody(
             with_contact: field.with_contact,
             region_only: field.region_only,
             entity_type: field.entity_type,
+            display_fields: field.display_fields,
             min_count: field.min_count,
             max_count: field.max_count,
             description: field.description,
