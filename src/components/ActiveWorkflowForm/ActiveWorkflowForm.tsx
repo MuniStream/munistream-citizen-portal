@@ -208,7 +208,10 @@ function renderBody(
                 ? field.options
                 : typeof field.options[0] === 'string'
                   ? field.options
-                  : field.options.map((opt: any) => opt.value || opt)
+                  // Conservar {value, label}: mapear a opt.value descartaba la
+                  // etiqueta y el menú mostraba el value crudo (p. ej.
+                  // "primera_vez" en vez de "Primera vez").
+                  : field.options.map((opt: any) => ({ value: opt.value, label: opt.label ?? opt.value }))
               : undefined,
             geo_mode: field.geo_mode,
             // Address field: catálogo geográfico y columnas para el autofill por CP.
@@ -220,7 +223,9 @@ function renderBody(
             same_as: field.same_as,
             same_as_label: field.same_as_label,
             with_contact: field.with_contact,
+            region_only: field.region_only,
             entity_type: field.entity_type,
+            display_fields: field.display_fields,
             min_count: field.min_count,
             max_count: field.max_count,
             description: field.description,

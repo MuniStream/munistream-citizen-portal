@@ -88,6 +88,16 @@ export const InstanceDetailContent: React.FC = () => {
     return () => clearInterval(t);
   }, [id, instance?.status, instance?.waiting_for, instance?.input_form]);
 
+  // On advancing to the next step, scroll back to the top: otherwise the next
+  // form renders with the scroll left at the bottom (where the previous step's
+  // submit button was), which is awkward. Fires when the active step changes.
+  const activeStepId = hasActiveFormFor(instance)
+    ? ((instance?.input_form as any)?.current_step_id ?? instance?.waiting_for ?? null)
+    : null;
+  useEffect(() => {
+    if (activeStepId) window.scrollTo(0, 0);
+  }, [activeStepId]);
+
   const fetchProgress = async (silent: boolean = false) => {
     if (!id) return;
 

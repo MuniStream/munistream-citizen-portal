@@ -48,6 +48,9 @@ interface AddressFieldProps {
   sameAsValue?: AddressValue;
   // Pide medios de contacto (teléfono fijo, móvil y correo) bajo el domicilio.
   withContact?: boolean;
+  // Solo región: captura únicamente Código Postal, Municipio y Estado (sin
+  // calle, número ni colonia). Útil para "Lugar de embarque" y similares.
+  regionOnly?: boolean;
 }
 
 const OTRA = '__otra__';
@@ -60,6 +63,7 @@ export const AddressField: React.FC<AddressFieldProps> = ({
   sameAsLabel,
   sameAsValue,
   withContact,
+  regionOnly,
 }) => {
   const catalogId = config?.catalog_id || 'geografia_mx';
   const cpCol = config?.cp_column || 'codigo_postal';
@@ -193,10 +197,11 @@ export const AddressField: React.FC<AddressFieldProps> = ({
           <span>{sameAsLabel}</span>
         </label>
       )}
-      {cell('Calle *', (
+      {!regionOnly && cell('Calle *', (
         <input style={inputStyle} value={v.calle || ''} disabled={locked}
           onChange={(e) => set({ calle: e.target.value })} />
       ))}
+      {!regionOnly && (
       <div style={{ display: 'flex', gap: '0.75rem' }}>
         <div style={{ flex: 1 }}>{cell('No. Ext *', (
           <input style={inputStyle} value={v.no_ext || ''} disabled={locked}
@@ -207,6 +212,7 @@ export const AddressField: React.FC<AddressFieldProps> = ({
             onChange={(e) => set({ no_int: e.target.value })} />
         ))}</div>
       </div>
+      )}
       {cell('Código Postal *', (
         <div>
           <input
@@ -224,7 +230,7 @@ export const AddressField: React.FC<AddressFieldProps> = ({
           {cpMsg && !cpLoading && <small style={{ color: '#64748b' }}>{cpMsg}</small>}
         </div>
       ))}
-      {cell('Colonia *', (
+      {!regionOnly && cell('Colonia *', (
         manualColonia ? (
           <div>
             <input style={inputStyle} value={v.colonia || ''} disabled={locked}
