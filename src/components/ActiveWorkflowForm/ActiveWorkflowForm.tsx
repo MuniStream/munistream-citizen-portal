@@ -179,6 +179,8 @@ function renderBody(
         multiple: it.multiple,
         helpText: it.helperText || it.helpText,
         options: it.options,
+        catalog_id: it.catalog_id,
+        label_columns: it.label_columns,
         show_if: it.show_if,
       });
       return (
