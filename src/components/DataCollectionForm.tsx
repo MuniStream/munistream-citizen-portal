@@ -1153,6 +1153,18 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
           </select>
         );
 
+      case 'catalog_autocomplete':
+        return (
+          <CatalogAutocomplete
+            catalogId={field.catalog_id || 'especies'}
+            labelColumns={field.label_columns}
+            placeholder={field.placeholder || 'Escriba para buscar en el catálogo…'}
+            disabled={isSubmitting}
+            value={formData[field.id] ?? ''}
+            onChange={(v) => handleInputChange(field.id, v)}
+          />
+        );
+
       case 'daterange': {
         // Un solo campo de rango (Desde/Hasta) como reservar por fechas. El
         // valor es { inicio, fin }; los inputs se acotan entre sí.
