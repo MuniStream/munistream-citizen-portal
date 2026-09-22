@@ -3,6 +3,7 @@ import { entityService } from '../services/entityService';
 import { GeoField } from './GeoField';
 import { AddressField } from './AddressField';
 import type { AddressValue } from './AddressField';
+import { CatalogAutocomplete } from './CatalogAutocomplete';
 
 // Aviso con las características que debe reunir un documento para cargarse
 // correctamente (formatos, tamaño y nombre sin acentos/caracteres especiales).
@@ -42,7 +43,7 @@ export interface FormField {
   id: string;
   name: string;
   label: string;
-  type: 'text' | 'email' | 'phone' | 'date' | 'number' | 'select' | 'textarea' | 'file' | 'camera' | 'entity_select' | 'entity_multi_select' | 'array' | 'geo' | 'address';
+  type: 'text' | 'email' | 'phone' | 'date' | 'daterange' | 'number' | 'select' | 'textarea' | 'file' | 'camera' | 'entity_select' | 'entity_multi_select' | 'array' | 'geo' | 'address' | 'catalog_autocomplete';
   required: boolean;
   placeholder?: string;
   options?: string[] | EntityOption[];
@@ -110,6 +111,8 @@ export interface FormField {
   region_only?: boolean;
   // Entity select: campos de la entidad a mostrar en cada tarjeta de la lista.
   display_fields?: string[];
+  // Catalog autocomplete: columnas que forman la etiqueta guardada.
+  label_columns?: string[];
 }
 
 export interface EntityOption {
@@ -481,6 +484,17 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
     };
 
     switch (itemField.type) {
+      case 'catalog_autocomplete':
+        return (
+          <CatalogAutocomplete
+            catalogId={itemField.catalog_id || 'especies'}
+            labelColumns={itemField.label_columns}
+            placeholder={itemField.placeholder || 'Escriba para buscar en el catálogo…'}
+            disabled={isSubmitting}
+            value={itemValue ?? ''}
+            onChange={(v) => handleItemChange(arrayFieldId, index, itemField.name, v)}
+          />
+        );
       case 'textarea':
         return (
           <textarea
@@ -1138,6 +1152,33 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
             })}
           </select>
         );
+
+      case 'daterange': {
+        // Un solo campo de rango (Desde/Hasta) como reservar por fechas. El
+        // valor es { inicio, fin }; los inputs se acotan entre sí.
+        const rangeVal = (formData[field.id] as any) || {};
+        const setRange = (patch: any) => handleInputChange(field.id, { ...rangeVal, ...patch });
+        const todayR = (() => { const d = new Date(); d.setHours(0,0,0,0); return d.toISOString().slice(0,10); })();
+        return (
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 150 }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', color: '#555', marginBottom: 4 }}>Desde</label>
+              <input type="date" className="form-input" disabled={isSubmitting}
+                value={rangeVal.inicio || ''}
+                min={field.minToday ? todayR : undefined}
+                max={rangeVal.fin || undefined}
+                onChange={(e) => setRange({ inicio: e.target.value })} />
+            </div>
+            <div style={{ flex: 1, minWidth: 150 }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', color: '#555', marginBottom: 4 }}>Hasta</label>
+              <input type="date" className="form-input" disabled={isSubmitting}
+                value={rangeVal.fin || ''}
+                min={rangeVal.inicio || (field.minToday ? todayR : undefined)}
+                onChange={(e) => setRange({ fin: e.target.value })} />
+            </div>
+          </div>
+        );
+      }
 
       case 'file':
         return (

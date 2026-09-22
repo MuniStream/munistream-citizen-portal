@@ -68,6 +68,11 @@ function formatValue(value: any, format?: string): string {
     if (format === 'file' && (value as any).filename) {
       return (value as any).filename as string;
     }
+    if (format === 'daterange' || (value as any).inicio !== undefined || (value as any).fin !== undefined) {
+      const r = value as any;
+      if (r.inicio && r.fin) return `${r.inicio} al ${r.fin}`;
+      return r.inicio || r.fin || '—';
+    }
     const looksLikeAddress = (v: any) =>
       v && typeof v === 'object' && (v.calle !== undefined || v.cp !== undefined || (v.colonia !== undefined && v.municipio !== undefined));
     if (format === 'address' || looksLikeAddress(value)) {
