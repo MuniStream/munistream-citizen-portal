@@ -15,6 +15,7 @@ import { VerificationPage } from './pages/VerificationPage';
 import { NotificationPreferencesPage } from './pages/NotificationPreferencesPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './App.css';
 
 function App() {
@@ -24,6 +25,14 @@ function App() {
         <LoginDialogProvider>
         <Router>
           <div className="app">
+            {/*
+              Sin esto, una excepción en cualquier render desmonta el árbol entero
+              y el ciudadano ve una página en blanco, sin mensaje y sin salida. Ha
+              pasado al menos dos veces (el visor de entidad y el detalle del
+              trámite). Arreglar cada causa es necesario; esto acota el daño de la
+              siguiente.
+            */}
+            <ErrorBoundary nombre="rutas">
             <Routes>
             {/* Public routes */}
             <Route path="/services" element={<PublicWorkflowCatalog />} />
@@ -89,6 +98,7 @@ function App() {
             {/* Catch all - redirect to services */}
             <Route path="*" element={<Navigate to="/services" replace />} />
           </Routes>
+            </ErrorBoundary>
         </div>
       </Router>
         </LoginDialogProvider>
