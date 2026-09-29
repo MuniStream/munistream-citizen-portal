@@ -24,7 +24,7 @@ export interface RequisitoDescriptor {
   min_count: number;
   max_count: number;
   required: boolean;
-  selection_mode?: 'individual' | 'masiva';
+  selection_mode?: 'individual' | 'bulk';
   total?: number;
   info?: { instructions?: string; workflow_id?: string; display_name?: string };
 }
@@ -34,8 +34,8 @@ interface Candidata {
   entity_type: string;
   name: string;
   status: string;
-  campos: Array<{ campo: string; valor: any }>;
-  vigencia: { hasta: string; vencida: boolean; origen: 'guardada' | 'derivada' } | null;
+  fields: Array<{ field: string; value: any }>;
+  validity: { until: string; expired: boolean; source: 'stored' | 'derived' } | null;
 }
 
 interface Props {
@@ -64,12 +64,12 @@ function valorLegible(valor: any): string {
   return String(valor);
 }
 
-function Vigencia({ vigencia }: { vigencia: Candidata['vigencia'] }) {
-  if (!vigencia) return null;
-  const fecha = new Date(vigencia.hasta).toLocaleDateString('es-MX');
+function Vigencia({ validity }: { validity: Candidata['validity'] }) {
+  if (!validity) return null;
+  const fecha = new Date(validity.until).toLocaleDateString('es-MX');
   return (
-    <span className={`picker-vigencia ${vigencia.vencida ? 'vencida' : ''}`}>
-      {vigencia.vencida ? `Venció el ${fecha}` : `Vigente hasta ${fecha}`}
+    <span className={`picker-vigencia ${validity.expired ? 'vencida' : ''}`}>
+      {validity.expired ? `Venció el ${fecha}` : `Vigente hasta ${fecha}`}
     </span>
   );
 }
@@ -130,7 +130,7 @@ export const EntityPickerWizard: React.FC<Props> = ({
       })
       .then(({ data }) => {
         if (cancelado) return;
-        setCandidatas(data.candidatas || []);
+        setCandidatas(data.candidates || []);
         setTotal(data.total || 0);
       })
       .catch(() => {
@@ -224,7 +224,7 @@ export const EntityPickerWizard: React.FC<Props> = ({
         </span>
       </div>
 
-      {requisito.selection_mode === 'masiva' && candidatas.length > 0 && (
+      {requisito.selection_mode === 'bulk' && candidatas.length > 0 && (
         <button type="button" className="picker-seleccionar-todo" onClick={seleccionarTodoLoFiltrado}>
           Seleccionar los {candidatas.length} de esta página
         </button>
@@ -273,12 +273,12 @@ export const EntityPickerWizard: React.FC<Props> = ({
             >
               <div className="entity-card-encabezado">
                 <strong>{c.name}</strong>
-                <Vigencia vigencia={c.vigencia} />
+                <Vigencia validity={c.validity} />
               </div>
-              {c.campos.map((campo) => (
-                <div key={campo.campo} className="entity-card-campo">
-                  <span className="entity-card-etiqueta">{etiquetaDeCampo(campo.campo)}:</span>{' '}
-                  {valorLegible(campo.valor)}
+              {c.fields.map((campo) => (
+                <div key={campo.field} className="entity-card-campo">
+                  <span className="entity-card-etiqueta">{etiquetaDeCampo(campo.field)}:</span>{' '}
+                  {valorLegible(campo.value)}
                 </div>
               ))}
             </div>

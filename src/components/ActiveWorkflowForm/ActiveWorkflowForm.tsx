@@ -169,7 +169,7 @@ function renderBody(
   // requerido, con su búsqueda y su paginación. Las candidatas ya no vienen
   // dentro del formulario —el backend las sirve paginadas— así que el render
   // genérico de DataCollectionForm ya no puede pintarlas.
-  if (inputForm.por_pantallas && Array.isArray(inputForm.fields)) {
+  if (inputForm.one_per_screen && Array.isArray(inputForm.fields)) {
     return (
       <EntityPickerWizard
         instanceId={instance.instance_id}
