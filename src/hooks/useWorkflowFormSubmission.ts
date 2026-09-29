@@ -183,6 +183,9 @@ export function useWorkflowFormSubmission(
               Object.entries(data._files).forEach(([key, file]) => {
                 if (file instanceof File) {
                   formData.append(key, file);
+                } else if (Array.isArray(file)) {
+                  // Campo múltiple: varios archivos bajo la misma clave.
+                  file.forEach((f) => { if (f instanceof File) formData.append(key, f); });
                 }
               });
             }
