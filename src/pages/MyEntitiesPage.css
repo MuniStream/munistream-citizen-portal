@@ -55,7 +55,12 @@
 /* Entities Grid */
 .entities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  /*
+   * `min(350px, 100%)` y no `350px` a secas: un mínimo fijo mayor que el
+   * contenedor desborda la pantalla en vez de encogerse, que es lo que pasaba en
+   * móvil. Con `min()` la pista nunca pide más de lo que hay.
+   */
+  grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
 }
@@ -93,6 +98,23 @@
 
 .entity-info {
   flex: 1;
+  /*
+   * Un flex item no se encoge por debajo de su min-content salvo que se le baje
+   * el `min-width`, que por defecto es `auto`. Sin esto, un nombre de entidad
+   * largo estiraba la tarjeta más allá de la pantalla.
+   */
+  min-width: 0;
+}
+
+/*
+ * Los nombres no siempre son frases con espacios donde partir: hay entidades
+ * cuyo nombre es una clave técnica de 50 caracteres sin un solo espacio. Sin
+ * permitir el corte dentro de la palabra, esa sola línea fija el ancho de la
+ * tarjeta y arrastra toda la pantalla con ella.
+ */
+.entity-info h3,
+.entity-type {
+  overflow-wrap: anywhere;
 }
 
 .entity-info h3 {
@@ -379,7 +401,13 @@
 /* Responsive */
 @media (max-width: 768px) {
   .entities-grid {
-    grid-template-columns: 1fr;
+    /*
+     * `minmax(0, 1fr)` y no `1fr`. El mínimo automático de una pista de rejilla
+     * es `auto`, es decir el min-content del contenido: con `1fr` a secas la
+     * pista crecía hasta 560px dentro de un contenedor de 328 y la tarjeta se
+     * salía de la pantalla, obligando a arrastrar de lado para leerla.
+     */
+    grid-template-columns: minmax(0, 1fr);
   }
   
   .filter-bar {
