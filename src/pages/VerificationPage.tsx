@@ -64,6 +64,10 @@ export const VerificationPage: React.FC = () => {
     fetchVerification();
   };
 
+  // Un documento es auténtico si lo emitió la dependencia (consta el trámite que
+  // lo generó) o si una persona dio fe de él, que es el caso de lo que se sube.
+  const esAutentico = !!(result?.issued_by_authority || result?.verified);
+
   const getStatusIcon = () => {
     if (!result) return <Info />;
 
@@ -167,10 +171,20 @@ export const VerificationPage: React.FC = () => {
                   variant="outlined"
                   size="small"
                 />
+                {/*
+                  La autenticidad de un documento emitido no depende de `verified`:
+                  ese campo es el visto bueno humano que se le pide a lo que el
+                  ciudadano sube. Mientras se leía solo `verified`, todo documento
+                  emitido —ninguno lo tiene— salía con una advertencia ámbar de "no
+                  verificado" junto al sello verde de válido: dos mensajes opuestos
+                  sobre el mismo papel.
+                */}
                 <Chip
-                  icon={result.verified ? <Verified /> : <Warning />}
-                  label={result.verified ? t('verification.officially_verified') : t('verification.not_verified')}
-                  color={result.verified ? 'success' : 'warning'}
+                  icon={esAutentico ? <Verified /> : <Warning />}
+                  label={esAutentico
+                    ? t('verification.officially_verified', 'Emitido por la autoridad')
+                    : t('verification.not_verified')}
+                  color={esAutentico ? 'success' : 'warning'}
                   variant="outlined"
                   size="small"
                 />
@@ -224,6 +238,15 @@ export const VerificationPage: React.FC = () => {
                     label={t('verification.issue_date')}
                     value={formatDate(result.created_at)}
                   />
+
+                  {/* Lo primero que pregunta quien revisa un documento en campo. */}
+                  {result.valid_until && (
+                    <InfoItem
+                      icon={<DateRange />}
+                      label={t('verification.valid_until', 'Vigente hasta')}
+                      value={formatDate(result.valid_until)}
+                    />
+                  )}
 
                   {result.verification_date && (
                     <InfoItem

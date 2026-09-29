@@ -1,4 +1,5 @@
 import api from './api';
+import { mensajeDeError } from '../utils/errorMessage';
 
 export interface VerificationResult {
   valid: boolean;
@@ -6,10 +7,17 @@ export interface VerificationResult {
   entity_type: string;
   name: string;
   status: string;
+  /**
+   * `true` cuando el documento lo emitió la propia dependencia al completar un
+   * trámite. Es lo que sostiene su autenticidad: `verified` (visto bueno de una
+   * persona) solo aplica a los documentos que el ciudadano sube.
+   */
+  issued_by_authority?: boolean;
   verified: boolean;
   verification_date?: string;
   verified_by?: string;
   created_at?: string;
+  valid_until?: string | null;
   authority: string;
   document_type: string;
   checksum_valid: boolean;
@@ -47,7 +55,7 @@ class VerificationService {
         document_type: 'Unknown',
         checksum_valid: false,
         checksum_provided: !!checksum,
-        error: error.response?.data?.detail || error.message || 'Verification failed'
+        error: mensajeDeError(error, 'No fue posible completar la verificación.')
       };
     }
   }
