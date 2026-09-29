@@ -2518,6 +2518,19 @@ html {
   margin: 0 0 1rem;
 }
 
+/*
+ * Aviso de por qué hay una pantalla con una sola opción. Sin él, confirmar el
+ * único registro que uno tiene parece un paso burocrático de más; con él, se
+ * entiende que es la pantalla donde se fija a nombre de quién va el trámite.
+ */
+.picker-confirmacion {
+  border-left: 4px solid var(--primary-color, #9b1c31);
+  background: rgba(155, 28, 49, 0.06);
+  padding: 0.6rem 0.9rem;
+  border-radius: 6px;
+  margin: 0 0 1rem;
+}
+
 .picker-errores {
   border-left: 4px solid var(--error-color, #dc3545);
   background: #fdf2f3;

@@ -24,6 +24,13 @@ export interface RequisitoDescriptor {
   min_count: number;
   max_count: number;
   required: boolean;
+  /**
+   * El requisito exige confirmarse aunque haya una sola candidata. Lo declaran
+   * la identidad y el RNPA: el trámite se presenta **a nombre de** alguien, y
+   * elegir eso en silencio le quita al ciudadano el único momento en que podía
+   * notar que va a nombre de quien no quería.
+   */
+  always_confirm?: boolean;
   selection_mode?: 'individual' | 'bulk';
   total?: number;
   info?: { instructions?: string; workflow_id?: string; display_name?: string };
@@ -198,6 +205,16 @@ export const EntityPickerWizard: React.FC<Props> = ({
       {requisito.info?.instructions && (
         <p className="picker-instrucciones">{requisito.info.instructions}</p>
       )}
+      {/*
+        Con una sola candidata la pantalla parecería un trámite burocrático de más
+        si no dijera para qué está. Decir que es una confirmación —y de qué— es lo
+        que la justifica ante quien la ve.
+      */}
+      {requisito.always_confirm && total === 1 && (
+        <p className="picker-confirmacion">
+          Tienes un solo registro. Confírmalo para continuar.
+        </p>
+      )}
 
       {erroresDelServidor && erroresDelServidor.length > 0 && (
         <div className="picker-errores" role="alert">
@@ -322,7 +339,9 @@ export const EntityPickerWizard: React.FC<Props> = ({
             onSubmit(seleccion);
           }}
         >
-          {ultima ? 'Continuar' : 'Siguiente →'}
+          {requisito.always_confirm && elegidas.length > 0
+            ? (ultima ? 'Confirmar y continuar' : 'Confirmar y seguir →')
+            : (ultima ? 'Continuar' : 'Siguiente →')}
         </button>
       </div>
     </div>
