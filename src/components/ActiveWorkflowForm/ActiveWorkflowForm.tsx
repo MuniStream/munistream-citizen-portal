@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import type { WorkflowInstanceProgress } from '../../services/workflowService';
 import { DataCollectionForm } from '../DataCollectionForm';
+import EntityPickerWizard from '../EntityPicker/EntityPickerWizard';
 import { CatalogSelector } from '../CatalogSelector';
 import { SelfieCapture, IDCapture } from '../capture';
 import { SigningForm } from '../signature/SigningForm';
@@ -163,6 +164,23 @@ function renderBody(
   const { instance, isSubmitting, isRewinding, profileValues, onSubmit, onRewind } =
     props;
   const inputForm = (instance.input_form as any) || {};
+
+  // El selector de entidades tiene su propio componente: una pantalla por tipo
+  // requerido, con su búsqueda y su paginación. Las candidatas ya no vienen
+  // dentro del formulario —el backend las sirve paginadas— así que el render
+  // genérico de DataCollectionForm ya no puede pintarlas.
+  if (inputForm.por_pantallas && Array.isArray(inputForm.fields)) {
+    return (
+      <EntityPickerWizard
+        instanceId={instance.instance_id}
+        requisitos={inputForm.fields}
+        seleccionPrevia={inputForm.previous_selections || inputForm.initial_values}
+        erroresDelServidor={inputForm.validation_errors}
+        isSubmitting={isSubmitting}
+        onSubmit={(selecciones) => onSubmit(selecciones)}
+      />
+    );
+  }
 
   switch (kind) {
     case 'user_input':
