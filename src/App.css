@@ -2473,3 +2473,28 @@ html {
     padding: 1.5rem;
   }
 }
+
+/* Formularios en columnas.
+   Un renglón por campo dejaba formularios innecesariamente largos: un importe y
+   una fecha no necesitan media pantalla cada uno. La densidad la declara el
+   backend con `form_config.columns`; sin ella el layout queda como estaba.
+   `minmax(0, 1fr)` en vez de `1fr` evita que un select con opciones largas
+   desborde su columna. */
+.fields-grid {
+  display: grid;
+  gap: 0 1.25rem;
+  align-items: start;
+}
+
+/* Los tipos compuestos y los que el backend marca `fullWidth` cruzan el grid
+   completo, sea cual sea el número de columnas. */
+.fields-grid > .form-group.full-row {
+  grid-column: 1 / -1;
+}
+
+/* En pantalla angosta no hay columnas que repartir. */
+@media (max-width: 720px) {
+  .fields-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

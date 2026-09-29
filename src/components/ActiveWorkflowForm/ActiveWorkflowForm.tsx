@@ -185,14 +185,18 @@ function renderBody(
       });
       return (
         <DataCollectionForm
+          columns={inputForm.columns}
           title={inputForm.title || 'Proporcione la Información Requerida'}
           description={
             inputForm.description ||
             'Complete los siguientes campos para continuar con su trámite.'
           }
-          initialValues={profileValues}
+          initialValues={{ ...profileValues, ...(inputForm.initial_values || {}) }}
           sections={inputForm.sections}
           fields={inputForm.fields?.map((field: any) => ({
+            // Propaga cualquier config extra del campo (p. ej. tipos propios del
+            // tenant), sin acoplar el shared; las claves normalizadas la sobrescriben.
+            ...field,
             id: field.name,
             name: field.name,
             label:
@@ -203,6 +207,7 @@ function renderBody(
             placeholder: field.placeholder,
             validation: field.validation,
             helpText: field.helperText || field.helpText,
+            fullWidth: field.fullWidth,
             accept: field.accept,
             multiple: field.multiple,
             options: field.options
@@ -238,6 +243,8 @@ function renderBody(
             max_items: field.max_items,
             item_label_template: field.item_label_template,
             add_button_label: field.add_button_label,
+            item_summary_template: field.item_summary_template,
+            collapsible: field.collapsible,
             sum_field: field.sum_field,
             sum_equals: field.sum_equals,
           }))}

@@ -4,6 +4,7 @@ import { GeoField } from './GeoField';
 import { AddressField } from './AddressField';
 import type { AddressValue } from './AddressField';
 import { CatalogAutocomplete } from './CatalogAutocomplete';
+import { getCustomFieldRenderer } from './customFieldRegistry';
 
 // Aviso con las características que debe reunir un documento para cargarse
 // correctamente (formatos, tamaño y nombre sin acentos/caracteres especiales).
@@ -64,6 +65,10 @@ export interface FormField {
   pattern?: string;
   // Date fields: disallow dates before today (no retroactive dates)
   minToday?: boolean;
+  // Layout: force this field to span the whole row when the form is laid
+  // out in columns. Long strings (a 60-char capture line) and file inputs
+  // look broken squeezed into half a row.
+  fullWidth?: boolean;
   helpText?: string;
   autoCompleteConfig?: {
     triggerOnLength?: number;
@@ -88,6 +93,10 @@ export interface FormField {
   min_items?: number;
   max_items?: number;
   item_label_template?: string;
+  // Arreglo colapsable (para muchos elementos): cada fila se muestra como una
+  // línea de resumen expandible. `item_summary_template` interpola {campo}.
+  collapsible?: boolean;
+  item_summary_template?: string;
   add_button_label?: string;
   sum_field?: string;
   sum_equals?: number;
@@ -143,7 +152,20 @@ export interface DataCollectionFormProps {
   isSubmitting?: boolean;
   submitButtonText?: string;
   initialValues?: Record<string, any>;
+  /** Fields per row. Defaults to 1, which is the historical one-per-row layout. */
+  columns?: number;
 }
+
+// Tipos compuestos que nunca caben en media fila: un selector de mapa, una
+// tabla de renglones o un input de archivo se ven roto a medio ancho. El resto
+// (números, fechas, textos cortos, selects) sí se empareja de dos en dos.
+const SIEMPRE_ANCHO_COMPLETO = new Set([
+  'textarea', 'file', 'camera', 'array', 'geo', 'address', 'daterange',
+  'entity_select', 'entity_multi_select',
+]);
+
+const ocupaTodoElRenglon = (field: FormField): boolean =>
+  field.fullWidth === true || SIEMPRE_ANCHO_COMPLETO.has(field.type);
 
 export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
   title,
@@ -154,13 +176,16 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
   onCancel,
   isSubmitting = false,
   submitButtonText = 'Submit Information',
-  initialValues
+  initialValues,
+  columns = 1
 }) => {
   const [formData, setFormData] = useState<Record<string, any>>(() => ({ ...(initialValues || {}) }));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>({});
   const [suggestions, setSuggestions] = useState<Record<string, any>>({});
   const [, setAutoCompleteLoading] = useState<Record<string, boolean>>({});
+  // Filas de arreglo expandidas (para arreglos colapsables con muchos elementos).
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   
   // Get all fields either from sections or direct fields prop
   const allFields = React.useMemo(() => {
@@ -291,8 +316,10 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
 
   const handleFileUpload = (fieldId: string, files: FileList | null) => {
     if (files && files.length > 0) {
-      const file = files[0];
-      setUploadedFiles(prev => ({ ...prev, [fieldId]: file }));
+      const field = allFields.find(f => f.id === fieldId);
+      // Campo múltiple: se guardan todos los archivos seleccionados (array).
+      const val: any = field?.multiple ? Array.from(files) : files[0];
+      setUploadedFiles(prev => ({ ...prev, [fieldId]: val }));
 
       // Clear error
       if (errors[fieldId]) {
@@ -624,14 +651,21 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
     if (field.type === 'address') {
       if (!field.required) return '';
       const addr = (value || {}) as Record<string, any>;
-      const req: Array<[string, string]> = [
-        ['calle', 'Calle'],
-        ['no_ext', 'No. Ext'],
-        ['cp', 'Código Postal'],
-        ['colonia', 'Colonia'],
-        ['municipio', 'Municipio'],
-        ['estado', 'Estado'],
-      ];
+      // region_only: solo Código Postal, Municipio y Estado (sin calle/número/colonia).
+      const req: Array<[string, string]> = field.region_only
+        ? [
+            ['cp', 'Código Postal'],
+            ['municipio', 'Municipio'],
+            ['estado', 'Estado'],
+          ]
+        : [
+            ['calle', 'Calle'],
+            ['no_ext', 'No. Ext'],
+            ['cp', 'Código Postal'],
+            ['colonia', 'Colonia'],
+            ['municipio', 'Municipio'],
+            ['estado', 'Estado'],
+          ];
       for (const [key, label] of req) {
         const val = addr[key];
         if (val === undefined || val === null || String(val).trim() === '') {
@@ -645,7 +679,8 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
       field.required &&
       (value === undefined ||
         value === null ||
-        (typeof value === 'string' && value.trim() === ''))
+        (typeof value === 'string' && value.trim() === '') ||
+        (Array.isArray(value) && value.length === 0))
     ) {
       return `${field.label} is required`;
     }
@@ -892,6 +927,19 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
   };
 
   const renderField = (field: FormField) => {
+    // Punto de extensión del tenant: si hay un renderer registrado para este tipo
+    // de campo (p. ej. uno propio del tenant), se usa en lugar del render nativo.
+    const customRenderer = getCustomFieldRenderer(field.type as string);
+    if (customRenderer) {
+      const custom = customRenderer({
+        field,
+        value: formData[field.id],
+        onChange: (v) => handleInputChange(field.id, v),
+        disabled: isSubmitting,
+      });
+      if (custom !== undefined && custom !== null) return custom;
+    }
+
     const commonProps = {
       id: field.id,
       name: field.id,
@@ -1026,22 +1074,44 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
 
         return (
           <div className="array-field">
-            {items.map((item, idx) => (
+            {items.map((item, idx) => {
+              // Encabezado: interpola {campo} con los valores de la fila (y {{index}}).
+              const rawTpl = field.item_summary_template || field.item_label_template || `${field.label} {{index}}`;
+              const header = rawTpl
+                .replace(/\{\{index\}\}/g, String(idx + 1))
+                .replace(/\{(\w+)\}/g, (_m, k) => {
+                  const v = item[k];
+                  return v === undefined || v === null || v === '' ? '' : String(v);
+                })
+                .replace(/\s+—\s*$/, '').trim() || `${field.label} ${idx + 1}`;
+              const rowKey = `${field.id}_${idx}`;
+              const collapsible = !!field.collapsible;
+              const expanded = collapsible ? !!expandedRows[rowKey] : true;
+              return (
               <div
                 key={idx}
                 className="array-field-item"
                 style={{
                   border: '1px solid #e1e5e9',
                   borderRadius: '8px',
-                  padding: '1rem',
-                  marginBottom: '0.75rem',
+                  padding: collapsible && !expanded ? '0.5rem 1rem' : '1rem',
+                  marginBottom: '0.5rem',
                   backgroundColor: '#fafbfc'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <strong>
-                    {(field.item_label_template || `${field.label} {{index}}`).replace('{{index}}', String(idx + 1))}
-                  </strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: expanded ? '0.75rem' : 0, gap: '0.5rem' }}>
+                  {collapsible ? (
+                    <button
+                      type="button"
+                      onClick={() => setExpandedRows(prev => ({ ...prev, [rowKey]: !prev[rowKey] }))}
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1f2937', fontWeight: 600 }}
+                    >
+                      <span style={{ color: '#9d2449' }}>{expanded ? '▾' : '▸'}</span>
+                      <span>{header}</span>
+                    </button>
+                  ) : (
+                    <strong>{header}</strong>
+                  )}
                   <button
                     type="button"
                     onClick={() => removeItem(field.id, idx, minItems)}
@@ -1052,7 +1122,7 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
                     Eliminar
                   </button>
                 </div>
-                {itemFields.map(itemField => {
+                {expanded && itemFields.map(itemField => {
                   if (!isItemFieldVisible(itemField, item)) return null;
                   return (
                     <div key={itemField.name} className="form-group" style={{ marginBottom: '0.75rem' }}>
@@ -1066,7 +1136,7 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
                   );
                 })}
               </div>
-            ))}
+            );})}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <button
                 type="button"
@@ -1192,36 +1262,40 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
         );
       }
 
-      case 'file':
+      case 'file': {
+        const rawVal = uploadedFiles[field.id] as any;
+        const fileList: File[] = Array.isArray(rawVal) ? rawVal : (rawVal ? [rawVal] : []);
         return (
           <div className="file-upload-container">
             <input
               {...commonProps}
               type="file"
+              multiple={!!field.multiple}
               onChange={(e) => handleFileUpload(field.id, e.target.files)}
               className="file-input"
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              accept={field.accept || '.pdf,.jpg,.jpeg,.png,.doc,.docx'}
             />
             <div className="file-upload-display">
-              {uploadedFiles[field.id] ? (
-                <div className="uploaded-file">
-                  <span className="file-icon">📄</span>
-                  <span className="file-name">{uploadedFiles[field.id].name}</span>
-                  <span className="file-size">
-                    ({Math.round(uploadedFiles[field.id].size / 1024)} KB)
-                  </span>
-                </div>
+              {fileList.length > 0 ? (
+                fileList.map((f, i) => (
+                  <div className="uploaded-file" key={i}>
+                    <span className="file-icon">📄</span>
+                    <span className="file-name">{f.name}</span>
+                    <span className="file-size">({Math.round(f.size / 1024)} KB)</span>
+                  </div>
+                ))
               ) : (
                 <div className="upload-placeholder">
                   <span className="upload-icon">⬆️</span>
-                  <span>Click to upload {field.label}</span>
-                  <small>PDF, JPG, PNG (máx 100MB)</small>
+                  <span>Click to upload {field.label}{field.multiple ? ' (puede seleccionar varios)' : ''}</span>
+                  <small>{field.accept || 'PDF, JPG, PNG'} (máx 100MB)</small>
                 </div>
               )}
             </div>
             <FileRequirementsNote />
           </div>
         );
+      }
 
       case 'camera':
         const facingMode = field.capture || 'user'; // 'user' for selfie, 'environment' for documents
@@ -1382,9 +1456,15 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
                   <p className="section-description">{section.description}</p>
                 )}
               </div>
-              <div className="section-fields">
+              <div
+                className={columns > 1 ? 'section-fields fields-grid' : 'section-fields'}
+                style={columns > 1 ? { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` } : undefined}
+              >
                 {section.fields.map(field => (
-                  <div key={field.id} className="form-group">
+                  <div
+                    key={field.id}
+                    className={ocupaTodoElRenglon(field) ? 'form-group full-row' : 'form-group'}
+                  >
                     <label htmlFor={field.id} className="form-label">
                       {field.label}
                       {field.required && <span className="required-indicator">*</span>}
@@ -1406,8 +1486,15 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
           ))
         ) : (
           // Fallback to flat fields rendering
-          allFields.map(field => (
-            <div key={field.id} className="form-group">
+          <div
+            className={columns > 1 ? 'fields-grid' : undefined}
+            style={columns > 1 ? { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` } : undefined}
+          >
+          {allFields.map(field => (
+            <div
+              key={field.id}
+              className={ocupaTodoElRenglon(field) ? 'form-group full-row' : 'form-group'}
+            >
               <label htmlFor={field.id} className="form-label">
                 {field.label}
                 {field.required && <span className="required-indicator">*</span>}
@@ -1423,7 +1510,8 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
                 <span className="field-error">{errors[field.id]}</span>
               )}
             </div>
-          ))
+          ))}
+          </div>
         )}
 
         <div className="form-actions">

@@ -69,3 +69,12 @@ export type {
 
 // Locale helpers (for tenant overrides that need to format/localize content)
 export { getCurrentLocale } from '../utils/locale';
+
+// Extensión de campos propios del tenant: registrar un renderer para un tipo de
+// campo que el portal base no conoce (lo consulta DataCollectionForm).
+export { registerCustomFieldRenderer, getCustomFieldRenderer } from '../components/customFieldRegistry';
+export type { CustomFieldRenderer, CustomFieldRenderArgs } from '../components/customFieldRegistry';
+// Autocompletado de catálogo, reutilizable dentro de campos propios del tenant.
+export { CatalogAutocomplete } from '../components/CatalogAutocomplete';
+// React (para componentes de tenant que no lo importan directamente).
+export { default as React } from 'react';
