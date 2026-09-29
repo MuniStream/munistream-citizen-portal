@@ -67,12 +67,9 @@ function valorLegible(valor: any): string {
 function Vigencia({ vigencia }: { vigencia: Candidata['vigencia'] }) {
   if (!vigencia) return null;
   const fecha = new Date(vigencia.hasta).toLocaleDateString('es-MX');
-  // Una fecha deducida de los años declarados no es lo mismo que una emitida:
-  // no debe presentarse como si fuera oficial.
-  const matiz = vigencia.origen === 'derivada' ? ' (estimada)' : '';
   return (
     <span className={`picker-vigencia ${vigencia.vencida ? 'vencida' : ''}`}>
-      {vigencia.vencida ? `Venció el ${fecha}${matiz}` : `Vigente hasta ${fecha}${matiz}`}
+      {vigencia.vencida ? `Venció el ${fecha}` : `Vigente hasta ${fecha}`}
     </span>
   );
 }
