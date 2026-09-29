@@ -71,7 +71,11 @@ const EmittedEntitiesSection: React.FC<EmittedEntitiesSectionProps> = ({ entitie
     return () => {
       cancelled = true;
     };
-  }, [entities]);
+    // Se depende de los folios, no del array: `emitted_entities` se recrea en cada
+    // render del padre, que sondea en intervalo, así que con `[entities]` el efecto
+    // se relanzaba en cada tick y recreaba el visor (y su iframe) desde cero.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entities.map((e) => e.entity_id).join('|')]);
 
   if (entities.length === 0) return null;
 

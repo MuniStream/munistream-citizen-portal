@@ -41,6 +41,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import { entityAddressSubtitle } from '../../utils/address';
+import { mensajeDeError } from '../../utils/errorMessage';
 
 interface EntityData {
   id: string;
@@ -113,10 +114,9 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
 
         setHtmlContent(response.data);
       } catch (error) {
-        const errorMessage = axios.isAxiosError(error)
-          ? error.response?.data?.detail || error.message
-          : 'Failed to load document HTML';
-        setError(errorMessage);
+        // `detail` puede no ser texto (un 422 lo manda como lista de objetos);
+        // guardarlo crudo en un estado `string` y pintarlo tumba la página entera.
+        setError(mensajeDeError(error, 'No se pudo cargar el documento.'));
       } finally {
         setLoading(false);
       }
@@ -154,10 +154,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      const msg = axios.isAxiosError(err)
-        ? err.response?.data?.detail || err.message
-        : 'No se pudo descargar el PDF';
-      setError(typeof msg === 'string' ? msg : 'No se pudo descargar el PDF');
+      setError(mensajeDeError(err, 'No se pudo descargar el PDF.'));
     } finally {
       setLoading(false);
     }
@@ -178,10 +175,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
 
       setVerificationResult(response.data);
     } catch (error) {
-      const errorMessage = axios.isAxiosError(error)
-        ? error.response?.data?.detail || error.message
-        : 'Failed to verify signature';
-      setError(errorMessage);
+      setError(mensajeDeError(error, 'No se pudo verificar la firma.'));
     } finally {
       setLoading(false);
     }
