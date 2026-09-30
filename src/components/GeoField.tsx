@@ -60,6 +60,77 @@ function toGeoJSON(points: LatLng[], mode: 'point' | 'polygon'): GeoValue {
   return { type: 'Polygon', coordinates: [ring] };
 }
 
+// --- Importación de archivos geográficos (KML / shapefile .zip) -------------
+// El parseo es 100% en el navegador; las librerías se cargan bajo demanda
+// (dynamic import) para no engordar el bundle inicial.
+
+function ringToLatLng(ring: number[][]): LatLng[] {
+  const pts = ring.map(([lng, lat]) => [lat, lng] as LatLng);
+  // Quitar el vértice de cierre (igual al primero) para editar.
+  if (pts.length > 1 && pts[0][0] === pts[pts.length - 1][0] && pts[0][1] === pts[pts.length - 1][1]) {
+    pts.pop();
+  }
+  return pts;
+}
+
+function* iterGeometries(gj: any): Generator<any> {
+  if (!gj) return;
+  if (gj.type === 'FeatureCollection') { for (const f of gj.features || []) yield* iterGeometries(f); return; }
+  if (gj.type === 'Feature') { yield* iterGeometries(gj.geometry); return; }
+  if (gj.type === 'GeometryCollection') { for (const g of gj.geometries || []) yield* iterGeometries(g); return; }
+  if (gj.type) yield gj;
+}
+
+// De un GeoJSON importado saca los puntos que corresponden al `mode` del campo:
+// polígono -> anillo exterior del primer Polygon/MultiPolygon; punto -> primer
+// Point/MultiPoint (o el primer vértice de un polígono como último recurso).
+function pointsFromImported(gj: any, mode: 'point' | 'polygon'): LatLng[] {
+  const geoms = [...iterGeometries(gj)];
+  if (mode === 'polygon') {
+    const poly = geoms.find((g) => g.type === 'Polygon') || geoms.find((g) => g.type === 'MultiPolygon');
+    if (poly?.type === 'Polygon') return ringToLatLng(poly.coordinates?.[0] || []);
+    if (poly?.type === 'MultiPolygon') return ringToLatLng(poly.coordinates?.[0]?.[0] || []);
+    return [];
+  }
+  const pt = geoms.find((g) => g.type === 'Point') || geoms.find((g) => g.type === 'MultiPoint');
+  if (pt?.type === 'Point') { const [lng, lat] = pt.coordinates; return [[lat, lng]]; }
+  if (pt?.type === 'MultiPoint') { const [lng, lat] = pt.coordinates?.[0] || []; return lng != null ? [[lat, lng]] : []; }
+  const poly = geoms.find((g) => g.type === 'Polygon');
+  if (poly) { const [lng, lat] = poly.coordinates?.[0]?.[0] || []; return lng != null ? [[lat, lng]] : []; }
+  return [];
+}
+
+async function parseGeoFile(file: File): Promise<any> {
+  const name = file.name.toLowerCase();
+  if (name.endsWith('.kml')) {
+    const text = await file.text();
+    const dom = new DOMParser().parseFromString(text, 'text/xml');
+    const { kml } = await import('@tmcw/togeojson');
+    return kml(dom);
+  }
+  if (name.endsWith('.zip') || name.endsWith('.shp')) {
+    const buf = await file.arrayBuffer();
+    const shp = (await import('shpjs')).default;
+    return await shp(buf);
+  }
+  throw new Error('Formato no soportado. Suba un archivo .kml o un shapefile comprimido .zip.');
+}
+
+// Recentra/ajusta el mapa cuando cambia `signal` (p. ej. tras importar un archivo),
+// sin recentrar en cada clic manual.
+const FitBounds: React.FC<{ points: LatLng[]; signal: number }> = ({ points, signal }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (!points.length) return;
+    try {
+      if (points.length === 1) map.setView(points[0], 15);
+      else map.fitBounds(points as any, { padding: [20, 20] });
+    } catch { /* contenedor aún sin tamaño */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signal]);
+  return null;
+};
+
 const ClickCapture: React.FC<{ onClick: (latlng: LatLng) => void; disabled?: boolean }> = ({ onClick, disabled }) => {
   useMapEvents({
     click(e) {
@@ -107,6 +178,9 @@ export const GeoField: React.FC<GeoFieldProps> = ({
   // quiere navegar el mapa).
   const [latInput, setLatInput] = useState<string>('');
   const [lngInput, setLngInput] = useState<string>('');
+  // Importación de KML/SHP: mensaje de estado y señal para recentrar el mapa.
+  const [importMsg, setImportMsg] = useState<string | null>(null);
+  const [fitSignal, setFitSignal] = useState<number>(0);
 
   // Sincronizar si el valor externo cambia (p.ej. reset del formulario).
   useEffect(() => {
@@ -152,6 +226,24 @@ export const GeoField: React.FC<GeoFieldProps> = ({
   const undo = () => emit(points.slice(0, -1));
   const clear = () => emit([]);
 
+  const handleImport = async (file?: File | null) => {
+    if (!file) return;
+    setImportMsg('Importando archivo…');
+    try {
+      const gj = await parseGeoFile(file);
+      const pts = pointsFromImported(gj, mode);
+      if (!pts.length) {
+        setImportMsg(`El archivo no contiene un ${mode === 'polygon' ? 'polígono' : 'punto'} válido.`);
+        return;
+      }
+      emit(pts);
+      setFitSignal((s) => s + 1);
+      setImportMsg(`Importado de ${file.name}: ${pts.length} ${mode === 'polygon' ? 'vértice(s)' : 'punto'}.`);
+    } catch (e: any) {
+      setImportMsg(e?.message || 'No se pudo leer el archivo.');
+    }
+  };
+
   const initialCenter = center || (points.length > 0 ? points[0] : DEFAULT_CENTER);
   const initialZoom = zoom || (points.length > 0 ? 13 : DEFAULT_ZOOM);
 
@@ -165,6 +257,7 @@ export const GeoField: React.FC<GeoFieldProps> = ({
           />
           <ClickCapture onClick={handleClick} disabled={disabled} />
           <ResizeInvalidate />
+          <FitBounds points={points} signal={fitSignal} />
           {points.map((p, i) => (
             <CircleMarker key={i} center={p} radius={6} pathOptions={{ color: '#9b1c31', fillColor: '#9b1c31', fillOpacity: 0.9 }} />
           ))}
@@ -205,7 +298,21 @@ export const GeoField: React.FC<GeoFieldProps> = ({
           >
             {mode === 'point' ? 'Colocar en el mapa' : 'Agregar vértice'}
           </button>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.75rem', color: '#555' }}>Importar KML / SHP</label>
+            <input
+              type="file"
+              accept=".kml,.zip,.shp"
+              onChange={(e) => { handleImport(e.target.files?.[0]); e.currentTarget.value = ''; }}
+              disabled={disabled}
+              style={{ fontSize: '0.85rem' }}
+            />
+          </div>
         </div>
+      )}
+
+      {importMsg && (
+        <div style={{ fontSize: '0.8rem', color: '#555', marginTop: 6 }}>{importMsg}</div>
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
