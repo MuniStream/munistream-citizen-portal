@@ -81,6 +81,26 @@
   line-height: 1.6;
 }
 
+/* Motivo por el que el trámite se detuvo. Se marca en rojo y con borde
+   lateral para que se lea como lo que es —algo que requiere atención— y no
+   como un párrafo más del encabezado. */
+.instance-failure {
+  display: block;
+  margin: 0 0 1.5rem 0;
+  padding: 0.875rem 1rem;
+  border: 1px solid #f5c2c7;
+  border-left: 4px solid #dc3545;
+  border-radius: 8px;
+  background: #fdf2f2;
+  color: #842029;
+  line-height: 1.6;
+}
+
+.instance-failure strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
 .instance-status-bar {
   margin-bottom: 1.5rem;
 }

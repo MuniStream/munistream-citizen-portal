@@ -213,6 +213,16 @@ export const InstanceDetailContent: React.FC = () => {
               }
             </p>
 
+            {/* Por qué se detuvo. Antes el trámite moría mostrando solo el
+                estado "Error": el ciudadano no podía saber si le tocaba
+                corregir algo o simplemente esperar. */}
+            {instance.status === 'failed' && instance.error_message && (
+              <p className="instance-failure" role="alert">
+                <strong>{t('instanceDetail.failureTitle')}</strong>
+                <span>{instance.error_message}</span>
+              </p>
+            )}
+
             <div className="instance-status-bar">
               <div className="progress-indicator">
                 <div className="progress-bar">

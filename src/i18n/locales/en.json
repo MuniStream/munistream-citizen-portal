@@ -148,6 +148,7 @@
   "instanceDetail": {
     "statusLabel": "Application status",
     "completedMessage": "Congratulations, your application has been completed.",
+    "failureTitle": "The application could not continue",
     "progressMessage": "Progress: {{percent}}% complete.",
     "started": "Started",
     "finished": "Finished",

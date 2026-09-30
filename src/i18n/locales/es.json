@@ -148,6 +148,7 @@
   "instanceDetail": {
     "statusLabel": "Estado de la solicitud",
     "completedMessage": "Felicitaciones, su trámite ha sido completado.",
+    "failureTitle": "El trámite no pudo continuar",
     "progressMessage": "Progreso: {{percent}}% completado.",
     "started": "Iniciado",
     "finished": "Finalizado",
