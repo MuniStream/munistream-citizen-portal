@@ -401,6 +401,9 @@ export interface WorkflowInstanceProgress {
   // on demand via getEntityDetail(). Present once the trámite has emitted them.
   emitted_entities?: EmittedEntity[];
   estimated_completion?: string;
+  // Por qué murió el trámite, cuando `status` es 'failed'. Sin esto la pantalla
+  // solo puede decir "Error" y el ciudadano no sabe si le toca corregir algo.
+  error_message?: string | null;
   message: string;
 }
 
