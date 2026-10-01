@@ -54,6 +54,18 @@ export interface FormField {
    * viaje sobre un rango de cinco, y nadie sabría cuál de los dos es el bueno.
    */
   computed_from?: { daterange?: string };
+  /**
+   * Antigüedad máxima del fin del rango, en horas.
+   *
+   * El aviso de arribo se presenta dentro de las 72 horas siguientes a que la
+   * embarcación llegó: un arribo de hace una semana ya no se puede avisar por aquí.
+   * Sin el tope, el ciudadano llenaba el trámite entero y lo presentaba fuera de
+   * plazo sin que nada se lo dijera, y el rechazo llegaba al final.
+   *
+   * Los inputs del rango son de fecha, no de hora, así que el tope se redondea a
+   * días completos: 72 horas son los tres días anteriores al de hoy.
+   */
+  maxEndAgeHours?: number;
   required: boolean;
   placeholder?: string;
   options?: string[] | EntityOption[];
@@ -668,6 +680,29 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
   };
 
   const validateField = (field: FormField, value: any): string => {
+    // Plazo del rango: el aviso de arribo se presenta dentro de las 72 horas
+    // siguientes a la llegada. El `min`/`max` del input acota el calendario, pero
+    // no alcanza: el valor puede venir pegado, tecleado o restaurado de un
+    // borrador, y entonces el trámite se presentaría fuera de plazo y el rechazo
+    // llegaría al final, con todo el formulario ya lleno.
+    if (field.type === 'daterange' && field.maxEndAgeHours && value?.fin) {
+      const fin = new Date(value.fin);
+      if (!Number.isNaN(fin.getTime())) {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const dias = Math.floor(field.maxEndAgeHours / 24);
+        const limite = new Date(hoy);
+        limite.setDate(limite.getDate() - dias);
+
+        if (fin < limite) {
+          return `${field.label}: el aviso se presenta dentro de las ${field.maxEndAgeHours} horas posteriores al arribo. La fecha de arribo no puede ser anterior al ${limite.toLocaleDateString('es-MX')}.`;
+        }
+        if (fin > hoy) {
+          return `${field.label}: la fecha de arribo no puede ser posterior a hoy.`;
+        }
+      }
+    }
+
     if (field.type === 'array') {
       const items: Record<string, any>[] = Array.isArray(value) ? value : [];
       const minItems = field.min_items ?? (field.required ? 1 : 0);
@@ -1320,6 +1355,22 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
         const rangeVal = (formData[field.id] as any) || {};
         const setRange = (patch: any) => handleInputChange(field.id, { ...rangeVal, ...patch });
         const todayR = (() => { const d = new Date(); d.setHours(0,0,0,0); return d.toISOString().slice(0,10); })();
+
+        // Tope de antigüedad del fin del rango. Se acota por los DOS lados: no
+        // puede ser anterior al plazo —el aviso ya no procede— ni posterior a hoy,
+        // porque no se avisa un arribo que todavía no ocurrió.
+        const finMasAntiguo = field.maxEndAgeHours
+          ? (() => {
+              const d = new Date();
+              d.setHours(0, 0, 0, 0);
+              d.setDate(d.getDate() - Math.floor(field.maxEndAgeHours! / 24));
+              return d.toISOString().slice(0, 10);
+            })()
+          : undefined;
+        // El más restrictivo de los dos mínimos: el inicio del viaje o el plazo.
+        const minFin = [rangeVal.inicio, finMasAntiguo, field.minToday ? todayR : undefined]
+          .filter(Boolean).sort().pop();
+
         return (
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 150 }}>
@@ -1334,7 +1385,8 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
               <label style={{ display: 'block', fontSize: '0.8rem', color: '#555', marginBottom: 4 }}>Hasta</label>
               <input type="date" className="form-input" disabled={isSubmitting}
                 value={rangeVal.fin || ''}
-                min={rangeVal.inicio || (field.minToday ? todayR : undefined)}
+                min={minFin}
+                max={field.maxEndAgeHours ? todayR : undefined}
                 onChange={(e) => setRange({ fin: e.target.value })} />
             </div>
           </div>
