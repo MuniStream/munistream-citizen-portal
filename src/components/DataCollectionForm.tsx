@@ -118,6 +118,13 @@ export interface FormField {
   with_contact?: boolean;
   // Address field: solo Código Postal, Municipio y Estado (sin calle/número/colonia).
   region_only?: boolean;
+  // Address field: domicilio mundial (pide país; Ciudad/Estado/CP de captura
+  // libre, sin la búsqueda por CP de SEPOMEX). `international` lo fija siempre;
+  // `international_if` lo enciende según otro campo del mismo formulario —el
+  // caso real es la nacionalidad: si no es México, el domicilio no puede
+  // pedirse con colonia y CP mexicanos.
+  international?: boolean;
+  international_if?: { field: string; value?: string | string[]; not_value?: string | string[] };
   // Entity select: campos de la entidad a mostrar en cada tarjeta de la lista.
   display_fields?: string[];
   // Catalog autocomplete: columnas que forman la etiqueta guardada.
@@ -489,6 +496,29 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
     setItems(arrayFieldId, items.filter((_, i) => i !== index));
   };
 
+  // ¿Este domicilio se captura como mundial? `international` manda; si no,
+  // `international_if` se resuelve contra el valor vivo del campo que nombra.
+  const isInternationalAddress = (field: FormField): boolean => {
+    if (field.international) return true;
+    const cond = field.international_if;
+    if (!cond) return false;
+    const ref = formData[cond.field];
+    const coincide = (esperado?: string | string[]) =>
+      esperado === undefined
+        ? false
+        : Array.isArray(esperado)
+          ? esperado.includes(ref as string)
+          : ref === esperado;
+    if (cond.value !== undefined) return coincide(cond.value);
+    if (cond.not_value !== undefined) {
+      // Mientras el campo de referencia esté vacío no se asume extranjero: el
+      // ciudadano vería un domicilio mundial antes de declarar su nacionalidad.
+      if (ref === undefined || ref === null || String(ref).trim() === '') return false;
+      return !coincide(cond.not_value);
+    }
+    return false;
+  };
+
   const isItemFieldVisible = (itemField: FormField, item: Record<string, any>): boolean => {
     if (!itemField.show_if) return true;
     const ref = item?.[itemField.show_if.field];
@@ -651,21 +681,37 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
     if (field.type === 'address') {
       if (!field.required) return '';
       const addr = (value || {}) as Record<string, any>;
-      // region_only: solo Código Postal, Municipio y Estado (sin calle/número/colonia).
+      // Qué se exige depende del modo. En el mundial no se puede pedir colonia
+      // ni código postal: hay países sin código postal y sin una división
+      // equivalente a la colonia, y exigirlos deja al extranjero sin forma de
+      // completar el trámite.
+      const internacional = isInternationalAddress(field);
       const req: Array<[string, string]> = field.region_only
-        ? [
-            ['cp', 'Código Postal'],
-            ['municipio', 'Municipio'],
-            ['estado', 'Estado'],
-          ]
-        : [
-            ['calle', 'Calle'],
-            ['no_ext', 'No. Ext'],
-            ['cp', 'Código Postal'],
-            ['colonia', 'Colonia'],
-            ['municipio', 'Municipio'],
-            ['estado', 'Estado'],
-          ];
+        ? internacional
+          ? [
+              ['pais', 'País'],
+              ['municipio', 'Ciudad'],
+            ]
+          : [
+              ['cp', 'Código Postal'],
+              ['municipio', 'Municipio'],
+              ['estado', 'Estado'],
+            ]
+        : internacional
+          ? [
+              ['pais', 'País'],
+              ['calle', 'Calle'],
+              ['no_ext', 'No. Ext'],
+              ['municipio', 'Ciudad'],
+            ]
+          : [
+              ['calle', 'Calle'],
+              ['no_ext', 'No. Ext'],
+              ['cp', 'Código Postal'],
+              ['colonia', 'Colonia'],
+              ['municipio', 'Municipio'],
+              ['estado', 'Estado'],
+            ];
       for (const [key, label] of req) {
         const val = addr[key];
         if (val === undefined || val === null || String(val).trim() === '') {
@@ -1199,6 +1245,7 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
             sameAsValue={field.same_as ? (formData[field.same_as] as AddressValue) : undefined}
             withContact={field.with_contact}
             regionOnly={field.region_only}
+            international={isInternationalAddress(field)}
           />
         );
 

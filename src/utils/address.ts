@@ -1,6 +1,7 @@
 /**
  * Utilidades para el domicilio estructurado (campo `address`).
- * El valor es un objeto { calle, no_ext, no_int, colonia, municipio, estado, cp }.
+ * El valor es un objeto { calle, no_ext, no_int, colonia, municipio, estado, cp, pais }.
+ * `pais` solo viene en los domicilios capturados en modo mundial; vacío es México.
  */
 
 export interface AddressLike {
@@ -11,12 +12,13 @@ export interface AddressLike {
   municipio?: string;
   estado?: string;
   cp?: string;
+  pais?: string;
 }
 
 function isAddress(v: any): v is AddressLike {
   return (
     v && typeof v === 'object' && !Array.isArray(v) &&
-    (v.calle || v.colonia || v.municipio || v.estado || v.cp)
+    (v.calle || v.colonia || v.municipio || v.estado || v.cp || v.pais)
   );
 }
 
@@ -33,6 +35,7 @@ export function formatAddress(a?: AddressLike | null): string {
     a!.municipio,
     a!.estado,
     a!.cp ? `C.P. ${a!.cp}` : '',
+    a!.pais,
   ].filter(Boolean).join(', ');
   return [l1, l2].filter(Boolean).join(', ');
 }

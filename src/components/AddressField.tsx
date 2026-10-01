@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import { CatalogAutocomplete } from './CatalogAutocomplete';
 
 /**
  * Domicilio estructurado con autocompletado por Código Postal.
@@ -10,7 +11,15 @@ import api from '../services/api';
  * colonias de ese CP en un menú; si la colonia no está en el catálogo, el usuario
  * la escribe con la opción "Otra".
  *
- * El valor es un objeto: { calle, no_ext, no_int, colonia, municipio, estado, cp }.
+ * En modo `international` el domicilio deja de estar anclado a México: se pide
+ * el país del catálogo ISO 3166-1, y Ciudad, Estado/Provincia y Código Postal
+ * pasan a captura libre porque el CP mexicano de SEPOMEX no significa nada fuera
+ * del país (ni tiene por qué ser numérico ni de cinco dígitos). Las CLAVES del
+ * objeto no cambian —`municipio` guarda la ciudad y `estado` la provincia— para
+ * que documentos, expedientes y visualizadores sigan leyendo el mismo domicilio
+ * sin ramificar por nacionalidad.
+ *
+ * El valor es un objeto: { calle, no_ext, no_int, colonia, municipio, estado, cp, pais }.
  */
 
 export interface AddressValue {
@@ -21,6 +30,10 @@ export interface AddressValue {
   municipio?: string;
   estado?: string;
   cp?: string;
+  // País (nombre del catálogo ISO 3166-1). Vacío = México, que es el caso por
+  // defecto de los trámites; solo el modo internacional lo pide de forma
+  // explícita.
+  pais?: string;
   // Medios de contacto (opcionales; solo si el field pide `with_contact`).
   telefono?: string;
   movil?: string;
@@ -34,6 +47,9 @@ interface AddressFieldConfig {
   colonia_column?: string;
   municipio_column?: string;
   estado_column?: string;
+  // Catálogo de países para el modo internacional.
+  paises_catalog_id?: string;
+  pais_column?: string;
 }
 
 interface AddressFieldProps {
@@ -51,6 +67,9 @@ interface AddressFieldProps {
   // Solo región: captura únicamente Código Postal, Municipio y Estado (sin
   // calle, número ni colonia). Útil para "Lugar de embarque" y similares.
   regionOnly?: boolean;
+  // Domicilio mundial: pide país y libera Ciudad / Estado / Código Postal de la
+  // búsqueda por CP mexicana.
+  international?: boolean;
 }
 
 const OTRA = '__otra__';
@@ -64,12 +83,15 @@ export const AddressField: React.FC<AddressFieldProps> = ({
   sameAsValue,
   withContact,
   regionOnly,
+  international,
 }) => {
   const catalogId = config?.catalog_id || 'geografia_mx';
   const cpCol = config?.cp_column || 'codigo_postal';
   const colCol = config?.colonia_column || 'localidad';
   const munCol = config?.municipio_column || 'municipio';
   const edoCol = config?.estado_column || 'estado';
+  const paisesCatalogId = config?.paises_catalog_id || 'paises';
+  const paisCol = config?.pais_column || 'pais';
 
   const v: AddressValue = value || {};
   const [coloniaOptions, setColoniaOptions] = useState<string[]>([]);
@@ -92,6 +114,9 @@ export const AddressField: React.FC<AddressFieldProps> = ({
   const locked = disabled || sameChecked;
 
   const lookupCp = async (rawCp: string) => {
+    // `geografia_mx` es SEPOMEX: un CP extranjero nunca va a estar ahí, y
+    // consultarlo solo produciría el mensaje de "no se encontró".
+    if (international) return;
     const cp = (rawCp || '').trim();
     if (cp.length < 4 || cp === lookedUpCp) return;
     setCpLoading(true);
@@ -197,6 +222,16 @@ export const AddressField: React.FC<AddressFieldProps> = ({
           <span>{sameAsLabel}</span>
         </label>
       )}
+      {international && cell('País *', (
+        <CatalogAutocomplete
+          value={v.pais || ''}
+          onChange={(pais) => set({ pais })}
+          disabled={locked}
+          catalogId={paisesCatalogId}
+          labelColumns={[paisCol]}
+          placeholder="Escriba el nombre del país…"
+        />
+      ))}
       {!regionOnly && cell('Calle *', (
         <input style={inputStyle} value={v.calle || ''} disabled={locked}
           onChange={(e) => set({ calle: e.target.value })} />
@@ -213,7 +248,18 @@ export const AddressField: React.FC<AddressFieldProps> = ({
         ))}</div>
       </div>
       )}
-      {cell('Código Postal *', (
+      {international ? cell('Código postal / ZIP', (
+        // Sin máscara ni obligatoriedad: hay códigos alfanuméricos (Reino
+        // Unido, Canadá) y países que simplemente no usan código postal.
+        <input
+          style={inputStyle}
+          value={v.cp || ''}
+          disabled={locked}
+          maxLength={16}
+          placeholder="Según el país"
+          onChange={(e) => set({ cp: e.target.value })}
+        />
+      )) : cell('Código Postal *', (
         <div>
           <input
             style={inputStyle}
@@ -230,7 +276,11 @@ export const AddressField: React.FC<AddressFieldProps> = ({
           {cpMsg && !cpLoading && <small style={{ color: '#64748b' }}>{cpMsg}</small>}
         </div>
       ))}
-      {!regionOnly && cell('Colonia *', (
+      {!regionOnly && international && cell('Colonia / Distrito / Barrio', (
+        <input style={inputStyle} value={v.colonia || ''} disabled={locked}
+          onChange={(e) => set({ colonia: e.target.value })} />
+      ))}
+      {!regionOnly && !international && cell('Colonia *', (
         manualColonia ? (
           <div>
             <input style={inputStyle} value={v.colonia || ''} disabled={locked}
@@ -261,13 +311,19 @@ export const AddressField: React.FC<AddressFieldProps> = ({
         )
       ))}
       <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div style={{ flex: 1 }}>{cell('Municipio *', (
+        <div style={{ flex: 1 }}>{international ? cell('Ciudad *', (
+          <input style={inputStyle} value={v.municipio || ''} disabled={locked}
+            onChange={(e) => set({ municipio: e.target.value })} />
+        )) : cell('Municipio *', (
           <input style={roStyle} value={v.municipio || ''}
             readOnly={!!v.municipio} disabled={locked}
             placeholder="Se llena con el CP"
             onChange={(e) => set({ municipio: e.target.value })} />
         ))}</div>
-        <div style={{ flex: 1 }}>{cell('Estado *', (
+        <div style={{ flex: 1 }}>{international ? cell('Estado / Provincia / Región', (
+          <input style={inputStyle} value={v.estado || ''} disabled={locked}
+            onChange={(e) => set({ estado: e.target.value })} />
+        )) : cell('Estado *', (
           <input style={roStyle} value={v.estado || ''}
             readOnly={!!v.estado} disabled={locked}
             placeholder="Se llena con el CP"
