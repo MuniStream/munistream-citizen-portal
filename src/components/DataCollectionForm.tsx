@@ -45,6 +45,15 @@ export interface FormField {
   name: string;
   label: string;
   type: 'text' | 'email' | 'phone' | 'date' | 'daterange' | 'number' | 'select' | 'textarea' | 'file' | 'camera' | 'entity_select' | 'entity_multi_select' | 'array' | 'geo' | 'address' | 'catalog_autocomplete';
+  /**
+   * Campo que se calcula solo a partir de otro, en vez de teclearse.
+   *
+   * `{ daterange: "periodo_viaje" }` cuenta los días del rango, ambos extremos
+   * incluidos. Pedir la duración a mano teniendo ya las fechas es pedir dos veces
+   * el mismo dato y abrir la puerta a que no cuadren: el acuse diría siete días de
+   * viaje sobre un rango de cinco, y nadie sabría cuál de los dos es el bueno.
+   */
+  computed_from?: { daterange?: string };
   required: boolean;
   placeholder?: string;
   options?: string[] | EntityOption[];
@@ -271,8 +280,31 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
     [formData, sections, entityService]
   );
 
+  /** Días entre dos fechas ISO, contando ambos extremos. */
+  const diasDelRango = (rango: any): number | '' => {
+    const inicio = rango?.inicio;
+    const fin = rango?.fin;
+    if (!inicio || !fin) return '';
+    const d1 = new Date(inicio);
+    const d2 = new Date(fin);
+    if (Number.isNaN(d1.getTime()) || Number.isNaN(d2.getTime())) return '';
+    const dias = Math.round((d2.getTime() - d1.getTime()) / 86_400_000) + 1;
+    return dias > 0 ? dias : '';
+  };
+
   const handleInputChange = (fieldId: string, value: any) => {
-    setFormData(prev => ({ ...prev, [fieldId]: value }));
+    setFormData(prev => {
+      const siguiente = { ...prev, [fieldId]: value };
+      // Los campos que se derivan de este se recalculan aquí y no en un efecto:
+      // así el valor ya está en el formulario cuando se valida, sin un render de
+      // por medio en el que el campo requerido aparecería vacío.
+      for (const campo of allFields) {
+        if (campo.computed_from?.daterange === fieldId) {
+          siguiente[campo.id] = diasDelRango(value);
+        }
+      }
+      return siguiente;
+    });
     
     // Clear error when user starts typing
     if (errors[fieldId]) {
@@ -1468,14 +1500,21 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
               pattern: field.pattern ?? field.validation?.pattern,
             }
           : {};
+        // Un campo calculado no se teclea: se muestra de solo lectura para que se
+        // vea de dónde sale el número y no invite a corregirlo a mano, que es lo
+        // que haría que dejara de cuadrar con el rango del que proviene.
+        const calculado = !!field.computed_from?.daterange;
         return (
           <input
             {...commonProps}
             type={field.type}
             placeholder={field.placeholder}
-            value={formData[field.id] || ''}
+            value={formData[field.id] ?? ''}
             onChange={(e) => handleInputChange(field.id, e.target.value)}
             className="form-input"
+            readOnly={calculado}
+            aria-readonly={calculado || undefined}
+            style={calculado ? { backgroundColor: '#f1f3f5', cursor: 'not-allowed' } : undefined}
             {...numberAttrs}
             {...dateAttrs}
             {...textAttrs}
