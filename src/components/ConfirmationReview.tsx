@@ -17,6 +17,8 @@ export interface ConfirmationSection {
   source_task_id?: string;
   operator_kind?: string;
   editable?: boolean;
+  /** Explicación del porqué la sección viene vacía (p. ej. un pago exento). */
+  note?: string | null;
   fields: ConfirmationField[];
 }
 
@@ -55,12 +57,52 @@ function localized(
   return base ?? '';
 }
 
+/**
+ * Geometría en algo que el ciudadano pueda revisar.
+ *
+ * Un polígono llega como `{type:'Polygon', coordinates:[[[lng,lat],…]]}` y caía
+ * en el `JSON.stringify` final: el resumen mostraba un muro de coordenadas donde
+ * debía confirmarse la ubicación de un predio. Esto no dibuja el mapa —eso es
+ * trabajo aparte— pero sí dice qué es, cuánto mide y dónde está.
+ *
+ * Un anillo cerrado repite el primer vértice al final; no se cuenta dos veces.
+ */
+function formatGeo(value: any): string | null {
+  if (!value || typeof value !== 'object') return null;
+  const g = value as { type?: string; coordinates?: any };
+
+  if (g.type === 'Point' && Array.isArray(g.coordinates)) {
+    const [lng, lat] = g.coordinates;
+    if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+    return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  }
+
+  const anillos: number[][][] =
+    g.type === 'Polygon' ? [g.coordinates?.[0] || []]
+    : g.type === 'MultiPolygon' ? (g.coordinates || []).map((p: any) => p?.[0] || [])
+    : [];
+  const vertices = anillos.reduce((n, anillo) => {
+    if (anillo.length < 2) return n + anillo.length;
+    const cerrado =
+      anillo[0]?.[0] === anillo[anillo.length - 1]?.[0] &&
+      anillo[0]?.[1] === anillo[anillo.length - 1]?.[1];
+    return n + (cerrado ? anillo.length - 1 : anillo.length);
+  }, 0);
+  if (!vertices) return null;
+
+  const puntos = anillos.flat().filter((c) => Array.isArray(c) && c.length >= 2);
+  const lng = puntos.reduce((a, c) => a + c[0], 0) / puntos.length;
+  const lat = puntos.reduce((a, c) => a + c[1], 0) / puntos.length;
+  const cuantos = anillos.length > 1 ? `${anillos.length} polígonos, ` : '';
+  return `${cuantos}${vertices} vértices · centro ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+}
+
 function formatValue(value: any, format?: string): string {
   if (value === null || value === undefined || value === '') return '—';
   if (Array.isArray(value)) {
     if (value.length === 0) return '—';
     return value
-      .map((item) => (typeof item === 'object' ? JSON.stringify(item) : String(item)))
+      .map((item) => (typeof item === 'object' ? (formatGeo(item) ?? JSON.stringify(item)) : String(item)))
       .join(', ');
   }
   if (typeof value === 'boolean') return value ? 'Sí' : 'No';
@@ -74,7 +116,7 @@ function formatValue(value: any, format?: string): string {
       return r.inicio || r.fin || '—';
     }
     const looksLikeAddress = (v: any) =>
-      v && typeof v === 'object' && (v.calle !== undefined || v.cp !== undefined || (v.colonia !== undefined && v.municipio !== undefined));
+      v && typeof v === 'object' && (v.calle !== undefined || v.cp !== undefined || v.pais !== undefined || (v.colonia !== undefined && v.municipio !== undefined));
     if (format === 'address' || looksLikeAddress(value)) {
       const a = value as Record<string, any>;
       const l1 = [
@@ -87,6 +129,7 @@ function formatValue(value: any, format?: string): string {
         a.municipio,
         a.estado,
         a.cp ? `C.P. ${a.cp}` : '',
+        a.pais,
       ].filter(Boolean).join(', ');
       const contacto = [
         a.telefono ? `Tel. ${a.telefono}` : '',
@@ -96,6 +139,8 @@ function formatValue(value: any, format?: string): string {
       const out = [[l1, l2].filter(Boolean).join(', '), contacto].filter(Boolean).join(' — ');
       return out || '—';
     }
+    const geo = formatGeo(value);
+    if (geo) return geo;
     if ((value as any).url) {
       return (value as any).url as string;
     }
@@ -225,6 +270,9 @@ export const ConfirmationReview: React.FC<ConfirmationReviewProps> = ({
                     </button>
                   )}
                 </div>
+                {section.note && (
+                  <p className="confirmation-section__note">{section.note}</p>
+                )}
                 <dl className="confirmation-section__fields">
                   {(section.fields || []).map((field) => (
                     <div key={field.key} className="confirmation-section__field">

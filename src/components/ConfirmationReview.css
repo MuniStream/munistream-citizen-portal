@@ -71,6 +71,18 @@
   color: #5b6b7c;
 }
 
+/* Explica por qué una sección viene sin datos —un pago exento no tiene importe
+   ni folio—, para que no se lea como un paso que quedó a medias. */
+.confirmation-section__note {
+  margin: 0 0 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid #b38f00;
+  background: #fdf8e3;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #4a4231;
+}
+
 .confirmation-section__fields {
   margin: 0;
   display: grid;
