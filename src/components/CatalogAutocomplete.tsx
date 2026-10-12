@@ -14,6 +14,11 @@ interface CatalogAutocompleteProps {
   catalogId: string;
   labelColumns?: string[];      // columnas que forman la etiqueta guardada
   placeholder?: string;
+  // Opcional: recibe la FILA completa del catálogo al elegir (no solo la
+  // etiqueta). Útil cuando quien usa el campo necesita columnas estructuradas
+  // (p. ej. nombre común y científico por separado). Aditivo: el contrato por
+  // defecto (onChange con la etiqueta) no cambia.
+  onSelectRow?: (row: Record<string, any>) => void;
 }
 
 const formatRow = (row: Record<string, any>, cols: string[]): string => {
@@ -29,6 +34,7 @@ export const CatalogAutocomplete: React.FC<CatalogAutocompleteProps> = ({
   catalogId,
   labelColumns = ['nombre_comun', 'nombre_cientifico'],
   placeholder = 'Escriba para buscar…',
+  onSelectRow,
 }) => {
   const [term, setTerm] = useState<string>(value || '');
   const [results, setResults] = useState<Record<string, any>[]>([]);
@@ -90,7 +96,7 @@ export const CatalogAutocomplete: React.FC<CatalogAutocompleteProps> = ({
             return (
               <div
                 key={i}
-                onClick={() => { setTerm(label); onChange(label); setOpen(false); }}
+                onClick={() => { setTerm(label); onChange(label); onSelectRow?.(row); setOpen(false); }}
                 style={{ padding: '0.5rem 0.75rem', cursor: 'pointer', borderBottom: i < results.length - 1 ? '1px solid #f1f5f9' : 'none' }}
                 onMouseDown={(e) => e.preventDefault()}
               >
