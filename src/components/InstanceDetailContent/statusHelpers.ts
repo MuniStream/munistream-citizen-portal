@@ -9,7 +9,8 @@ export type CanonicalStatus =
   | 'failed'
   | 'waiting'
   | 'pending'
-  | 'skipped';
+  | 'skipped'
+  | 'rejected';
 
 export const normalizeStatus = (status?: string): CanonicalStatus => {
   switch (status) {
@@ -30,6 +31,8 @@ export const normalizeStatus = (status?: string): CanonicalStatus => {
       return 'waiting';
     case 'skipped':
       return 'skipped';
+    case 'rejected':
+      return 'rejected';
     default:
       return 'pending';
   }
@@ -42,6 +45,7 @@ export const getStatusColor = (status?: string): string => {
     case 'in_progress':
       return '#2196f3';
     case 'failed':
+    case 'rejected':
       return '#f44336';
     case 'waiting':
       return '#ff9800';
@@ -62,6 +66,15 @@ export const statusI18nKey = (status?: string): string => {
 // Instance-level helpers: is the trámite still active (worth refreshing / show
 // the clock) vs. finished (hide refresh, show emitted entities).
 export const isDoneStatus = (status?: string): boolean =>
-  status === 'completed' || status === 'failed' || status === 'cancelled';
+  status === 'completed' || status === 'failed' || status === 'cancelled' || status === 'rejected';
+
+// Estado de la instancia tal como debe verlo el ciudadano. Un trámite RECHAZADO
+// termina en el motor como `completed` (no es un fallo técnico) con
+// `terminal_status: 'rejected'`; mostrarlo como "Completado" le diría que se le
+// otorgó lo que pidió.
+export const instanceStatus = (instance: {
+  status: string;
+  terminal_status?: string | null;
+}): string => (instance.terminal_status === 'rejected' ? 'rejected' : instance.status);
 
 export const isActiveStatus = (status?: string): boolean => !isDoneStatus(status);

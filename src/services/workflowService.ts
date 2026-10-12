@@ -404,6 +404,10 @@ export interface WorkflowInstanceProgress {
   // Por qué murió el trámite, cuando `status` es 'failed'. Sin esto la pantalla
   // solo puede decir "Error" y el ciudadano no sabe si le toca corregir algo.
   error_message?: string | null;
+  // Desenlace de negocio (p. ej. 'rejected') y su motivo. Un trámite rechazado
+  // llega con status 'completed': esto es lo que lo distingue.
+  terminal_status?: string | null;
+  terminal_message?: string | null;
   message: string;
 }
 
@@ -498,6 +502,8 @@ export interface MyWorkflowInstance {
   completed_at?: string;
   progress_percentage?: number;
   context?: Record<string, any>;
+  terminal_status?: string | null;
+  terminal_message?: string | null;
 }
 
 export const workflowService = new WorkflowService();

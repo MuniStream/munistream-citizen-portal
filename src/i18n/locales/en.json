@@ -93,7 +93,8 @@
     "cancelled": "Cancelled",
     "awaiting_input": "Awaiting Input",
     "pending_validation": "Pending Validation",
-    "waiting": "Waiting"
+    "waiting": "Waiting",
+    "rejected": "Rejected"
   },
   "workflow": {
     "start_title": "Start New Application",
@@ -149,6 +150,7 @@
     "statusLabel": "Application status",
     "completedMessage": "Congratulations, your application has been completed.",
     "failureTitle": "The application could not continue",
+    "rejectedTitle": "Your application was rejected",
     "progressMessage": "Progress: {{percent}}% complete.",
     "started": "Started",
     "finished": "Finished",
