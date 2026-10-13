@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polygon, Polyline, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -55,8 +55,11 @@ function toGeoJSON(points: LatLng[], mode: 'point' | 'polygon'): GeoValue {
     const [lat, lng] = points[0];
     return { type: 'Point', coordinates: [lng, lat] };
   }
+  // Con menos de 3 vértices no hay polígono (un GeoJSON Polygon de 1 o 2
+  // puntos es inválido): el campo queda sin valor y el requerido lo detiene.
+  if (points.length < 3) return null;
   const ring = points.map(([lat, lng]) => [lng, lat]);
-  if (points.length >= 3) ring.push(ring[0]); // cerrar el anillo
+  ring.push(ring[0]); // cerrar el anillo
   return { type: 'Polygon', coordinates: [ring] };
 }
 
@@ -182,8 +185,14 @@ export const GeoField: React.FC<GeoFieldProps> = ({
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const [fitSignal, setFitSignal] = useState<number>(0);
 
+  // Lo último que emitió este campo: un polígono en trazo (menos de 3
+  // vértices) emite null, y eso no debe leerse como un reset que borre los
+  // puntos que se están dibujando.
+  const emitido = useRef<GeoValue>(undefined);
+
   // Sincronizar si el valor externo cambia (p.ej. reset del formulario).
   useEffect(() => {
+    if (value === emitido.current) return;
     const ext = pointsFromValue(value, mode);
     if (ext.length === 0 && points.length > 0 && (value === null || value === undefined)) {
       setPoints([]);
@@ -212,7 +221,9 @@ export const GeoField: React.FC<GeoFieldProps> = ({
 
   const emit = (pts: LatLng[]) => {
     setPoints(pts);
-    onChange(toGeoJSON(pts, mode));
+    const valor = toGeoJSON(pts, mode);
+    emitido.current = valor;
+    onChange(valor);
   };
 
   const handleClick = (latlng: LatLng) => {
