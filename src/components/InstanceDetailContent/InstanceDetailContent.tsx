@@ -7,7 +7,7 @@ import { ActiveWorkflowForm } from '../ActiveWorkflowForm';
 import { useWorkflowFormSubmission } from '../../hooks/useWorkflowFormSubmission';
 import StepTimeline from './StepTimeline';
 import EmittedEntitiesSection from './EmittedEntitiesSection';
-import { getStatusColor, statusI18nKey, isDoneStatus } from './statusHelpers';
+import { getStatusColor, statusI18nKey, isDoneStatus, instanceStatus } from './statusHelpers';
 import '../../pages/InstanceDetail.css';
 
 // A citizen form is only rendered when paused on a form-kind wait with its
@@ -184,8 +184,10 @@ export const InstanceDetailContent: React.FC = () => {
     );
   }
 
-  const isDone = isDoneStatus(instance.status);
-  const isCompleted = instance.status === 'completed';
+  const status = instanceStatus(instance);
+  const isRejected = status === 'rejected';
+  const isDone = isDoneStatus(status);
+  const isCompleted = status === 'completed';
   // Show the processing indicator when the trámite is active but no citizen form
   // is being rendered (between operators, or under admin review).
   const hasActiveForm = hasActiveFormFor(instance);
@@ -204,18 +206,29 @@ export const InstanceDetailContent: React.FC = () => {
 
             <p className="instance-description">
               {t('instanceDetail.statusLabel')}:{' '}
-              <strong style={{ color: getStatusColor(instance.status) }}>
-                {t(statusI18nKey(instance.status))}
+              <strong style={{ color: getStatusColor(status) }}>
+                {t(statusI18nKey(status))}
               </strong>.
               {isCompleted
                 ? ` ${t('instanceDetail.completedMessage')}`
-                : ` ${t('instanceDetail.progressMessage', { percent: instance.progress_percentage.toFixed(0) })}`
+                : isRejected
+                  ? ''
+                  : ` ${t('instanceDetail.progressMessage', { percent: instance.progress_percentage.toFixed(0) })}`
               }
             </p>
 
             {/* Por qué se detuvo. Antes el trámite moría mostrando solo el
                 estado "Error": el ciudadano no podía saber si le tocaba
                 corregir algo o simplemente esperar. */}
+            {/* Rechazado: la resolución y su fundamento, que es lo que la persona
+                necesita para decidir si vuelve a presentar la solicitud. */}
+            {isRejected && (
+              <p className="instance-failure" role="alert">
+                <strong>{t('instanceDetail.rejectedTitle')}</strong>
+                {instance.terminal_message && <span>{instance.terminal_message}</span>}
+              </p>
+            )}
+
             {instance.status === 'failed' && instance.error_message && (
               <p className="instance-failure" role="alert">
                 <strong>{t('instanceDetail.failureTitle')}</strong>
@@ -230,7 +243,7 @@ export const InstanceDetailContent: React.FC = () => {
                     className="progress-fill"
                     style={{
                       width: `${instance.progress_percentage}%`,
-                      backgroundColor: getStatusColor(instance.status)
+                      backgroundColor: getStatusColor(status)
                     }}
                   />
                 </div>

@@ -93,7 +93,8 @@
     "cancelled": "Cancelado",
     "awaiting_input": "Esperando Información",
     "pending_validation": "Pendiente de Validación",
-    "waiting": "Esperando"
+    "waiting": "Esperando",
+    "rejected": "Rechazado"
   },
   "workflow": {
     "start_title": "Iniciar Nueva Solicitud",
@@ -149,6 +150,7 @@
     "statusLabel": "Estado de la solicitud",
     "completedMessage": "Felicitaciones, su trámite ha sido completado.",
     "failureTitle": "El trámite no pudo continuar",
+    "rejectedTitle": "Su solicitud fue rechazada",
     "progressMessage": "Progreso: {{percent}}% completado.",
     "started": "Iniciado",
     "finished": "Finalizado",

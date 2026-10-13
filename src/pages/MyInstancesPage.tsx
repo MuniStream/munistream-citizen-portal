@@ -32,6 +32,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { MainLayout } from '../components/Layout/MainLayout';
 import { workflowService } from '../services/workflowService';
+import { instanceStatus } from '../components/InstanceDetailContent/statusHelpers';
 
 interface WorkflowInstance {
   instance_id: string;
@@ -44,6 +45,7 @@ interface WorkflowInstance {
   completed_at?: string;
   progress_percentage?: number;
   context?: Record<string, any>;
+  terminal_status?: string | null;
 }
 
 export const MyInstancesPage: React.FC = () => {
@@ -91,7 +93,8 @@ export const MyInstancesPage: React.FC = () => {
   const getStatusColor = (status: string): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' => {
     switch (status.toLowerCase()) {
       case 'completed': return 'success';
-      case 'failed': return 'error';
+      case 'failed':
+      case 'rejected': return 'error';
       case 'running': return 'info';
       case 'in_progress': return 'info';
       case 'waiting': return 'warning';
@@ -103,7 +106,8 @@ export const MyInstancesPage: React.FC = () => {
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed': return '✅';
-      case 'failed': return '❌';
+      case 'failed':
+      case 'rejected': return '❌';
       case 'running': return '🔄';
       case 'in_progress': return '🔄';
       case 'waiting': return '⏸️';
@@ -118,7 +122,7 @@ export const MyInstancesPage: React.FC = () => {
       instance.workflow_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       instance.instance_id.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = statusFilter === 'all' || instance.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchesStatus = statusFilter === 'all' || instanceStatus(instance).toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
   });
@@ -129,7 +133,8 @@ export const MyInstancesPage: React.FC = () => {
     { value: 'completed', label: t('status.completed') },
     { value: 'paused', label: t('status.paused') },
     { value: 'waiting', label: t('status.waiting') },
-    { value: 'failed', label: t('status.failed') }
+    { value: 'failed', label: t('status.failed') },
+    { value: 'rejected', label: t('status.rejected') }
   ];
 
   if (!isAuthenticated) {
@@ -301,8 +306,8 @@ export const MyInstancesPage: React.FC = () => {
                       </Typography>
                       <Chip
                         size="small"
-                        label={`${getStatusIcon(instance.status)} ${t(`status.${instance.status}`)}`}
-                        color={getStatusColor(instance.status)}
+                        label={`${getStatusIcon(instanceStatus(instance))} ${t(`status.${instanceStatus(instance)}`)}`}
+                        color={getStatusColor(instanceStatus(instance))}
                         sx={{ minWidth: 100 }}
                       />
                     </Box>
@@ -413,7 +418,7 @@ export const MyInstancesPage: React.FC = () => {
                 </Box>
                 <Box textAlign="center">
                   <Typography variant="h4" color="success.main">
-                    {instances.filter(i => i.status === 'completed').length}
+                    {instances.filter(i => instanceStatus(i) === 'completed').length}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {t('status.completed')}
