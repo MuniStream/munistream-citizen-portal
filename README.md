@@ -104,6 +104,19 @@ docker build -t munistream-citizen-portal .
 - [Backend API](https://github.com/MuniStream/munistream-workflow)
 - [Admin Portal](https://github.com/MuniStream/munistream-admin-frontend)
 
+## Code language: English
+
+Code shared by every tenant is written in **English**: identifiers, comments,
+docstrings, log messages and test names. This applies to this repository.
+
+What citizens and staff read stays in their language, but it lives outside the
+code: i18n files, notification templates and user-facing messages (UI text,
+API error details shown to users).
+
+Tenant-specific code (`tenants/<id>/` and each tenant's workflow repository)
+may follow the tenant's own language. Existing Spanish code in shared
+repositories is migrated as it is touched, not in bulk.
+
 ## License
 
 Private repository - All rights reserved

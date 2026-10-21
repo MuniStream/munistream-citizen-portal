@@ -145,6 +145,8 @@ class KeycloakService {
       document_type: tokenParsed.document_type,
       document_number: tokenParsed.document_number,
       phone_number: tokenParsed.phone_number,
+      // Realms with a user profile (e.g. LlaveMX) emit the attribute as `phone`.
+      phone: tokenParsed.phone ?? tokenParsed.phone_number,
       address: tokenParsed.address,
       municipality: tokenParsed.municipality,
     };

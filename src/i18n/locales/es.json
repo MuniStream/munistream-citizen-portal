@@ -621,6 +621,12 @@
       "channel": {
         "email": "Email",
         "whatsapp": "WhatsApp"
+      },
+      "contacts": {
+        "title": "Dónde recibirás los avisos",
+        "subtitle": "Los datos de tu cuenta más los teléfonos y correos que agregues en tu perfil.",
+        "noEmail": "Sin correo registrado.",
+        "noWhatsapp": "Sin celular registrado. Agrégalo en tu perfil para recibir avisos por WhatsApp."
       }
     }
   }

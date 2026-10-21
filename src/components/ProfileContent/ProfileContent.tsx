@@ -16,6 +16,7 @@ import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import PersonIcon from '@mui/icons-material/Person';
 import { useAuth } from '../../contexts/AuthContext';
 import profileService, { type ProfileField } from '../../services/profileService';
+import { NotificationPreferences } from '../NotificationPreferences/NotificationPreferences';
 
 type FormValues = Record<string, string>;
 
@@ -26,6 +27,8 @@ export const ProfileContent: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  // Phone/email profile fields are notification addresses: re-read them after saving.
+  const [contactsVersion, setContactsVersion] = useState(0);
 
   useEffect(() => {
     const load = async () => {
@@ -76,6 +79,7 @@ export const ProfileContent: React.FC = () => {
         refreshed[f.field_id] = v === null || v === undefined ? '' : String(v);
       }
       setValues(refreshed);
+      setContactsVersion((v) => v + 1);
     } catch (err: any) {
       setMessage({
         ok: false,
@@ -220,6 +224,17 @@ export const ProfileContent: React.FC = () => {
           </Box>
         )}
       </Paper>
+
+      {/* Notificaciones: a dónde llegan y cuáles recibe */}
+      <Stack spacing={0.5} sx={{ mt: 5, mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+          Notificaciones
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Elige cómo quieres enterarte del avance de tus trámites y de los documentos que se emitan.
+        </Typography>
+      </Stack>
+      <NotificationPreferences contactsVersion={contactsVersion} />
     </Container>
   );
 };
