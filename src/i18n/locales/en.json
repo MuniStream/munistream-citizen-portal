@@ -621,6 +621,12 @@
       "channel": {
         "email": "Email",
         "whatsapp": "WhatsApp"
+      },
+      "contacts": {
+        "title": "Where you will receive notices",
+        "subtitle": "Your account details plus the phones and emails you add to your profile.",
+        "noEmail": "No email on file.",
+        "noWhatsapp": "No mobile number on file. Add one to your profile to receive WhatsApp notices."
       }
     }
   }

@@ -27,7 +27,18 @@ export interface NotificationCatalogEntry {
   default_channels: NotificationChannelKey[];
 }
 
+export interface NotificationContacts {
+  email: string[];
+  whatsapp: string[];
+  channels_enabled: NotificationChannelKey[];
+}
+
 export const notificationService = {
+  /** Where this citizen's notices are delivered (account plus profile fields). */
+  async getContacts(): Promise<NotificationContacts> {
+    const { data } = await api.get<NotificationContacts>('/me/notification-contacts');
+    return data;
+  },
   async getCatalog(): Promise<NotificationCatalogEntry[]> {
     const { data } = await api.get<NotificationCatalogEntry[]>('/me/notification-catalog');
     return data;
