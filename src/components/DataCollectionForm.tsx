@@ -6,9 +6,23 @@ import type { AddressValue } from './AddressField';
 import { CatalogAutocomplete } from './CatalogAutocomplete';
 import { getCustomFieldRenderer } from './customFieldRegistry';
 
+// Formatos que acepta el campo, legibles: ".xml" -> "XML",
+// ".pdf,.jpg,.jpeg,.png" -> "PDF, JPG, JPEG o PNG". Sin `accept`, los de siempre.
+function acceptedFormats(accept?: string): string {
+  const formatos = (accept || '.pdf,.jpg,.png')
+    .split(',')
+    .map((f) => f.trim())
+    .filter(Boolean)
+    .map((f) => (f.endsWith('/*') ? f.slice(0, -2) : f.replace(/^\./, '')).toUpperCase());
+  const unicos = Array.from(new Set(formatos));
+  return unicos.length > 1 ? `${unicos.slice(0, -1).join(', ')} o ${unicos[unicos.length - 1]}` : unicos[0] || '';
+}
+
 // Aviso con las características que debe reunir un documento para cargarse
 // correctamente (formatos, tamaño y nombre sin acentos/caracteres especiales).
-const FileRequirementsNote: React.FC = () => (
+// Los formatos salen del `accept` del campo: un campo de XML decía "Formato PDF,
+// JPG o PNG".
+const FileRequirementsNote: React.FC<{ accept?: string }> = ({ accept }) => (
   <div className="file-requirements-note" style={{
     marginTop: '0.5rem',
     padding: '0.6rem 0.8rem',
@@ -21,7 +35,7 @@ const FileRequirementsNote: React.FC = () => (
   }}>
     <strong>📋 El documento debe cumplir:</strong>
     <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.1rem' }}>
-      <li>Formato PDF, JPG o PNG.</li>
+      <li>Formato {acceptedFormats(accept)}.</li>
       <li>Tamaño máximo: 100 MB.</li>
       <li>Nombre del archivo sin acentos ni caracteres especiales (ej. "aviso_arribo.pdf", no "Avisó (1).pdf").</li>
     </ul>
@@ -654,7 +668,7 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
                 </div>
               )}
             </div>
-            <FileRequirementsNote />
+            <FileRequirementsNote accept={itemField.accept || '.pdf,.jpg,.jpeg,.png'} />
           </div>
         );
       }
@@ -1418,12 +1432,12 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
               ) : (
                 <div className="upload-placeholder">
                   <span className="upload-icon">⬆️</span>
-                  <span>Click to upload {field.label}{field.multiple ? ' (puede seleccionar varios)' : ''}</span>
-                  <small>{field.accept || 'PDF, JPG, PNG'} (máx 100MB)</small>
+                  <span>Haz clic para subir {field.label}{field.multiple ? ' (puede seleccionar varios)' : ''}</span>
+                  <small>{acceptedFormats(field.accept || '.pdf,.jpg,.jpeg,.png,.doc,.docx')} (máx 100MB)</small>
                 </div>
               )}
             </div>
-            <FileRequirementsNote />
+            <FileRequirementsNote accept={field.accept || '.pdf,.jpg,.jpeg,.png,.doc,.docx'} />
           </div>
         );
       }
