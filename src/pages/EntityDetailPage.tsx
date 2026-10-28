@@ -5,7 +5,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { MainLayout } from '../components/Layout/MainLayout';
 // import { EntityFieldVisualizer } from '../components/EntityVisualizer/EntityFieldVisualizer';
 import { EntityViewer } from '../components/signature/EntityViewer';
+import { EntityDataTable } from '../components/EntityDataTable/EntityDataTable';
 import { authService } from '../services/authService';
+import { humanizeKey } from '../utils/humanize';
 import './EntityDetailPage.css';
 
 interface EntityDetail {
@@ -19,6 +21,17 @@ interface EntityDetail {
     created_at: string;
     updated_at: string;
     relationships_count: number;
+    // How the entity is shown: its type's display in the tenant's entity type
+    // catalog, resolved by the backend.
+    type_name?: string | null;
+    // Entities this one points to, as the catalog declares (e.g. the economic
+    // unit of an RNPA record). Shown before the entity's own data.
+    related?: { title: string; entity_id: string; rows: { key: string; label: string; value: any }[] }[];
+    display?: {
+      default_view?: string;
+      fields?: string[];
+      labels?: Record<string, string>;
+    };
   };
   available_workflows: AvailableWorkflow[];
   recent_instances: RecentInstance[];
@@ -296,7 +309,7 @@ export const EntityDetailPage: React.FC = () => {
               <div className="entity-title-info">
                 <h2>{entity.name}</h2>
                 <div className="entity-meta-badges">
-                  <span className="entity-type-badge">{entity.entity_type}</span>
+                  <span className="entity-type-badge">{entity.type_name || humanizeKey(entity.entity_type)}</span>
                   {getStatusBadge(entity.status)}
                   {entity.verified && (
                     <span className="verified-badge" title={t('my_entities.verified')}>
@@ -344,7 +357,28 @@ export const EntityDetailPage: React.FC = () => {
           </section>
           */}
 
-          {/* Entity PDF Viewer */}
+          {/* Types declared as `data` in the catalog show their fields as a
+              table; the rest, as the document their visualizer renders. */}
+          {entity.display?.default_view === 'data' ? (
+          <section className="entity-data-section">
+            {(entity.related || []).map((section) => (
+              <div key={section.entity_id} className="entity-related">
+                <h3>{section.title}</h3>
+                <EntityDataTable
+                  data={Object.fromEntries(section.rows.map((r) => [r.key, r.value]))}
+                  fields={section.rows.map((r) => r.key)}
+                  labels={Object.fromEntries(section.rows.map((r) => [r.key, r.label]))}
+                />
+              </div>
+            ))}
+            <h3>{t('entity.information')}</h3>
+            <EntityDataTable
+              data={entity.data}
+              fields={entity.display.fields}
+              labels={entity.display.labels}
+            />
+          </section>
+          ) : (
           <section className="entity-viewer-section">
             <h3>📄 {t('entity.document_viewer')}</h3>
             <EntityViewer
@@ -365,6 +399,7 @@ export const EntityDetailPage: React.FC = () => {
               apiBaseUrl={`${import.meta.env.VITE_API_URL}${import.meta.env.VITE_API_BASE_URL}`}
             />
           </section>
+          )}
 
           {/* Available Workflows */}
           <section className="workflows-section">

@@ -540,7 +540,8 @@
       "rejected": "Rechazado",
       "view": "Ver",
       "download": "Descargar"
-    }
+    },
+    "no_data": "Este registro no tiene datos para mostrar."
   },
   "instances": {
     "subtitle": "Rastrea y gestiona todas tus solicitudes enviadas",

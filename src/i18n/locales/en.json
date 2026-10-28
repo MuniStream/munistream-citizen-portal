@@ -540,7 +540,8 @@
       "rejected": "Rejected",
       "view": "View",
       "download": "Download"
-    }
+    },
+    "no_data": "This record has no data to show."
   },
   "instances": {
     "subtitle": "Track and manage all your submitted applications",
