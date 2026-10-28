@@ -58,6 +58,33 @@ interface EntityData {
   };
 }
 
+/**
+ * Datos de la firma de una entidad, para `signature_info`.
+ *
+ * La firma llega en dos formas: un objeto con sus metadatos
+ * (`signer`, `cert_subject`, `signature_valid`, `signed_at`…) o la cadena del
+ * sello con esos metadatos aplanados en `data`. Leer solo
+ * `certificate_info.subject` y `verified` —que ningún firmante escribe— dejaba
+ * cada documento firmado como "Firmante: Unknown" con la etiqueta "Error".
+ * `verified` queda indefinido cuando la firma no dice si fue válida: eso es
+ * "Pendiente", no un error.
+ */
+export function signatureInfoFromData(
+  data: Record<string, any> | undefined,
+  createdAt: string,
+): EntityData['signature_info'] {
+  const firma = data?.signature;
+  if (!firma) return undefined;
+  const meta: Record<string, any> = typeof firma === 'object' ? firma : data || {};
+  const valida = meta.signature_valid ?? meta.verified;
+  return {
+    algorithm: texto(meta.algorithm) || 'RSA-SHA256',
+    signer: texto(meta.signer || meta.cert_subject || meta.certificate_info?.subject),
+    timestamp: texto(meta.signed_at || meta.timestamp) || createdAt,
+    verified: typeof valida === 'boolean' ? valida : undefined,
+  };
+}
+
 interface EntityViewerProps {
   entity: EntityData;
   apiBaseUrl?: string;
@@ -100,12 +127,15 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [htmlContent, setHtmlContent] = useState<string>('');
+  // La vista HTML se pide al montar: mientras llega, se muestra que carga y no
+  // el aviso de "no hay visualizador", que antes aparecía en cada apertura.
+  const [htmlLoading, setHtmlLoading] = useState(true);
 
   // Load HTML content on component mount
   useEffect(() => {
     const loadHtmlContent = async () => {
       try {
-        setLoading(true);
+        setHtmlLoading(true);
         setError(null);
 
         const response = await axios.get(
@@ -118,7 +148,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
         // guardarlo crudo en un estado `string` y pintarlo tumba la página entera.
         setError(mensajeDeError(error, 'No se pudo cargar el documento.'));
       } finally {
-        setLoading(false);
+        setHtmlLoading(false);
       }
     };
 
@@ -336,9 +366,12 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
       }
     }
 
+    // `s3_keys` repite las llaves de `uploaded_files`: sin descartarlas, cada
+    // archivo salía dos veces, una con su nombre y otra con el de S3.
+    const yaListadas = new Set(fileGroups.flatMap((g) => g.files.map((f) => f.s3Key)));
     if (data.s3_keys && Array.isArray(data.s3_keys)) {
       const directFiles = data.s3_keys
-        .filter((key: any) => typeof key === 'string' && key)
+        .filter((key: any) => typeof key === 'string' && key && !yaListadas.has(key))
         .map((key: string, index: number) => ({
           name: key.split('/').pop() || `Archivo ${index + 1}`,
           s3Key: key,
@@ -399,9 +432,9 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
   return (
     <Box>
       {/* HTML Visualizer (if available) */}
-      {htmlContent && (
+      {(htmlLoading || htmlContent) && (
         <>
-          {loading ? (
+          {htmlLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', mb: 2 }}>
               <CircularProgress />
               <Typography variant="body2" sx={{ ml: 2 }}>
@@ -499,7 +532,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
                   </ListItemIcon>
                   <ListItemText
                     primary="Firmante"
-                    secondary={texto(entity.signature_info.signer)}
+                    secondary={texto(entity.signature_info.signer) || 'No disponible'}
                   />
                 </ListItem>
                 <ListItem>
@@ -538,7 +571,7 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
             </Alert>
           )}
 
-          {!htmlContent && (
+          {!htmlLoading && !htmlContent && (
             <Alert severity="info" sx={{ mb: 2 }}>
               <Typography variant="body2">
                 No hay visualizador disponible para esta entidad. Solo se puede descargar como PDF.

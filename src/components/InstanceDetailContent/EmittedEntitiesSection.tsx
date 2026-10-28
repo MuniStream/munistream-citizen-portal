@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EntityViewer } from '../signature/EntityViewer';
+import { EntityViewer, signatureInfoFromData } from '../signature/EntityViewer';
 import { workflowService, type EmittedEntity } from '../../services/workflowService';
 
 interface EmittedEntitiesSectionProps {
@@ -106,15 +106,7 @@ const EmittedEntitiesSection: React.FC<EmittedEntitiesSectionProps> = ({ entitie
                   data: entity.data,
                   created_at: entity.created_at,
                   has_signature: entity.data?.signature ? true : false,
-                  signature_info: entity.data?.signature
-                    ? {
-                        algorithm: entity.data.signature.algorithm || 'RSA-SHA256',
-                        signer:
-                          entity.data.signature.certificate_info?.subject || 'Unknown',
-                        timestamp: entity.data.signature.timestamp || entity.created_at,
-                        verified: entity.data.signature.verified || false,
-                      }
-                    : undefined,
+                  signature_info: signatureInfoFromData(entity.data, entity.created_at),
                 }}
                 apiBaseUrl={apiBaseUrl}
               />

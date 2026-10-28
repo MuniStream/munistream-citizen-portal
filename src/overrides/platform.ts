@@ -40,7 +40,7 @@ export { workflowService } from '../services/workflowService';
 export type { WorkflowDefinition, WorkflowInstanceProgress, StepProgress, InputForm, DataSubmissionResponse, EmittedEntity } from '../services/workflowService';
 
 // Entity rendering (for showing a workflow-emitted entity inline on completion)
-export { EntityViewer } from '../components/signature/EntityViewer';
+export { EntityViewer, signatureInfoFromData } from '../components/signature/EntityViewer';
 export type { WorkflowStep, StepFlowSegment, FlowStep, FlowRoute } from '../types/workflow';
 export { default as keycloakService } from '../services/keycloak';
 export { profileService } from '../services/profileService';

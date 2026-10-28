@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { MainLayout } from '../components/Layout/MainLayout';
 // import { EntityFieldVisualizer } from '../components/EntityVisualizer/EntityFieldVisualizer';
-import { EntityViewer } from '../components/signature/EntityViewer';
+import { EntityViewer, signatureInfoFromData } from '../components/signature/EntityViewer';
 import { EntityDataTable } from '../components/EntityDataTable/EntityDataTable';
 import { authService } from '../services/authService';
 import { humanizeKey } from '../utils/humanize';
@@ -393,12 +393,7 @@ export const EntityDetailPage: React.FC = () => {
                 data: entity.data,
                 created_at: entity.created_at,
                 has_signature: entity.data.signature ? true : false,
-                signature_info: entity.data.signature ? {
-                  algorithm: entity.data.signature.algorithm || 'RSA-SHA256',
-                  signer: entity.data.signature.certificate_info?.subject || 'Unknown',
-                  timestamp: entity.data.signature.timestamp || entity.created_at,
-                  verified: entity.data.signature.verified || false,
-                } : undefined
+                signature_info: signatureInfoFromData(entity.data, entity.created_at)
               }}
               apiBaseUrl={`${import.meta.env.VITE_API_URL}${import.meta.env.VITE_API_BASE_URL}`}
             />
