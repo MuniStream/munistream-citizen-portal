@@ -155,6 +155,7 @@
 }
 
 /* Workflows Section */
+.entity-data-section,
 .workflows-section {
   background: white;
   border-radius: 12px;
@@ -163,6 +164,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+.entity-data-section h3,
 .workflows-section h3 {
   margin-bottom: 1.5rem;
   color: var(--primary-color, #2c5aa0);
@@ -515,4 +517,7 @@
   .instances-table td {
     padding: 0.5rem;
   }
+}
+.entity-related {
+  margin-bottom: 2rem;
 }
