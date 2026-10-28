@@ -541,7 +541,8 @@
       "view": "Ver",
       "download": "Descargar"
     },
-    "no_data": "Este registro no tiene datos para mostrar."
+    "no_data": "Este registro no tiene datos para mostrar.",
+    "information_of": "Información de {{type}}"
   },
   "instances": {
     "subtitle": "Rastrea y gestiona todas tus solicitudes enviadas",

@@ -29,6 +29,7 @@ interface EntityDetail {
     related?: { title: string; entity_id: string; rows: { key: string; label: string; value: any }[] }[];
     display?: {
       default_view?: string;
+      heading?: string;
       fields?: string[];
       labels?: Record<string, string>;
     };
@@ -371,7 +372,10 @@ export const EntityDetailPage: React.FC = () => {
                 />
               </div>
             ))}
-            <h3>{t('entity.information')}</h3>
+            <h3>
+              {entity.display?.heading
+                || (entity.type_name ? t('entity.information_of', { type: entity.type_name }) : t('entity.information'))}
+            </h3>
             <EntityDataTable
               data={entity.data}
               fields={entity.display.fields}

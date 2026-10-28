@@ -541,7 +541,8 @@
       "view": "View",
       "download": "Download"
     },
-    "no_data": "This record has no data to show."
+    "no_data": "This record has no data to show.",
+    "information_of": "{{type}} information"
   },
   "instances": {
     "subtitle": "Track and manage all your submitted applications",
