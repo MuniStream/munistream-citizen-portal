@@ -1,174 +1,477 @@
-.my-entities-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #e8f4f8 0%, #f8f9fa 100%);
+/*
+ * Cartera del ciudadano. Muchos documentos de muchos tipos: un indice de tipos
+ * con su conteo (fijo al costado; tira deslizable en movil) y una lista
+ * compacta agrupada por tipo, cuyo encabezado de grupo se queda fijo al hacer
+ * scroll. Los colores salen del tema del tenant (ThemeContext).
+ *
+ * --wallet-top lo calcula la pagina: alto del encabezado fijo del layout.
+ */
+.wallet {
+  --w-ink: var(--text-primary, #1e293b);
+  --w-muted: var(--text-secondary, #64748b);
+  --w-accent: var(--primary-color, #9d2449);
+  --w-accent-dark: var(--primary-dark, #611232);
+  --w-line: color-mix(in srgb, var(--w-ink) 12%, transparent);
+  --w-paper: #fff;
+  --w-wash: color-mix(in srgb, var(--w-accent) 6%, #fff);
+  --w-valid: var(--success-color, #047a38);
+  --w-warn: var(--warning-color, #ef801a);
+  --w-expired: var(--error-color, #e4044e);
+  --w-gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem var(--w-gap) 4rem;
+  color: var(--w-ink);
+  box-sizing: border-box;
 }
 
-.entities-header {
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 1rem 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
-.entities-main {
-  padding: 2rem 0;
-}
-
-.page-header {
-  margin-bottom: 2rem;
-}
-
-.page-header h2 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  color: var(--primary-color, #2c5aa0);
-}
-
-.page-header p {
-  color: var(--text-secondary, #666);
-  font-size: 1.1rem;
-}
-
-/* Filter Bar */
-.filter-bar {
+.wallet-head {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  margin-bottom: 1.75rem;
 }
 
-.filter-select {
-  flex: 1;
-  max-width: 300px;
-  padding: 0.75rem;
-  border: 1px solid var(--border-color, #ddd);
-  border-radius: 6px;
-  font-size: 1rem;
-  background: white;
+.wallet-title {
+  font-family: var(--font-heading, inherit);
+  font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem);
+  line-height: 1.1;
+  margin: 0 0 0.375rem;
+  color: var(--w-accent);
 }
 
-/* Entities Grid */
-.entities-grid {
+.wallet-lead {
+  margin: 0;
+  color: var(--w-muted);
+  max-width: 52ch;
+}
+
+.wallet-search {
+  position: relative;
+  flex: 0 1 22rem;
+  min-width: min(100%, 16rem);
+}
+
+.wallet-search-icon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  width: 1.125rem;
+  height: 1.125rem;
+  transform: translateY(-50%);
+  color: var(--w-muted);
+  pointer-events: none;
+}
+
+.wallet-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  font: inherit;
+  color: var(--w-ink);
+  background: var(--w-paper);
+  border: 1px solid color-mix(in srgb, var(--w-ink) 22%, transparent);
+  border-radius: 999px;
+}
+
+.wallet-search input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--w-accent) 35%, transparent);
+  outline-offset: 1px;
+  border-color: var(--w-accent);
+}
+
+/* --- Indice de tipos + lista --------------------------------------------- */
+.wallet-body {
   display: grid;
-  /*
-   * `min(350px, 100%)` y no `350px` a secas: un mínimo fijo mayor que el
-   * contenedor desborda la pantalla en vez de encogerse, que es lo que pasaba en
-   * móvil. Con `min()` la pista nunca pide más de lo que hay.
-   */
-  grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
+  grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
 }
 
-.entity-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  border: 2px solid transparent;
+.wallet-index {
+  position: sticky;
+  top: calc(var(--wallet-top, 0px) + 1rem);
+  max-height: calc(100vh - var(--wallet-top, 0px) - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 
-.entity-card.clickable {
+.wallet-index ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 2px solid var(--w-line);
+}
+
+.wallet-index-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  margin-left: -2px;
+  padding: 0.5rem 0.75rem 0.5rem 1rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  text-align: left;
+  color: var(--w-muted);
+  background: none;
+  border: 0;
+  border-left: 2px solid transparent;
   cursor: pointer;
 }
 
-.entity-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  border-color: var(--primary-color, #2c5aa0);
+.wallet-index-item:hover {
+  color: var(--w-ink);
+  border-left-color: color-mix(in srgb, var(--w-accent) 40%, transparent);
 }
 
-.entity-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-  position: relative;
+.wallet-index-item[aria-current='true'] {
+  color: var(--w-accent-dark);
+  font-weight: 600;
+  border-left-color: var(--w-accent);
+  background: var(--w-wash);
 }
 
-.entity-icon {
-  font-size: 2.5rem;
-  margin-right: 1rem;
+.wallet-index-item:focus-visible,
+.wallet-row-link:focus-visible,
+.wallet-row-delete:focus-visible,
+.wallet-btn:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--w-accent) 45%, transparent);
+  outline-offset: 2px;
 }
 
-.entity-info {
-  flex: 1;
-  /*
-   * Un flex item no se encoge por debajo de su min-content salvo que se le baje
-   * el `min-width`, que por defecto es `auto`. Sin esto, un nombre de entidad
-   * largo estiraba la tarjeta más allá de la pantalla.
-   */
+/* El conteo es lo que se lee de un vistazo: cifras tabulares y grandes. */
+.wallet-index-count {
+  font-family: var(--font-heading, inherit);
+  font-size: 1.125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--w-ink);
+}
+
+.wallet-index-item[aria-current='true'] .wallet-index-count {
+  color: var(--w-accent);
+}
+
+.wallet-list {
   min-width: 0;
 }
 
-/*
- * Los nombres no siempre son frases con espacios donde partir: hay entidades
- * cuyo nombre es una clave técnica de 50 caracteres sin un solo espacio. Sin
- * permitir el corte dentro de la palabra, esa sola línea fija el ancho de la
- * tarjeta y arrastra toda la pantalla con ella.
- */
-.entity-info h3,
-.entity-type {
+.wallet-status {
+  margin: 0 0 1rem;
+  color: var(--w-muted);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.wallet-group + .wallet-group {
+  margin-top: 2rem;
+}
+
+.wallet-group-head {
+  position: sticky;
+  top: var(--wallet-top, 0px);
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+  padding: 0.75rem 0 0.5rem;
+  font-family: var(--font-heading, inherit);
+  font-size: 1.25rem;
+  line-height: 1.25;
+  color: var(--w-ink);
+  background: var(--background-default, #f9f9f9);
+  border-bottom: 2px solid var(--w-accent);
+}
+
+.wallet-group-count {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--w-muted);
+}
+
+.wallet-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--w-paper);
+}
+
+.wallet-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--w-line);
+}
+
+.wallet-row-link {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.25rem 1.5rem;
+  padding: 0.875rem 0.5rem 0.875rem 1rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.wallet-row:hover {
+  background: var(--w-wash);
+}
+
+.wallet-row-link:hover .wallet-row-name {
+  color: var(--w-accent-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.wallet-row-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.wallet-row-name {
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
-.entity-info h3 {
-  margin: 0 0 0.25rem 0;
-  font-size: 1.25rem;
-  color: var(--text-primary, #333);
+.wallet-row-sub {
+  font-size: 0.875rem;
+  color: var(--w-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.entity-type {
-  color: var(--text-secondary, #666);
-  font-size: 0.9rem;
-  text-transform: capitalize;
-}
-
-.verified-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  font-size: 1.2rem;
-}
-
-.entity-details {
-  border-top: 1px solid #eee;
-  padding-top: 1rem;
-  margin-bottom: 1rem;
-}
-
-.entity-data {
-  color: var(--text-secondary, #555);
-  font-size: 0.95rem;
-  margin-bottom: 0.5rem;
-  line-height: 1.4;
-}
-
-.entity-meta {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.85rem;
-  color: #888;
-}
-
-.entity-actions {
-  display: flex;
-  justify-content: space-between;
+/* Vigencia: el unico acento de color de cada renglon. */
+.wallet-row-validity {
+  display: inline-flex;
   align-items: center;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--w-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
-.btn-primary.small {
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
+.wallet-row-validity[class*='is-']::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
 }
 
+.wallet-row-validity.is-valid { color: var(--w-valid); }
+.wallet-row-validity.is-expiring { color: color-mix(in srgb, var(--w-warn) 75%, #000); font-weight: 600; }
+.wallet-row-validity.is-expired { color: var(--w-expired); font-weight: 600; }
+
+.wallet-row-delete {
+  flex: none;
+  width: 2.75rem;
+  display: grid;
+  place-items: center;
+  color: var(--w-muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.wallet-row-delete svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.wallet-row-delete:hover {
+  color: var(--w-expired);
+  background: color-mix(in srgb, var(--w-expired) 8%, #fff);
+}
+
+.wallet-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--w-accent-dark);
+  background: var(--w-paper);
+  border: 1px solid var(--w-accent);
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.wallet-btn:hover:not(:disabled) {
+  background: var(--w-wash);
+}
+
+.wallet-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.wallet-btn-primary {
+  color: var(--primary-contrast, #fff);
+  background: var(--w-accent);
+}
+
+.wallet-btn-primary:hover:not(:disabled) {
+  background: var(--w-accent-dark);
+}
+
+.wallet-more {
+  display: flex;
+  margin: 1.5rem auto 0;
+}
+
+.wallet-noresults {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.wallet-empty {
+  max-width: 34rem;
+  padding: 3rem 0;
+}
+
+.wallet-empty h2 {
+  font-family: var(--font-heading, inherit);
+  margin: 0 0 0.5rem;
+}
+
+.wallet-empty p {
+  margin: 0 0 1.5rem;
+  color: var(--w-muted);
+}
+
+.wallet-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0.875rem 1rem;
+  color: var(--w-expired);
+  background: color-mix(in srgb, var(--w-expired) 7%, #fff);
+  border-left: 3px solid var(--w-expired);
+}
+
+.wallet-error p {
+  margin: 0;
+}
+
+/* --- Movil: el indice pasa a una tira deslizable fija arriba ------------- */
+@media (max-width: 860px) {
+  .wallet {
+    --w-strip-h: 3.5rem;
+    padding-top: 1.25rem;
+  }
+
+  .wallet-head {
+    margin-bottom: 1rem;
+  }
+
+  .wallet-search {
+    flex-basis: 100%;
+  }
+
+  .wallet-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .wallet-index {
+    top: var(--wallet-top, 0px);
+    z-index: 3;
+    box-sizing: border-box;
+    height: var(--w-strip-h);
+    max-height: none;
+    display: flex;
+    align-items: center;
+    margin: 0 calc(-1 * var(--w-gap));
+    padding: 0.5rem var(--w-gap);
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: var(--background-default, #f9f9f9);
+    border-bottom: 1px solid var(--w-line);
+    scrollbar-width: none;
+  }
+
+  .wallet-index::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wallet-index ul {
+    display: flex;
+    gap: 0.5rem;
+    width: max-content;
+    border-left: 0;
+  }
+
+  .wallet-index-item {
+    margin-left: 0;
+    padding: 0.4375rem 0.875rem;
+    white-space: nowrap;
+    border: 1px solid var(--w-line);
+    border-radius: 999px;
+    background: var(--w-paper);
+  }
+
+  .wallet-index-item:hover {
+    border-color: color-mix(in srgb, var(--w-accent) 40%, transparent);
+  }
+
+  .wallet-index-item[aria-current='true'] {
+    color: var(--primary-contrast, #fff);
+    background: var(--w-accent);
+    border-color: var(--w-accent);
+  }
+
+  .wallet-index-item[aria-current='true'] .wallet-index-count {
+    color: inherit;
+  }
+
+  .wallet-index-count {
+    font-size: 0.9375rem;
+  }
+
+  .wallet-status {
+    margin-top: 1rem;
+  }
+
+  /* Bajo la tira del indice, no debajo del encabezado del layout. */
+  .wallet-group-head {
+    top: calc(var(--wallet-top, 0px) + var(--w-strip-h));
+  }
+
+  .wallet-row-link {
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: 0.75rem;
+  }
+}
+
+/* --- Dialogo de eliminacion ---------------------------------------------- */
 .btn-danger {
   background-color: var(--error-color, #dc3545);
   color: white;
@@ -220,68 +523,6 @@
   cursor: not-allowed;
 }
 
-.workflows-count {
-  font-size: 0.85rem;
-  color: var(--text-secondary, #666);
-}
-
-/* Loading State */
-.loading-state {
-  text-align: center;
-  padding: 3rem;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid var(--primary-color, #2c5aa0);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.empty-state h3 {
-  font-size: 1.5rem;
-  color: var(--text-secondary, #666);
-  margin-bottom: 1rem;
-}
-
-.empty-state p {
-  color: #888;
-  margin-bottom: 2rem;
-}
-
-/* Error State */
-.error-state {
-  text-align: center;
-  padding: 2rem;
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 8px;
-  margin: 2rem 0;
-}
-
-.error-state p {
-  color: #856404;
-  margin-bottom: 1rem;
-}
-
-/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -350,90 +591,6 @@
   margin-bottom: 1.5rem;
 }
 
-.workflows-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.workflow-option {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  border: 1px solid var(--border-color, #ddd);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.workflow-option:hover {
-  border-color: var(--primary-color, #2c5aa0);
-  background: var(--background-paper, #f8f9fa);
-  transform: translateX(4px);
-}
-
-.workflow-info h4 {
-  margin: 0 0 0.5rem 0;
-  color: var(--text-primary, #333);
-}
-
-.workflow-info p {
-  margin: 0 0 0.5rem 0;
-  color: var(--text-secondary, #666);
-  font-size: 0.9rem;
-}
-
-.workflow-category {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  background: #e8f4f8;
-  color: var(--primary-color, #2c5aa0);
-  border-radius: 4px;
-  font-size: 0.85rem;
-}
-
-.workflow-arrow {
-  font-size: 1.5rem;
-  color: var(--primary-color, #2c5aa0);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .entities-grid {
-    /*
-     * `minmax(0, 1fr)` y no `1fr`. El mínimo automático de una pista de rejilla
-     * es `auto`, es decir el min-content del contenido: con `1fr` a secas la
-     * pista crecía hasta 560px dentro de un contenedor de 328 y la tarjeta se
-     * salía de la pantalla, obligando a arrastrar de lado para leerla.
-     */
-    grid-template-columns: minmax(0, 1fr);
-  }
-  
-  .filter-bar {
-    flex-direction: column;
-  }
-  
-  .filter-select {
-    max-width: 100%;
-  }
-  
-  .entity-header {
-    flex-wrap: wrap;
-  }
-  
-  .entity-actions {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: stretch;
-  }
-  
-  .btn-primary.small, .btn-danger.small {
-    width: 100%;
-  }
-}
-
-/* Modal Actions */
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -472,10 +629,3 @@
   margin-top: 1rem;
 }
 
-/* Entity Actions Spacing */
-.entity-actions {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
