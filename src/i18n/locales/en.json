@@ -80,7 +80,9 @@
     "faq": "FAQ",
     "more": "More",
     "delete": "Delete",
-    "deleting": "Deleting..."
+    "deleting": "Deleting...",
+    "yes": "Yes",
+    "no": "No"
   },
   "status": {
     "all": "All",
@@ -505,17 +507,10 @@
     }
   },
   "entity": {
-    "detail": "Entity Detail",
     "statusLabel": "Status",
     "information": "Entity Information",
     "created_at": "Created",
     "updated_at": "Updated",
-    "relationships": "Relationships",
-    "available_workflows": "Available Processes",
-    "no_workflows_available": "No processes available for this entity",
-    "start_workflow": "Start Process",
-    "recent_workflows": "Recent Processes",
-    "workflow": "Process",
     "status": {
       "active": "Active",
       "inactive": "Inactive",
@@ -524,25 +519,36 @@
     },
     "started": "Started",
     "completed": "Completed",
-    "actions": "Actions",
-    "view_progress": "View Progress",
-    "documents": "Documents",
-    "document_viewer": "Document Viewer",
-    "no_documents": "No documents associated with this entity",
-    "document": {
-      "type": "Type",
-      "issued_by": "Issuer",
-      "issued_date": "Issue Date",
-      "expiry_date": "Expiry Date",
-      "expired": "Expired",
-      "verified": "Verified",
-      "pending": "Pending",
-      "rejected": "Rejected",
-      "view": "View",
-      "download": "Download"
-    },
     "no_data": "This record has no data to show.",
-    "information_of": "{{type}} information"
+    "information_of": "{{type}} information",
+    "record": {
+      "folio": "Reference",
+      "document": "Document",
+      "document_of": "Document for {{name}}",
+      "download_pdf": "Download PDF",
+      "download": "Download",
+      "download_failed": "The file could not be downloaded.",
+      "print": "Print",
+      "verify_signature": "Verify signature",
+      "verify_failed": "The signature could not be verified.",
+      "signed_by": "Signed by",
+      "signature_check": "Verification",
+      "signature_valid": "Valid signature",
+      "signature_invalid": "The signature could not be verified",
+      "files": "Files",
+      "file": "File",
+      "files_group": {
+        "uploaded": "What you attached",
+        "flow": "What the trámite produced",
+        "other": "Other files"
+      },
+      "available_workflows": "Trámites for this document",
+      "no_workflows": "There are no trámites for this document yet.",
+      "history": "History",
+      "tramite": "Trámite",
+      "load_failed": "The document could not be loaded.",
+      "not_found": "This document does not exist or is not in your wallet."
+    }
   },
   "instances": {
     "subtitle": "Track and manage all your submitted applications",

@@ -5,6 +5,7 @@ import { workflowService } from '../../services/workflowService';
 import { useAuth } from '../../contexts/AuthContext';
 import keycloakService from '../../services/keycloak';
 import type { WorkflowDefinition, WorkflowStep, StepFlowSegment, FlowStep } from '../../types/workflow';
+import { formatCost } from '../../utils/cost';
 
 // Theme-driven default for the service detail / pre-check page. Colors and fonts
 // come from each tenant's theme via CSS variables (set in ThemeContext), so every
@@ -708,7 +709,7 @@ export const WorkflowDetailContent: React.FC = () => {
             <InfoCard label="Tiempo estimado" value={duration || 'Por determinar'} />
             <InfoCard
               label="Costo"
-              value={cost ? `$${Number(cost).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN` : 'Sin costo'}
+              value={formatCost(cost) || 'Sin costo'}
               valueColor={cost ? 'var(--primary-color)' : 'var(--text-primary)'}
             />
             <InfoCard label="Modalidad" value="En línea" />
