@@ -80,7 +80,9 @@
     "faq": "Preguntas Frecuentes",
     "more": "más",
     "delete": "Eliminar",
-    "deleting": "Eliminando..."
+    "deleting": "Eliminando...",
+    "yes": "Sí",
+    "no": "No"
   },
   "status": {
     "all": "Todos",
@@ -505,17 +507,10 @@
     }
   },
   "entity": {
-    "detail": "Detalle de Entidad",
     "statusLabel": "Estado",
     "information": "Información de la Entidad",
     "created_at": "Creado",
     "updated_at": "Actualizado",
-    "relationships": "Relaciones",
-    "available_workflows": "Procesos Disponibles",
-    "no_workflows_available": "No hay procesos disponibles para esta entidad",
-    "start_workflow": "Iniciar Proceso",
-    "recent_workflows": "Procesos Recientes",
-    "workflow": "Proceso",
     "status": {
       "active": "Activo",
       "inactive": "Inactivo",
@@ -524,25 +519,36 @@
     },
     "started": "Iniciado",
     "completed": "Completado",
-    "actions": "Acciones",
-    "view_progress": "Ver Progreso",
-    "documents": "Documentos",
-    "document_viewer": "Visor de Documentos",
-    "no_documents": "No hay documentos asociados a esta entidad",
-    "document": {
-      "type": "Tipo",
-      "issued_by": "Emisor",
-      "issued_date": "Fecha de Emisión",
-      "expiry_date": "Fecha de Vencimiento",
-      "expired": "Vencido",
-      "verified": "Verificado",
-      "pending": "Pendiente",
-      "rejected": "Rechazado",
-      "view": "Ver",
-      "download": "Descargar"
-    },
     "no_data": "Este registro no tiene datos para mostrar.",
-    "information_of": "Información de {{type}}"
+    "information_of": "Información de {{type}}",
+    "record": {
+      "folio": "Folio",
+      "document": "Documento",
+      "document_of": "Documento de {{name}}",
+      "download_pdf": "Descargar PDF",
+      "download": "Descargar",
+      "download_failed": "No se pudo descargar el archivo.",
+      "print": "Imprimir",
+      "verify_signature": "Verificar firma",
+      "verify_failed": "No se pudo verificar la firma.",
+      "signed_by": "Firmado por",
+      "signature_check": "Verificación",
+      "signature_valid": "Firma válida",
+      "signature_invalid": "No se pudo verificar la firma",
+      "files": "Archivos",
+      "file": "Archivo",
+      "files_group": {
+        "uploaded": "Lo que usted adjuntó",
+        "flow": "Lo que generó el trámite",
+        "other": "Otros archivos"
+      },
+      "available_workflows": "Trámites con este documento",
+      "no_workflows": "Por ahora no hay trámites que se hagan con este documento.",
+      "history": "Historial",
+      "tramite": "Trámite",
+      "load_failed": "No se pudo cargar el documento.",
+      "not_found": "Este documento no existe o no está en su cartera."
+    }
   },
   "instances": {
     "subtitle": "Rastrea y gestiona todas tus solicitudes enviadas",

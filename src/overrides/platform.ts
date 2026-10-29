@@ -41,6 +41,14 @@ export type { WorkflowDefinition, WorkflowInstanceProgress, StepProgress, InputF
 
 // Entity rendering (for showing a workflow-emitted entity inline on completion)
 export { EntityViewer, signatureInfoFromData } from '../components/signature/EntityViewer';
+export { EntityRecord } from '../components/EntityRecord';
+export type {
+  RecordEntity,
+  RecordDisplay,
+  RecordInstance,
+  RecordRelatedSection,
+  RecordWorkflow,
+} from '../components/EntityRecord';
 export type { WorkflowStep, StepFlowSegment, FlowStep, FlowRoute } from '../types/workflow';
 export { default as keycloakService } from '../services/keycloak';
 export { profileService } from '../services/profileService';

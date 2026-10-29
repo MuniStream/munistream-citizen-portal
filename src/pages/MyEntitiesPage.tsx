@@ -6,6 +6,7 @@ import { MainLayout } from '../components/Layout/MainLayout';
 import { authService } from '../services/authService';
 import { humanizeKey } from '../utils/humanize';
 import { entityAddressSubtitle } from '../utils/address';
+import { ID_FIELDS, validityOf, isRawKey, type Validity } from '../utils/entityIdentity';
 import './MyEntitiesPage.css';
 
 interface Entity {
@@ -35,29 +36,10 @@ const API_BASE_URL = `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_API_
 
 // Documents fetched per request. The backend caps a page at 100.
 const PAGE_SIZE = 30;
-// A document whose validity ends within this many days is flagged as expiring.
-const EXPIRING_DAYS = 30;
 const SEARCH_DEBOUNCE_MS = 300;
 
-// Official identifiers worth showing under the name, in order of preference.
-// Same fields the backend search looks into.
-const ID_FIELDS = ['matricula', 'folio', 'numero_permiso', 'numero_titulo', 'rnpa', 'rfc', 'curp'];
-
-type Validity = { kind: 'valid' | 'expiring' | 'expired'; date: Date } | null;
-
-function validityOf(entity: Entity, now: number): Validity {
-  if (!entity.valid_until) return null;
-  const date = new Date(entity.valid_until);
-  if (Number.isNaN(date.getTime())) return null;
-  const days = (date.getTime() - now) / 86_400_000;
-  if (days < 0) return { kind: 'expired', date };
-  if (days <= EXPIRING_DAYS) return { kind: 'expiring', date };
-  return { kind: 'valid', date };
-}
-
-// Names written by some workflows are raw keys ("mia_particular").
-function displayName(name: string): string {
-  return /^[a-z0-9]+(_[a-z0-9]+)+$/.test(name) ? humanizeKey(name) : name;
+function entityName(name: string): string {
+  return isRawKey(name) ? humanizeKey(name) : name;
 }
 
 /**
@@ -429,7 +411,7 @@ export const MyEntitiesPage: React.FC = () => {
                         <li key={e.entity_id} className="wallet-row">
                           <Link to={`/entity/${e.entity_id}`} className="wallet-row-link">
                             <span className="wallet-row-main">
-                              <span className="wallet-row-name">{displayName(e.name)}</span>
+                              <span className="wallet-row-name">{entityName(e.name)}</span>
                               {sub && <span className="wallet-row-sub">{sub}</span>}
                             </span>
                             <span className={`wallet-row-validity${v ? ` is-${v.kind}` : ''}`}>
@@ -440,7 +422,7 @@ export const MyEntitiesPage: React.FC = () => {
                             type="button"
                             className="wallet-row-delete"
                             onClick={() => setEntityToDelete(e)}
-                            aria-label={t('my_entities.delete_named', { name: displayName(e.name) })}
+                            aria-label={t('my_entities.delete_named', { name: entityName(e.name) })}
                             title={t('common.delete')}
                           >
                             <svg aria-hidden="true" viewBox="0 0 20 20">
@@ -475,7 +457,7 @@ export const MyEntitiesPage: React.FC = () => {
               <div className="modal-body">
                 <p className="modal-subtitle">{t('entities.deleteConfirmMessage')}</p>
                 <div className="entity-to-delete">
-                  <strong>{displayName(entityToDelete.name)}</strong>
+                  <strong>{entityName(entityToDelete.name)}</strong>
                   <br />
                   <small>{typeLabel(entityToDelete.entity_type)}</small>
                 </div>

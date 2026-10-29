@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EntityViewer, signatureInfoFromData } from '../signature/EntityViewer';
+import type { RecordDisplay, RecordRelatedSection } from '../EntityRecord';
 import { workflowService, type EmittedEntity } from '../../services/workflowService';
 
 interface EmittedEntitiesSectionProps {
@@ -13,6 +14,15 @@ interface LoadedEntity {
   name: string;
   data: Record<string, any>;
   created_at: string;
+  // How the type is shown, its name and its related entities: the detail
+  // endpoint resolves all three from the tenant's entity type catalog, and
+  // dropping them here left the embedded record without them.
+  type_name?: string | null;
+  status?: string;
+  verified?: boolean;
+  valid_until?: string | null;
+  display?: RecordDisplay;
+  related?: RecordRelatedSection[];
 }
 
 const apiBaseUrl = `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_API_BASE_URL}`;
@@ -47,6 +57,12 @@ const EmittedEntitiesSection: React.FC<EmittedEntitiesSectionProps> = ({ entitie
               name: entity.name || ref.entity_type || ref.entity_id,
               data: entity.data || {},
               created_at: entity.created_at || '',
+              type_name: entity.type_name,
+              status: entity.status,
+              verified: entity.verified,
+              valid_until: entity.valid_until,
+              display: entity.display,
+              related: entity.related,
             } as LoadedEntity;
           } catch {
             return null;
@@ -109,6 +125,12 @@ const EmittedEntitiesSection: React.FC<EmittedEntitiesSectionProps> = ({ entitie
                   signature_info: signatureInfoFromData(entity.data, entity.created_at),
                 }}
                 apiBaseUrl={apiBaseUrl}
+                display={entity.display}
+                typeName={entity.type_name}
+                related={entity.related}
+                status={entity.status}
+                verified={entity.verified}
+                validUntil={entity.valid_until}
               />
             </div>
           ))}

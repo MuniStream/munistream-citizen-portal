@@ -1,47 +1,19 @@
 /**
- * Entity Viewer Component
+ * Entity Viewer — the record of an entity, shown inside another screen.
  *
- * Displays entities with digital signatures and provides access to signed PDFs.
+ * This is the adapter that keeps the embedded callers working: the trámite
+ * screen (`EmittedEntitiesSection`) and the tenant overrides of
+ * `InstanceDetailContent`, which build this prop shape from the entity detail
+ * they already fetched. The record itself lives in `EntityRecord`.
+ *
+ * `display`, `typeName` and `related` are optional because a caller that has
+ * not been updated yet simply has no catalog data to pass: the record then
+ * shows the document and the data table, without related sections.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { humanizeKey } from '../../utils/humanize';
-import { authService } from '../../services/authService';
-import {
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-  Box,
-  Typography,
-  Chip,
-  Alert,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  Paper,
-  Link,
-} from '@mui/material';
-import {
-  PictureAsPdf,
-  Verified,
-  Warning,
-  Error as ErrorIcon,
-  Security,
-  Info,
-  CheckCircle,
-  Schedule,
-} from '@mui/icons-material';
-import axios from 'axios';
-import { entityAddressSubtitle } from '../../utils/address';
-import { mensajeDeError } from '../../utils/errorMessage';
+import React from 'react';
+import { EntityRecord } from '../EntityRecord';
+import type { RecordDisplay, RecordRelatedSection, RecordWorkflow } from '../EntityRecord';
 
 interface EntityData {
   id: string;
@@ -85,29 +57,6 @@ export function signatureInfoFromData(
   };
 }
 
-interface EntityViewerProps {
-  entity: EntityData;
-  apiBaseUrl?: string;
-}
-
-
-interface VerificationResult {
-  valid: boolean;
-  verification_timestamp: string;
-  signature_info: Record<string, any>;
-  verification_results: Record<string, any>;
-  overall_valid: boolean;
-}
-
-/**
- * Un valor de la entidad, siempre como texto.
- *
- * React revienta la pagina entera —error #31, pantalla en blanco— si le llega un
- * objeto donde espera un nodo, y aqui los valores vienen de `entity.data`, que es
- * lo que cada tramite haya guardado: no hay forma de garantizar su forma desde
- * este lado. Un campo con una forma inesperada tiene que verse raro, no dejar al
- * ciudadano sin documento.
- */
 function texto(valor: unknown): string {
   if (valor === null || valor === undefined) return '';
   if (typeof valor === 'string') return valor;
@@ -119,623 +68,54 @@ function texto(valor: unknown): string {
   }
 }
 
+interface EntityViewerProps {
+  entity: EntityData;
+  apiBaseUrl?: string;
+  /** The type's display config, from the entity detail payload. */
+  display?: RecordDisplay;
+  /** The type's name in the tenant's entity type catalog. */
+  typeName?: string | null;
+  /** Related entities, as the catalog declares or derives them. */
+  related?: RecordRelatedSection[];
+  /** Trámites that accept this type. Omitted: the section is not shown. */
+  availableWorkflows?: RecordWorkflow[];
+  /** State of the entity, for the identity block. */
+  status?: string;
+  verified?: boolean;
+  validUntil?: string | null;
+}
+
 export const EntityViewer: React.FC<EntityViewerProps> = ({
   entity,
   apiBaseUrl = '/api/v1',
-}) => {
-  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [htmlContent, setHtmlContent] = useState<string>('');
-  // La vista HTML se pide al montar: mientras llega, se muestra que carga y no
-  // el aviso de "no hay visualizador", que antes aparecía en cada apertura.
-  const [htmlLoading, setHtmlLoading] = useState(true);
-
-  // Load HTML content on component mount
-  useEffect(() => {
-    const loadHtmlContent = async () => {
-      try {
-        setHtmlLoading(true);
-        setError(null);
-
-        const response = await axios.get(
-          `${apiBaseUrl}/signatures/entities/${entity.id}/html`
-        );
-
-        setHtmlContent(response.data);
-      } catch (error) {
-        // `detail` puede no ser texto (un 422 lo manda como lista de objetos);
-        // guardarlo crudo en un estado `string` y pintarlo tumba la página entera.
-        setError(mensajeDeError(error, 'No se pudo cargar el documento.'));
-      } finally {
-        setHtmlLoading(false);
-      }
-    };
-
-    loadHtmlContent();
-  }, [entity.id, apiBaseUrl]);
-
-  // Print HTML view
-  const handlePrintHtml = useCallback(() => {
-    const iframe = document.querySelector('#entity-html-iframe') as HTMLIFrameElement;
-    if (iframe?.contentWindow) {
-      iframe.contentWindow.print();
-    }
-  }, []);
-
-  // Descargar el PDF renderizado por el servidor (mismo visualizador/plantilla/
-  // datos que el preview del EntityViewer, con la foto embebida). Reemplaza el
-  // "print" del navegador, que con @page 130x90mm recortaba/movía el layout y
-  // dejaba la credencial descargada distinta al preview.
-  const handleDownloadPdf = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.get(
-        `${apiBaseUrl}/signatures/entities/${entity.id}/pdf`,
-        { responseType: 'blob' }
-      );
-      const url = window.URL.createObjectURL(response.data);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${entity.name || entity.id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      setError(mensajeDeError(err, 'No se pudo descargar el PDF.'));
-    } finally {
-      setLoading(false);
-    }
-  }, [entity.id, entity.name, apiBaseUrl]);
-
-  // Download PDF
-  // Verify signature
-  const handleVerifySignature = useCallback(async () => {
-    if (!entity.has_signature) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await axios.post(
-        `${apiBaseUrl}/signatures/entities/${entity.id}/verify-signature`
-      );
-
-      setVerificationResult(response.data);
-    } catch (error) {
-      setError(mensajeDeError(error, 'No se pudo verificar la firma.'));
-    } finally {
-      setLoading(false);
-    }
-  }, [entity.id, entity.has_signature, apiBaseUrl]);
-
-
-
-  // Get signature status color and icon
-  const getSignatureStatus = () => {
-    if (!entity.has_signature) {
-      return {
-        color: 'default' as const,
-        icon: <Info />,
-        label: 'Sin firma',
-      };
-    }
-
-    if (entity.signature_info?.verified === true) {
-      return {
-        color: 'success' as const,
-        icon: <Verified />,
-        label: 'Verificada',
-      };
-    }
-
-    if (entity.signature_info?.verified === false) {
-      return {
-        color: 'error' as const,
-        icon: <ErrorIcon />,
-        label: 'Error',
-      };
-    }
-
-    return {
-      color: 'warning' as const,
-      icon: <Warning />,
-      label: 'Pendiente',
-    };
-  };
-
-  const signatureStatus = getSignatureStatus();
-
-  // Helper function to detect and format catalog data
-  const getCatalogData = () => {
-    const catalogSections: { title: string; data: Record<string, any> }[] = [];
-
-    // Look for catalog data keys
-    const catalogKeys = Object.keys(entity.data).filter(key =>
-      key.includes('_catastral_data') ||
-      key.includes('_folio_data') ||
-      key.includes('clave_catastral_data') ||
-      key.includes('folio_real_data')
-    );
-
-    catalogKeys.forEach(key => {
-      const data = entity.data[key];
-      if (data && typeof data === 'object') {
-        const title = humanizeKey(key.replace(/_data$/, '')).toUpperCase();
-        catalogSections.push({ title, data });
-      }
-    });
-
-    return catalogSections;
-  };
-
-  // Helper function to detect related entities
-  /**
-   * Entidades relacionadas, a partir de los campos `*_ids` de la entidad.
-   *
-   * El nombre de la clave promete identificadores, pero según el operador que la
-   * escriba lo que hay dentro es la entidad entera. Al pintar el elemento tal
-   * cual, React se encontraba un objeto donde esperaba texto y tiraba la página
-   * entera: el ciudadano veía su credencial en blanco.
-   *
-   * Aquí se normaliza a `{ id, etiqueta }` sea cual sea la forma, y de paso el
-   * enlace deja de apuntar a `/entity/[object Object]`.
-   */
-  const getRelatedEntities = () => {
-    const relatedKeys = Object.keys(entity.data).filter(key =>
-      key.includes('_ids') && Array.isArray(entity.data[key])
-    );
-
-    const relatedEntities: { type: string; ids: { id: string; etiqueta: string }[] }[] = [];
-
-    relatedKeys.forEach(key => {
-      const crudos = entity.data[key] as unknown[];
-      const ids = crudos
-        .map((v: any) => {
-          if (typeof v === 'string') return { id: v, etiqueta: v };
-          if (v && typeof v === 'object') {
-            const id = v.entity_id || v.id;
-            if (!id) return null;
-            return { id: String(id), etiqueta: texto(v.name) || String(id) };
-          }
-          return null;
-        })
-        .filter((v): v is { id: string; etiqueta: string } => v !== null);
-
-      if (ids.length > 0) {
-        const type = humanizeKey(key.replace(/_ids$/, ''));
-        relatedEntities.push({ type, ids });
-      }
-    });
-
-    return relatedEntities;
-  };
-
-  /**
-   * Archivos de la entidad, identificados por su `s3_key`.
-   *
-   * Antes se construía aquí la URL de descarga directa. Esa ruta no exigía
-   * ninguna credencial: quien conociera la llave bajaba cualquier objeto del
-   * bucket. Ahora se guarda la llave y el token se pide al descargar, contra
-   * un endpoint que sí comprueba que el archivo sea de esta entidad y de quien
-   * lo pide.
-   */
-  const getS3Files = () => {
-    const fileGroups: { title: string; files: Array<{ name: string; s3Key: string; size?: number }> }[] = [];
-
-    const data = entity.data;
-
-    if (data.uploaded_files && Array.isArray(data.uploaded_files)) {
-      const files = data.uploaded_files
-        .filter((file: any) => file?.s3_key)
-        .map((file: any) => ({
-          name: file.filename || 'Archivo',
-          s3Key: file.s3_key,
-          size: file.size,
-        }));
-
-      if (files.length > 0) {
-        fileGroups.push({ title: 'ARCHIVOS SUBIDOS', files });
-      }
-    }
-
-    // Archivos producidos por el flujo. El validador persiste `s3_key` junto a
-    // la `download_url` heredada, así que no hace falta migrar datos viejos:
-    // basta con leer la llave en vez de la URL.
-    if (data.signable_data?.data) {
-      const signableFiles: Array<{ name: string; s3Key: string; size?: number }> = [];
-
-      Object.keys(data.signable_data.data).forEach(key => {
-        if (key.includes('_result') && Array.isArray(data.signable_data.data[key])) {
-          data.signable_data.data[key].forEach((file: any) => {
-            if (file?.s3_key) {
-              signableFiles.push({
-                name: file.filename || 'Archivo',
-                s3Key: file.s3_key,
-                size: file.size,
-              });
-            }
-          });
-        }
-      });
-
-      if (signableFiles.length > 0) {
-        fileGroups.push({ title: 'ARCHIVOS DEL FLUJO', files: signableFiles });
-      }
-    }
-
-    // `s3_keys` repite las llaves de `uploaded_files`: sin descartarlas, cada
-    // archivo salía dos veces, una con su nombre y otra con el de S3.
-    const yaListadas = new Set(fileGroups.flatMap((g) => g.files.map((f) => f.s3Key)));
-    if (data.s3_keys && Array.isArray(data.s3_keys)) {
-      const directFiles = data.s3_keys
-        .filter((key: any) => typeof key === 'string' && key && !yaListadas.has(key))
-        .map((key: string, index: number) => ({
-          name: key.split('/').pop() || `Archivo ${index + 1}`,
-          s3Key: key,
-          size: undefined,
-        }));
-
-      if (directFiles.length > 0) {
-        fileGroups.push({ title: 'DOCUMENTOS', files: directFiles });
-      }
-    }
-
-    return fileGroups;
-  };
-
-  /**
-   * Descarga un archivo de la entidad.
-   *
-   * Pide primero un permiso de descarga de vida corta y sólo entonces baja el
-   * objeto. El permiso se emite contra la sesión del ciudadano y únicamente
-   * para llaves que pertenecen a esta entidad.
-   */
-  const downloadEntityFile = async (s3Key: string, filename: string) => {
-    const token = authService.getToken();
-
-    const grantRes = await fetch(`${apiBaseUrl}/files/grant`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ scope: { entity_id: entity.id }, s3_keys: [s3Key] }),
-    });
-    if (!grantRes.ok) throw new Error('No se pudo autorizar la descarga');
-
-    const { grants } = await grantRes.json();
-    const grant = (grants || []).find((g: any) => g.s3_key === s3Key);
-    if (!grant) throw new Error('El archivo no pertenece a esta entidad');
-
-    const res = await fetch(
-      `${apiBaseUrl}/files/download/${s3Key}?t=${encodeURIComponent(grant.token)}`,
-    );
-    if (!res.ok) throw new Error('Error al descargar archivo');
-
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    try {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } finally {
-      window.URL.revokeObjectURL(url);
-    }
-  };
-
-  return (
-    <Box>
-      {/* HTML Visualizer (if available) */}
-      {(htmlLoading || htmlContent) && (
-        <>
-          {htmlLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', mb: 2 }}>
-              <CircularProgress />
-              <Typography variant="body2" sx={{ ml: 2 }}>
-                Cargando documento...
-              </Typography>
-            </Box>
-          ) : (
-            <Box
-              sx={{
-                width: '100%',
-                height: '800px',
-                border: '2px solid',
-                borderColor: 'divider',
-                borderRadius: 1,
-                overflow: 'hidden',
-                mb: 2,
-                p: 2,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                backgroundColor: '#f5f5f5'
-              }}
-            >
-              <iframe
-                id="entity-html-iframe"
-                srcDoc={htmlContent}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  border: 'none',
-                  background: 'white'
-                }}
-                title={`Documento - ${entity.name}`}
-              />
-            </Box>
-          )}
-        </>
-      )}
-
-      {/* Complete Entity Information (always shown) */}
-      <Card variant="outlined">
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                📊 Información de la Entidad
-              </Typography>
-              <Typography variant="h5" gutterBottom>
-                {texto(entity.name) || `${texto(entity.type)} ${texto(entity.id)}`}
-              </Typography>
-              {entityAddressSubtitle(entity.data) && (
-                <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                  {texto(entityAddressSubtitle(entity.data))}
-                </Typography>
-              )}
-              <Typography variant="body2" color="text.secondary">
-                Tipo: {texto(entity.type)} • Creado: {new Date(entity.created_at).toLocaleDateString()}
-              </Typography>
-            </Box>
-
-            <Box display="flex" gap={1}>
-              <Chip
-                icon={signatureStatus.icon}
-                label={signatureStatus.label}
-                color={signatureStatus.color}
-                size="small"
-              />
-              {entity.has_signature && (
-                <Chip
-                  icon={<Security />}
-                  label="Firmado"
-                  color="primary"
-                  size="small"
-                />
-              )}
-            </Box>
-          </Box>
-
-          {entity.signature_info && (
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" gutterBottom>
-                Información de Firma:
-              </Typography>
-              <List dense>
-                <ListItem>
-                  <ListItemIcon>
-                    <Security />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Algoritmo"
-                    secondary={texto(entity.signature_info.algorithm)}
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemIcon>
-                    <Verified />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Firmante"
-                    secondary={texto(entity.signature_info.signer) || 'No disponible'}
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemIcon>
-                    <Schedule />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Fecha de firma"
-                    secondary={new Date(entity.signature_info.timestamp).toLocaleString()}
-                  />
-                </ListItem>
-              </List>
-            </Box>
-          )}
-
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-              {error}
-            </Alert>
-          )}
-
-          {verificationResult && (
-            <Alert
-              severity={verificationResult.overall_valid ? 'success' : 'error'}
-              sx={{ mb: 2 }}
-            >
-              <Typography variant="body2">
-                <strong>Verificación:</strong>{' '}
-                {verificationResult.overall_valid
-                  ? 'Firma válida y verificada'
-                  : 'Firma inválida o no se pudo verificar'}
-              </Typography>
-              <Typography variant="caption" display="block">
-                Verificado el: {new Date(verificationResult.verification_timestamp).toLocaleString()}
-              </Typography>
-            </Alert>
-          )}
-
-          {!htmlLoading && !htmlContent && (
-            <Alert severity="info" sx={{ mb: 2 }}>
-              <Typography variant="body2">
-                No hay visualizador disponible para esta entidad. Solo se puede descargar como PDF.
-              </Typography>
-            </Alert>
-          )}
-
-          {/* Catalog Data Section */}
-          {getCatalogData().length > 0 && (
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                📊 Datos del Catálogo
-              </Typography>
-              {getCatalogData().map((section, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="primary" gutterBottom>
-                    {section.title}
-                  </Typography>
-                  <TableContainer component={Paper} variant="outlined">
-                    <Table size="small">
-                      <TableBody>
-                        {Object.entries(section.data).map(([field, value]) => (
-                          <TableRow key={field}>
-                            <TableCell component="th" scope="row" sx={{ fontWeight: 'medium' }}>
-                              {humanizeKey(field).toUpperCase()}
-                            </TableCell>
-                            <TableCell>
-                              {String(value)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              ))}
-            </Box>
-          )}
-
-          {/* Related Entities Section */}
-          {getRelatedEntities().length > 0 && (
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                🔗 Entidades Relacionadas
-              </Typography>
-              {getRelatedEntities().map((relation, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="primary" gutterBottom>
-                    {relation.type.toUpperCase()}
-                  </Typography>
-                  <List dense>
-                    {relation.ids.map((relacionada, i) => (
-                      <ListItem key={i}>
-                        <ListItemIcon>
-                          📄
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Link
-                              href={`/entity/${relacionada.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              underline="hover"
-                            >
-                              {relacionada.etiqueta}
-                            </Link>
-                          }
-                          secondary={`${relation.type} relacionado`}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
-              ))}
-            </Box>
-          )}
-
-          {/* S3 Files Section */}
-          {getS3Files().length > 0 && (
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                📎 Archivos Adjuntos
-              </Typography>
-              {getS3Files().map((group, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="primary" gutterBottom>
-                    {group.title}
-                  </Typography>
-                  <List dense>
-                    {group.files.map((file, i) => (
-                      <ListItem key={i}>
-                        <ListItemIcon>
-                          📄
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={file.name}
-                          secondary={file.size ? `Tamaño: ${Math.round(file.size / 1024)} KB` : 'Archivo adjunto'}
-                        />
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={async () => {
-                            try {
-                              await downloadEntityFile(file.s3Key, file.name);
-                            } catch (err) {
-                              console.error('Error downloading file:', err);
-                              setError('Error al descargar el archivo');
-                            }
-                          }}
-                          sx={{ ml: 1 }}
-                        >
-                          Descargar
-                        </Button>
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
-              ))}
-            </Box>
-          )}
-        </CardContent>
-
-        <CardActions>
-          {htmlContent && (
-            <Button
-              startIcon={<PictureAsPdf />}
-              onClick={handleDownloadPdf}
-              disabled={loading}
-              variant="contained"
-            >
-              Descargar PDF
-            </Button>
-          )}
-          {htmlContent && (
-            <Button
-              startIcon={<PictureAsPdf />}
-              onClick={handlePrintHtml}
-              disabled={loading}
-              variant="outlined"
-            >
-              Imprimir
-            </Button>
-          )}
-
-          {/* "Descargar PDF" ahora baja el PDF renderizado por el servidor (mismo
-             visualizador/plantilla/datos que el preview, con foto). "Imprimir"
-             queda como opción para imprimir el preview desde el navegador. */}
-
-          {entity.has_signature && (
-            <Button
-              startIcon={<CheckCircle />}
-              onClick={handleVerifySignature}
-              disabled={loading}
-              color="primary"
-            >
-              Verificar Firma
-            </Button>
-          )}
-
-          {loading && <CircularProgress size={20} />}
-        </CardActions>
-      </Card>
-    </Box>
-  );
-};
+  display,
+  typeName,
+  related,
+  availableWorkflows,
+  status,
+  verified,
+  validUntil,
+}) => (
+  // `signature_info` is not forwarded: the record reads the signature from
+  // `data`, which is where `signatureInfoFromData` reads it from too.
+  <EntityRecord
+    entity={{
+      entity_id: entity.id,
+      entity_type: entity.type,
+      name: entity.name,
+      data: entity.data || {},
+      created_at: entity.created_at,
+      valid_until: validUntil,
+      status,
+      verified,
+      type_name: typeName,
+      related,
+      display,
+    }}
+    apiBaseUrl={apiBaseUrl}
+    availableWorkflows={availableWorkflows}
+    variant="embedded"
+  />
+);
 
 export default EntityViewer;
