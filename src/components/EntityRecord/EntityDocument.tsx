@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import api from '../../services/api';
 import { mensajeDeError } from '../../utils/errorMessage';
 import { asText, type RecordEntity } from './types';
 
@@ -13,6 +13,9 @@ interface Props {
 /**
  * The document the entity's visualizer renders, as the sheet of paper it is,
  * with the actions that get it out of the screen: download and print.
+ *
+ * Requests go through the session client so they carry the citizen's token:
+ * the backend only serves documents to their owner (and to staff).
  *
  * Nothing is announced while it loads and nothing is announced if there is no
  * visualizer — the section simply does not exist in that case. Telling the
@@ -41,7 +44,7 @@ export const EntityDocument: React.FC<Props> = ({ entity, apiBaseUrl, sectionTag
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${apiBaseUrl}/signatures/entities/${entity.entity_id}/html`);
+        const response = await api.get(`${apiBaseUrl}/signatures/entities/${entity.entity_id}/html`);
         if (!cancelled) setHtml(typeof response.data === 'string' ? response.data : '');
       } catch {
         // No visualizer, or it failed: the section hides itself rather than
@@ -59,7 +62,7 @@ export const EntityDocument: React.FC<Props> = ({ entity, apiBaseUrl, sectionTag
     setBusy(true);
     setError(null);
     try {
-      const response = await axios.get(`${apiBaseUrl}/signatures/entities/${entity.entity_id}/pdf`, {
+      const response = await api.get(`${apiBaseUrl}/signatures/entities/${entity.entity_id}/pdf`, {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(response.data);
@@ -89,7 +92,7 @@ export const EntityDocument: React.FC<Props> = ({ entity, apiBaseUrl, sectionTag
     setBusy(true);
     setError(null);
     try {
-      const response = await axios.post(`${apiBaseUrl}/signatures/entities/${entity.entity_id}/verify-signature`);
+      const response = await api.post(`${apiBaseUrl}/signatures/entities/${entity.entity_id}/verify-signature`);
       setSignatureCheck({
         valid: !!response.data?.overall_valid,
         at: response.data?.verification_timestamp || new Date().toISOString(),
