@@ -8,6 +8,7 @@
 import { X509Certificate } from '@peculiar/x509';
 import { Crypto } from '@peculiar/webcrypto';
 import axios from 'axios';
+import api from './api';
 
 // Initialize WebCrypto API
 const crypto = new Crypto();
@@ -207,7 +208,7 @@ export class SignatureService {
    */
   async getSignableData(instanceId: string, signatureField: string): Promise<SignableData> {
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${this.apiBaseUrl}/signatures/instances/${instanceId}/signable-data/${signatureField}`
       );
       return response.data;
@@ -276,7 +277,7 @@ export class SignatureService {
     signatureResult: SignatureResult
   ): Promise<SubmissionResponse> {
     try {
-      const response = await axios.post(
+      const response = await api.post(
         `${this.apiBaseUrl}/signatures/instances/${instanceId}/signatures/${signatureField}`,
         signatureResult
       );
@@ -294,7 +295,7 @@ export class SignatureService {
    */
   async getSignatureStatus(instanceId: string, signatureField: string): Promise<SignatureStatus> {
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${this.apiBaseUrl}/signatures/instances/${instanceId}/signature-status/${signatureField}`
       );
       return response.data;
