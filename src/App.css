@@ -2554,6 +2554,15 @@ html {
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
+  /* Es un <input> HTML crudo: fija su propio color, fondo y esquema para no
+     quedar a merced del `color-scheme` heredado ni del color de texto de un
+     contenedor temático (en modo oscuro salía texto blanco ilegible). */
+  color: var(--text-primary, #1e293b);
+  background-color: #ffffff;
+  color-scheme: light;
+}
+.picker-busqueda::placeholder {
+  color: var(--text-secondary, #6c757d);
 }
 
 .picker-contador {
