@@ -924,19 +924,20 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
       if (hasArrayFiles) {
         // Base64-serialized files inside arrays require JSON transport.
         const extraFiles: Record<string, any> = {};
-        for (const [key, file] of Object.entries(uploadedFiles)) {
+        // uploadedFiles guarda File o File[] (los campos `multiple` acumulan un
+        // array; ver handleFileUpload). El estado está tipado como File, así que
+        // se reconoce el tipo real aquí para no perder los campos múltiples.
+        const subidos = uploadedFiles as Record<string, File | File[]>;
+        for (const [key, file] of Object.entries(subidos)) {
           if (file instanceof File) {
             extraFiles[key] = await serializeFile(file);
           } else if (Array.isArray(file)) {
-            // Campo `multiple`: uploadedFiles guarda un array de File (ver
-            // handleFileUpload). Sin esta rama, un `file instanceof File` lo
+            // Campo `multiple`: sin esta rama un `file instanceof File` lo
             // descartaba y el backend rechazaba el paso por campo requerido
             // ausente (p. ej. `escritura_files` en alta_cuenta_predial).
-            const serialized = await Promise.all(
-              file.filter((f): f is File => f instanceof File).map(serializeFile)
-            );
-            if (serialized.length > 0) {
-              extraFiles[key] = serialized;
+            const soloFiles = file.filter((f) => f instanceof File);
+            if (soloFiles.length > 0) {
+              extraFiles[key] = await Promise.all(soloFiles.map(serializeFile));
             }
           }
         }
