@@ -927,6 +927,17 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
         for (const [key, file] of Object.entries(uploadedFiles)) {
           if (file instanceof File) {
             extraFiles[key] = await serializeFile(file);
+          } else if (Array.isArray(file)) {
+            // Campo `multiple`: uploadedFiles guarda un array de File (ver
+            // handleFileUpload). Sin esta rama, un `file instanceof File` lo
+            // descartaba y el backend rechazaba el paso por campo requerido
+            // ausente (p. ej. `escritura_files` en alta_cuenta_predial).
+            const serialized = await Promise.all(
+              file.filter((f): f is File => f instanceof File).map(serializeFile)
+            );
+            if (serialized.length > 0) {
+              extraFiles[key] = serialized;
+            }
           }
         }
         Object.assign(submissionData, extraFiles);
