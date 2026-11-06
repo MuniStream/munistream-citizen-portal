@@ -3,9 +3,14 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* El portal es institucional y siempre claro. El default `light dark` que
+     trae la plantilla de Vite hacía que la UA pintara los controles de
+     formulario crudos (p. ej. el buscador del EntityPicker) con el esquema
+     oscuro en un SO en modo oscuro: texto casi blanco e ilegible sobre el
+     card claro. Se fija el esquema claro de forma explícita. */
+  color-scheme: light;
+  color: #213547;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
