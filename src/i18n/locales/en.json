@@ -164,6 +164,8 @@
     "routeLabel": "Application route",
     "processingTitle": "Processing your application",
     "processingBody": "Preparing the next step… the page will refresh automatically.",
+    "readingTitle": "We are reading your document",
+    "readingBody": "We are checking that it is the requested document and that it can be read. It may take a few minutes; the page will refresh automatically.",
     "underReviewTitle": "Under review",
     "underReviewBody": "Your application was received and is under review by a validator.",
     "folio": "Reference",

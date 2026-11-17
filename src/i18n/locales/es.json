@@ -164,6 +164,8 @@
     "routeLabel": "Ruta del trámite",
     "processingTitle": "Procesando su solicitud",
     "processingBody": "Preparando el siguiente paso… la pantalla se actualizará automáticamente.",
+    "readingTitle": "Estamos leyendo tu documento",
+    "readingBody": "Revisamos que sea el documento que se pide y que se lea bien. Puede tardar unos minutos; la pantalla se actualizará sola.",
     "underReviewTitle": "En revisión",
     "underReviewBody": "Su solicitud fue recibida y está en revisión por un validador.",
     "folio": "Folio",
