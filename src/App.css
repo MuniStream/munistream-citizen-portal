@@ -2540,6 +2540,15 @@ html {
 }
 .picker-errores p { margin: 0.25rem 0; }
 
+.form-errores-servidor {
+  border-left: 4px solid var(--error-color, #dc3545);
+  background: #fdf2f3;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0 0;
+  border-radius: 4px;
+}
+.form-errores-servidor p { margin: 0.25rem 0; }
+
 .picker-barra {
   display: flex;
   flex-wrap: wrap;

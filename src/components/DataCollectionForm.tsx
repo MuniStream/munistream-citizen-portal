@@ -196,6 +196,12 @@ export interface DataCollectionFormProps {
   initialValues?: Record<string, any>;
   /** Fields per row. Defaults to 1, which is the historical one-per-row layout. */
   columns?: number;
+  /**
+   * Por qué el backend no aceptó lo enviado (`validation_errors`). Sin esto la
+   * persona veía el formulario otra vez sin saber qué corregir: p. ej. «El
+   * documento es del 30/04/2026: tiene más de 90 días».
+   */
+  serverErrors?: string[];
 }
 
 // Tipos compuestos que nunca caben en media fila: un selector de mapa, una
@@ -219,7 +225,8 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
   isSubmitting = false,
   submitButtonText = 'Submit Information',
   initialValues,
-  columns = 1
+  columns = 1,
+  serverErrors
 }) => {
   const [formData, setFormData] = useState<Record<string, any>>(() => ({ ...(initialValues || {}) }));
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -1607,6 +1614,13 @@ export const DataCollectionForm: React.FC<DataCollectionFormProps> = ({
       <div className="form-header">
         <h3>{title}</h3>
         <p>{description}</p>
+        {serverErrors && serverErrors.length > 0 && (
+          <div className="form-errores-servidor" role="alert">
+            {serverErrors.map((e, i) => (
+              <p key={i}>{e}</p>
+            ))}
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="form-content">

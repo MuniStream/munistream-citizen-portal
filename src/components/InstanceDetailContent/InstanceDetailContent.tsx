@@ -330,10 +330,20 @@ export const InstanceDetailContent: React.FC = () => {
             <div className="container">
               <div className="processing-card" role="status" aria-live="polite">
                 <div className="spinner" aria-hidden="true"></div>
-                <div>
-                  <strong>{t('instanceDetail.processingTitle')}</strong>
-                  <p>{t('instanceDetail.processingBody')}</p>
-                </div>
+                {/* Leer un documento tarda minutos (la GPU de DocumentIA se enciende
+                    bajo demanda): el aviso genérico de "preparando el siguiente
+                    paso" hacía creer que el trámite se había quedado colgado. */}
+                {instance.waiting_for === 'document_reading' ? (
+                  <div>
+                    <strong>{t('instanceDetail.readingTitle')}</strong>
+                    <p>{t('instanceDetail.readingBody')}</p>
+                  </div>
+                ) : (
+                  <div>
+                    <strong>{t('instanceDetail.processingTitle')}</strong>
+                    <p>{t('instanceDetail.processingBody')}</p>
+                  </div>
+                )}
               </div>
             </div>
           </section>

@@ -204,6 +204,7 @@ function renderBody(
       return (
         <DataCollectionForm
           columns={inputForm.columns}
+          serverErrors={inputForm.validation_errors}
           title={inputForm.title || 'Proporcione la Información Requerida'}
           description={
             inputForm.description ||
