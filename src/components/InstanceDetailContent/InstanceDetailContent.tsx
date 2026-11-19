@@ -202,6 +202,11 @@ export const InstanceDetailContent: React.FC = () => {
         <section className="instance-header">
           <div className="container">
             <div className="instance-id">{t('instances.instanceId')}: {id.slice(0, 8)}...</div>
+            {instance.folio && (
+              <div className="instance-folio">
+                {t('instanceDetail.folio', 'Folio de seguimiento')}: <strong>{instance.folio}</strong>
+              </div>
+            )}
             <h1 className="instance-title">{instance.workflow_name}</h1>
 
             <p className="instance-description">
