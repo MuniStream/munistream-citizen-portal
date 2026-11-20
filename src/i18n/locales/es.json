@@ -343,7 +343,9 @@
     "support": "Soporte",
     "settings": "Configuración",
     "menu": "Menú",
-    "dashboard": "Tablero"
+    "dashboard": "Tablero",
+    "indicadores": "Indicadores",
+    "ayuda": "Ayuda"
   },
   "profile": {
     "title": "Mi Perfil",
@@ -554,9 +556,9 @@
   },
   "instances": {
     "subtitle": "Rastrea y gestiona todas tus solicitudes enviadas",
-    "searchPlaceholder": "Buscar por nombre de trámite o ID...",
+    "searchPlaceholder": "Buscar por folio, nombre de trámite o ID…",
     "filterByStatus": "Filtrar por Estado",
-    "totalInstances": "{count} instancias",
+    "totalInstances": "{{count}} instancias",
     "lastRefresh": "Última actualización",
     "noInstances": "Aún No Hay Solicitudes",
     "noInstancesDescription": "Aún no has iniciado ninguna solicitud. Explora nuestros servicios para comenzar.",
@@ -570,7 +572,8 @@
     "summary": "Resumen",
     "total": "Total",
     "active": "Activos",
-    "needsAction": "Requiere Acción"
+    "needsAction": "Requiere Acción",
+    "folio": "Folio"
   },
   "entities": {
     "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar esta entidad?",
@@ -665,5 +668,107 @@
         "noWhatsapp": "Sin celular registrado. Agrégalo en tu perfil para recibir avisos por WhatsApp."
       }
     }
+  },
+  "plazo": {
+    "enCaptura": "Aún no se presenta: complete los pasos pendientes para que su solicitud entre a revisión.",
+    "sinPlazo": "Este trámite no tiene un plazo legal de resolución.",
+    "habiles": "hábiles",
+    "naturales": "naturales",
+    "habilesCorto": "días háb.",
+    "naturalesCorto": "días nat.",
+    "resueltoEnPlazo": "Resuelto en {{n}} días {{tipo}}, dentro del plazo legal.",
+    "resueltoFueraDePlazo": "Resuelto en {{n}} días {{tipo}}, fuera del plazo legal.",
+    "compromiso": "Fecha compromiso de respuesta",
+    "pausado": "Plazo detenido: esperando sus correcciones",
+    "estado": {
+      "en_tiempo": "En tiempo",
+      "por_vencer": "Por vencer",
+      "vencido": "Plazo vencido"
+    },
+    "avance": "Avance del plazo legal",
+    "transcurridos": "{{n}} de {{total}} días {{tipo}} transcurridos",
+    "explicacion": "El plazo legal corre desde el {{fecha}}, cuando su solicitud entró a revisión.",
+    "explicacionPausa": "El plazo se detuvo porque la persona revisora le pidió correcciones; se reanuda cuando las envíe.",
+    "titulo": "Plazo de respuesta"
+  },
+  "calificacion": {
+    "titulo": "¿Cómo fue su experiencia con este trámite?",
+    "pregunta": "Su opinión nos ayuda a mejorar el servicio. Califique de 1 a 5 estrellas.",
+    "tuCalificacion": "Calificación del trámite",
+    "comentario": "Comentario (opcional)",
+    "enviar": "Enviar calificación",
+    "gracias": "Gracias por su opinión.",
+    "error": "No se pudo enviar su calificación. Intente de nuevo."
+  },
+  "indicadores": {
+    "titulo": "Indicadores institucionales",
+    "descripcion": "Cifras agregadas y anónimas de los trámites de la institución: solicitudes recibidas y resueltas, cumplimiento del plazo legal de respuesta y satisfacción de las personas usuarias.",
+    "periodo": "Periodo",
+    "ultimosMeses": "Últimos {{n}} meses",
+    "error": "No fue posible cargar los indicadores.",
+    "sinDato": "sin dato",
+    "kpi": {
+      "recibidos": "Solicitudes recibidas",
+      "recibidosAyuda": "Ingresadas a revisión en el periodo",
+      "resueltos": "Solicitudes resueltas",
+      "resueltosAyuda": "{{n}} en revisión actualmente",
+      "enPlazo": "Resueltas en plazo",
+      "enPlazoAyuda": "Tiempo promedio: {{dias}} días hábiles",
+      "satisfaccion": "Satisfacción",
+      "satisfaccionAyuda": "Promedio de {{n}} opiniones"
+    },
+    "porMes": "Solicitudes por mes",
+    "porMesDescripcion": "Gráfica de barras con las solicitudes recibidas y resueltas por mes",
+    "recibidos": "Recibidas",
+    "resueltos": "Resueltas",
+    "porTramite": "Desempeño por trámite",
+    "col": {
+      "tramite": "Trámite",
+      "plazo": "Plazo legal",
+      "recibidos": "Recibidas",
+      "resueltos": "Resueltas",
+      "enPlazo": "En plazo",
+      "dias": "Días promedio",
+      "satisfaccion": "Satisfacción"
+    },
+    "notaSupresion": "Para proteger la privacidad, las cifras de menos de {{n}} casos no se publican y aparecen como «—».",
+    "notaMetodo": "El plazo se cuenta en días hábiles desde que la solicitud entra a revisión. Las solicitudes interrumpidas por fallas técnicas no se consideran resueltas. Actualizado: {{fecha}}."
+  },
+  "atencion": {
+    "titulo": "Atención ciudadana",
+    "descripcion": "Envíe dudas, reportes de problemas, quejas o sugerencias. El personal de la institución le responderá aquí y le avisaremos por correo o WhatsApp.",
+    "nueva": "Nueva solicitud de atención",
+    "categoria": "Tipo de solicitud",
+    "tramite": "Trámite relacionado",
+    "ninguno": "Ninguno",
+    "asunto": "Asunto",
+    "mensaje": "Describa su solicitud",
+    "enviar": "Enviar solicitud",
+    "errorEnviar": "No se pudo enviar la solicitud. Intente de nuevo.",
+    "misSolicitudes": "Mis solicitudes",
+    "sinSolicitudes": "Aún no tiene solicitudes de atención.",
+    "categorias": {
+      "duda_tramite": "Duda sobre un trámite",
+      "problema_tecnico": "Problema técnico",
+      "queja": "Queja",
+      "sugerencia": "Sugerencia",
+      "otro": "Otro"
+    },
+    "estados": {
+      "abierta": "En espera de respuesta",
+      "respondida": "Respondida",
+      "cerrada": "Cerrada"
+    },
+    "volver": "Volver a mis solicitudes",
+    "noEncontrada": "No se encontró la solicitud.",
+    "verTramite": "Ver trámite",
+    "tu": "Usted",
+    "personal": "Personal de la institución",
+    "tuMensaje": "Escriba su mensaje",
+    "enviarMensaje": "Enviar mensaje",
+    "cerrar": "Marcar como resuelta",
+    "cerrada": "Esta solicitud está cerrada. Si necesita más ayuda, abra una nueva.",
+    "ayudaInicio": "¿Tiene dudas antes de iniciar? Envíe una solicitud de atención y el personal de la institución le responderá.",
+    "irAyuda": "Ir a Atención ciudadana"
   }
 }

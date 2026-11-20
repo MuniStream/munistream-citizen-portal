@@ -192,19 +192,9 @@ export const WorkflowStartPage: React.FC = () => {
             <h3>❓ {t('workflow.need_help')}</h3>
             <div className="help-grid">
               <div className="help-card">
-                <h4>📞 {t('common.contact_support')}</h4>
-                <p>{t('workflowStart.callAssistance')}</p>
-                <span className="phone">(555) 123-4567</span>
-              </div>
-              <div className="help-card">
-                <h4>📧 {t('workflowStart.emailSupport')}</h4>
-                <p>{t('workflowStart.sendQuestionsEmail')}</p>
-                <span className="email">support@munistream.com</span>
-              </div>
-              <div className="help-card">
-                <h4>💬 {t('workflowStart.liveChat')}</h4>
-                <p>{t('workflowStart.chatWithTeam')}</p>
-                <button className="btn-secondary">{t('workflowStart.startChat')}</button>
+                <h4>{t('atencion.titulo')}</h4>
+                <p>{t('atencion.ayudaInicio')}</p>
+                <button className="btn-secondary" onClick={() => navigate('/ayuda')}>{t('atencion.irAyuda')}</button>
               </div>
             </div>
           </section>

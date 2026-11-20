@@ -168,6 +168,9 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({ isMobile = false }) =>
           </ListItemIcon>
           <ListItemText>{t('navigation.myInstances')}</ListItemText>
         </MenuItem>
+        <MenuItem onClick={() => handleNavigate('/ayuda')}>
+          <ListItemText>{t('navigation.ayuda')}</ListItemText>
+        </MenuItem>
 
         <MenuItem onClick={() => handleNavigate('/settings')}>
           <ListItemIcon>

@@ -33,6 +33,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { MainLayout } from '../components/Layout/MainLayout';
 import { workflowService } from '../services/workflowService';
 import { instanceStatus } from '../components/InstanceDetailContent/statusHelpers';
+import { PlazoTramite } from '../components/PlazoTramite/PlazoTramite';
+import type { PlazoCiudadano } from '../services/atencionService';
 
 interface WorkflowInstance {
   instance_id: string;
@@ -46,6 +48,8 @@ interface WorkflowInstance {
   progress_percentage?: number;
   context?: Record<string, any>;
   terminal_status?: string | null;
+  folio?: string | null;
+  plazo?: PlazoCiudadano | null;
 }
 
 export const MyInstancesPage: React.FC = () => {
@@ -117,10 +121,12 @@ export const MyInstancesPage: React.FC = () => {
   };
 
   const filteredInstances = instances.filter(instance => {
-    const matchesSearch = !searchQuery ||
-      instance.workflow_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      instance.workflow_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      instance.instance_id.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch = !q ||
+      instance.folio?.toLowerCase().includes(q) ||
+      instance.workflow_name?.toLowerCase().includes(q) ||
+      instance.workflow_id.toLowerCase().includes(q) ||
+      instance.instance_id.toLowerCase().includes(q);
 
     const matchesStatus = statusFilter === 'all' || instanceStatus(instance).toLowerCase() === statusFilter.toLowerCase();
 
@@ -312,9 +318,11 @@ export const MyInstancesPage: React.FC = () => {
                       />
                     </Box>
 
-                    {/* Instance ID */}
+                    {/* Official tracking folio (falls back to the short instance id) */}
                     <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {t('instances.instanceId')}: {instance.instance_id.slice(0, 8)}...
+                      {instance.folio
+                        ? <>{t('instances.folio')}: <strong>{instance.folio}</strong></>
+                        : <>{t('instances.instanceId')}: {instance.instance_id.slice(0, 8)}...</>}
                     </Typography>
 
                     {/* Current Step */}
@@ -340,6 +348,13 @@ export const MyInstancesPage: React.FC = () => {
                           value={instance.progress_percentage}
                           sx={{ height: 8, borderRadius: 4 }}
                         />
+                      </Box>
+                    )}
+
+                    {/* Legal resolution term */}
+                    {instance.plazo && (
+                      <Box sx={{ mt: 2 }}>
+                        <PlazoTramite plazo={instance.plazo} />
                       </Box>
                     )}
 
