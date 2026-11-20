@@ -236,9 +236,15 @@ class WorkflowService {
   }
 
   // Submit citizen data for a workflow step (requires authentication)
-  async submitCitizenData(instanceId: string, data: FormData | Record<string, any>): Promise<DataSubmissionResponse> {
+  async submitCitizenData(
+    instanceId: string,
+    data: FormData | Record<string, any>,
+    options: { clientSubmissionId?: string } = {}
+  ): Promise<DataSubmissionResponse> {
     const searchParams = new URLSearchParams();
     addLocaleToParams(searchParams);
+    // Lets the backend recognise a replay from the offline outbox.
+    if (options.clientSubmissionId) searchParams.set('client_submission_id', options.clientSubmissionId);
 
     // Get valid token
     const keycloakService = (await import('./keycloak')).default;

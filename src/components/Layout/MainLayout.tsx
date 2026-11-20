@@ -8,6 +8,7 @@ import { Hero } from '../Hero/Hero';
 import { HtmlInjector } from '../HtmlInjector/HtmlInjector';
 import { useThemeConfig } from '../../contexts/ThemeContext';
 import { getOverride } from '../../overrides';
+import { EstadoConexion } from '../EstadoConexion/EstadoConexion';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -43,6 +44,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
           ? <HtmlInjector src="/themes/components/header.html" />
           : <Header {...(headerProps || {})} />
       }
+      {/* No signal / captures waiting to be sent (offline outbox) */}
+      <EstadoConexion />
       {showHero && (
         TsxHero
           ? <TsxHero />

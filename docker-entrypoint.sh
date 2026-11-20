@@ -53,6 +53,38 @@ replace_env_vars() {
 # Replace environment variables
 replace_env_vars
 
+# PWA manifest, per tenant: the `pwa` section of the theme when present,
+# otherwise the tenant name from the environment. Icons are served from the
+# theme assets (/themes/assets/...).
+generate_manifest() {
+    node -e "
+        const fs = require('fs');
+        let theme = {};
+        try { theme = JSON.parse(fs.readFileSync('/usr/share/nginx/html/themes/theme-config.json', 'utf8')); } catch (e) {}
+        const pwa = theme.pwa || {};
+        const colors = theme.colors || {};
+        const name = pwa.name || process.env.VITE_TENANT_NAME || 'Portal ciudadano';
+        const icons = (pwa.icons || [])
+            .filter((i) => fs.existsSync('/usr/share/nginx/html/themes/assets/' + i.src))
+            .map((i) => ({ src: '/themes/assets/' + i.src, sizes: i.sizes, type: 'image/png', purpose: i.purpose || 'any' }));
+        const manifest = {
+            name,
+            short_name: pwa.short_name || name,
+            description: pwa.description || name,
+            lang: 'es-MX',
+            start_url: '/',
+            scope: '/',
+            display: 'standalone',
+            theme_color: pwa.theme_color || colors.primary_dark || '#611232',
+            background_color: pwa.background_color || colors.background_paper || '#ffffff',
+            icons,
+        };
+        fs.writeFileSync('/usr/share/nginx/html/manifest.webmanifest', JSON.stringify(manifest, null, 2));
+        console.log('PWA manifest written for ' + name + ' (' + icons.length + ' icons)');
+    "
+}
+generate_manifest
+
 echo "Configuration complete. Starting nginx..."
 
 # Start nginx

@@ -770,5 +770,17 @@
     "cerrada": "Esta solicitud está cerrada. Si necesita más ayuda, abra una nueva.",
     "ayudaInicio": "¿Tiene dudas antes de iniciar? Envíe una solicitud de atención y el personal de la institución le responderá.",
     "irAyuda": "Ir a Atención ciudadana"
+  },
+  "offline": {
+    "sinSenal": "Sin conexión. Puede seguir llenando los trámites que ya tenía abiertos; lo que envíe se guardará en este dispositivo.",
+    "sinSenalPendientes_one": "Sin conexión. {{count}} captura guardada en este dispositivo se enviará en cuanto haya señal.",
+    "sinSenalPendientes_other": "Sin conexión. {{count}} capturas guardadas en este dispositivo se enviarán en cuanto haya señal.",
+    "pendientes_one": "{{count}} captura pendiente de enviar.",
+    "pendientes_other": "{{count}} capturas pendientes de enviar.",
+    "requiereSesion_one": "{{count}} captura pendiente: inicie sesión para enviarla.",
+    "requiereSesion_other": "{{count}} capturas pendientes: inicie sesión para enviarlas.",
+    "conError": "El último intento fue rechazado: {{error}}",
+    "enviarAhora": "Enviar ahora",
+    "iniciarSesion": "Iniciar sesión"
   }
 }

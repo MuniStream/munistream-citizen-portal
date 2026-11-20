@@ -1,4 +1,6 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { esFallaDeRed, guardar as guardarPendiente, nuevoId, onOutboxChange, pendientes, serializarForm } from '../offline/outbox';
+import { usuarioActual } from '../offline/sincronizar';
 import { workflowService } from '../services/workflowService';
 import type { WorkflowInstanceProgress } from '../services/workflowService';
 
@@ -7,6 +9,8 @@ export interface UseWorkflowFormSubmissionResult {
   isRewinding: boolean;
   submissionSuccess: string | null;
   submissionError: string | null;
+  /** The last submission was saved on the device (no signal) and is waiting to be sent. */
+  submissionQueued: boolean;
   submit: (data: Record<string, any>) => Promise<void>;
   rewind: (toTaskId: string) => Promise<void>;
   clearMessages: () => void;
@@ -92,6 +96,21 @@ export function useWorkflowFormSubmission(
   const successMs = options.successAutoClearMs ?? DEFAULT_SUBMIT_CLEAR_MS;
   const rewindMs = options.rewindAutoClearMs ?? DEFAULT_REWIND_CLEAR_MS;
 
+  // A capture queued offline: once the outbox sends it, drop the "saved on
+  // this device" notice and reload the request to show the next step.
+  const [enColaLocal, setEnColaLocal] = useState(false);
+  useEffect(() => {
+    if (!enColaLocal || !instanceId) return;
+    return onOutboxChange(async () => {
+      const quedan = (await pendientes().catch(() => [])).some((e) => e.instanceId === instanceId);
+      if (!quedan) {
+        setEnColaLocal(false);
+        setSubmissionSuccess(null);
+        optionsRef.current.onAfterSubmit?.();
+      }
+    });
+  }, [enColaLocal, instanceId]);
+
   const clearMessages = useCallback(() => {
     setSubmissionSuccess(null);
     setSubmissionError(null);
@@ -123,21 +142,61 @@ export function useWorkflowFormSubmission(
 
         let response;
         let defaultMessage = 'Datos enviados exitosamente';
+        let enCola = false;
+
+        // One captured step can only be queued once.
+        const yaEnCola = (await pendientes().catch(() => [])).some(
+          (e) => e.instanceId === id && e.stepId === taskId
+        );
+        if (yaEnCola) {
+          throw new Error('Este paso ya está guardado y se enviará en cuanto haya conexión.');
+        }
+
+        // Every submission goes through here: online it is sent; without
+        // signal it is stored in the outbox with an id the backend uses to
+        // ignore a replay, and sent when the device is back online.
+        const clientSubmissionId = nuevoId();
+        const enviar = async (body: FormData | Record<string, any>) => {
+          const owner = usuarioActual();
+          if (owner && !navigator.onLine) {
+            enCola = true;
+          } else {
+            try {
+              return await workflowService.submitCitizenData(id, body, { clientSubmissionId });
+            } catch (err) {
+              if (!owner || !esFallaDeRed(err)) throw err;
+              enCola = true;
+            }
+          }
+          await guardarPendiente({
+            id: clientSubmissionId,
+            owner: owner!,
+            instanceId: id,
+            stepId: taskId,
+            workflowName: (inst as any)?.workflow_name,
+            kind: body instanceof FormData ? 'form' : 'json',
+            json: body instanceof FormData ? undefined : body,
+            form: body instanceof FormData ? serializarForm(body) : undefined,
+            createdAt: new Date().toISOString(),
+            attempts: 0,
+          });
+          return { success: true, message: 'Sin conexión: su captura quedó guardada en este dispositivo y se enviará automáticamente en cuanto haya señal.' } as any;
+        };
 
         if (waitingFor === 'assertion_review') {
           defaultMessage = 'Verificación enviada exitosamente';
-          response = await workflowService.submitCitizenData(id, {
+          response = await enviar({
             [`${taskId}_input`]: data,
           });
         } else if (waitingFor === 'confirmation') {
           defaultMessage = 'Confirmación registrada exitosamente';
-          response = await workflowService.submitCitizenData(id, data);
+          response = await enviar(data);
         } else if (useJsonFlag) {
           const { _use_json: _ignored, ...rest } = data as Record<string, any>;
-          response = await workflowService.submitCitizenData(id, rest);
+          response = await enviar(rest);
         } else if (waitingFor === 'entity_selection' || hasEntityFields) {
           defaultMessage = 'Selecciones enviadas exitosamente';
-          response = await workflowService.submitCitizenData(id, {
+          response = await enviar({
             [`${taskId}_selections`]: data,
           });
         } else {
@@ -156,7 +215,7 @@ export function useWorkflowFormSubmission(
                   : [value];
               }
             });
-            response = await workflowService.submitCitizenData(id, {
+            response = await enviar({
               [`${taskId}_selections`]: transformedSelections,
             });
           } else {
@@ -189,11 +248,15 @@ export function useWorkflowFormSubmission(
                 }
               });
             }
-            response = await workflowService.submitCitizenData(id, formData);
+            response = await enviar(formData);
           }
         }
 
-        if (response?.success) {
+        if (response?.success && enCola) {
+          // Nothing reached the server yet: no step transition to wait for.
+          setSubmissionSuccess(response.message);
+          setEnColaLocal(true);
+        } else if (response?.success) {
           setSubmissionSuccess(response.message || defaultMessage);
           // Esperar a que el backend efectivamente avance el step antes de
           // pedirle a la UI que recargue. Sin esto, el executor async puede
@@ -249,6 +312,7 @@ export function useWorkflowFormSubmission(
   );
 
   return {
+    submissionQueued: enColaLocal,
     isSubmitting,
     isRewinding,
     submissionSuccess,

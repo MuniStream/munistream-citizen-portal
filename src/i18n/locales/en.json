@@ -770,5 +770,17 @@
     "cerrada": "This request is closed. If you need more help, open a new one.",
     "ayudaInicio": "Questions before you start? Send a support request and staff will reply.",
     "irAyuda": "Go to Citizen support"
+  },
+  "offline": {
+    "sinSenal": "No connection. You can keep filling the requests you already had open; what you submit is saved on this device.",
+    "sinSenalPendientes_one": "No connection. {{count}} capture saved on this device will be sent as soon as there is signal.",
+    "sinSenalPendientes_other": "No connection. {{count}} captures saved on this device will be sent as soon as there is signal.",
+    "pendientes_one": "{{count}} capture waiting to be sent.",
+    "pendientes_other": "{{count}} captures waiting to be sent.",
+    "requiereSesion_one": "{{count}} capture waiting: sign in to send it.",
+    "requiereSesion_other": "{{count}} captures waiting: sign in to send them.",
+    "conError": "The last attempt was rejected: {{error}}",
+    "enviarAhora": "Send now",
+    "iniciarSesion": "Sign in"
   }
 }
