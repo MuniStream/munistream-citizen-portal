@@ -404,6 +404,9 @@ export interface WorkflowInstanceProgress {
   // Folio oficial de seguimiento (p. ej. "C-T003-2026-0042-B7K"). Presente una
   // vez que el trámite lo emite; marca el inicio oficial de la atención.
   folio?: string | null;
+  // Plazo legal de resolución tal como lo ve el ciudadano (fecha compromiso,
+  // días transcurridos, si va en tiempo). Ver services/sla.py del backend.
+  plazo?: import('./atencionService').PlazoCiudadano | null;
   // Por qué murió el trámite, cuando `status` es 'failed'. Sin esto la pantalla
   // solo puede decir "Error" y el ciudadano no sabe si le toca corregir algo.
   error_message?: string | null;

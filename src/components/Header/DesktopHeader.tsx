@@ -160,8 +160,14 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
                 >
                   {t('navigation.myInstances')}
                 </Button>
+                <Button component={Link} to="/ayuda" color="inherit" sx={{ textTransform: 'none' }}>
+                  {t('navigation.ayuda')}
+                </Button>
               </>
             )}
+            <Button component={Link} to="/indicadores" color="inherit" sx={{ textTransform: 'none' }}>
+              {t('navigation.indicadores')}
+            </Button>
           </Box>
 
           {/* Right Actions */}

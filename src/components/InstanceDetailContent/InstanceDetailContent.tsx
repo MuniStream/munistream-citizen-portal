@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { PlazoTramite } from '../PlazoTramite/PlazoTramite';
+import { CalificacionTramite } from '../CalificacionTramite/CalificacionTramite';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { workflowService, type WorkflowInstanceProgress } from '../../services/workflowService';
@@ -297,6 +299,16 @@ export const InstanceDetailContent: React.FC = () => {
         </section>
 
         {/* Active form section — dispatcher for all waiting_for cases */}
+        {/* Legal resolution term: visible whenever the clock is running */}
+        {instance.plazo && !instance.plazo.en_captura && !instance.plazo.sin_plazo && (
+          <section className="current-status-section">
+            <div className="container">
+              <h3>{t('plazo.titulo')}</h3>
+              <PlazoTramite plazo={instance.plazo} variant="full" />
+            </div>
+          </section>
+        )}
+
         <ActiveWorkflowForm
           instance={instance}
           isSubmitting={isSubmittingData}
@@ -312,6 +324,11 @@ export const InstanceDetailContent: React.FC = () => {
           <EmittedEntitiesSection entities={emittedEntities} />
         )}
 
+        {/* Rating of the resolved request */}
+        {instance.status === 'completed' && id && (
+          <div className="container"><CalificacionTramite instanceId={id} /></div>
+        )}
+
         {/* Admin review notice (static; no live timer) */}
         {showProcessing && waitingForAdmin && (
           <section className="current-status-section">
@@ -320,8 +337,7 @@ export const InstanceDetailContent: React.FC = () => {
                 <h2>{t('instanceDetail.underReviewTitle')}</h2>
                 <div className="review-details">
                   <p>{t('instanceDetail.underReviewBody')}</p>
-                  <p><strong>{t('instanceDetail.folio')}:</strong> <code>{id}</code></p>
-                  <p><strong>{t('instanceDetail.resolutionTime')}:</strong> {t('instanceDetail.resolutionTimeValue')}</p>
+                  <p><strong>{t('instanceDetail.folio')}:</strong> <code>{instance.folio || id}</code></p>
                   <p className="review-hint">{t('instanceDetail.underReviewHint')}</p>
                 </div>
               </div>

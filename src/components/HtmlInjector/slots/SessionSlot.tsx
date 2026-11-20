@@ -123,6 +123,12 @@ export const SessionSlot: React.FC = () => {
             {t('navigation.myProfile')}
           </button>
           <button
+            onClick={() => { setMenuOpen(false); navigate('/ayuda'); }}
+            style={menuItemStyle}
+          >
+            {t('navigation.ayuda')}
+          </button>
+          <button
             onClick={() => { setMenuOpen(false); logout(); }}
             style={{ ...menuItemStyle, color: '#d32f2f' }}
           >

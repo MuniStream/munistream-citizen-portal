@@ -86,3 +86,8 @@ export type { CustomFieldRenderer, CustomFieldRenderArgs } from '../components/c
 export { CatalogAutocomplete } from '../components/CatalogAutocomplete';
 // React (para componentes de tenant que no lo importan directamente).
 export { default as React } from 'react';
+
+// Citizen service (legal term, rating of resolved requests)
+export { PlazoTramite } from '../components/PlazoTramite/PlazoTramite';
+export { CalificacionTramite } from '../components/CalificacionTramite/CalificacionTramite';
+export type { PlazoCiudadano } from '../services/atencionService';

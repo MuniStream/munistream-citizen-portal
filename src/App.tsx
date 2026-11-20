@@ -14,6 +14,9 @@ import { EntityDetailPage } from './pages/EntityDetailPage';
 import { VerificationPage } from './pages/VerificationPage';
 import { NotificationPreferencesPage } from './pages/NotificationPreferencesPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { IndicadoresPage } from './pages/IndicadoresPage';
+import { AyudaPage } from './pages/AyudaPage';
+import { SolicitudAtencionPage } from './pages/SolicitudAtencionPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './App.css';
@@ -41,6 +44,7 @@ function App() {
             <Route path="/start/:workflowId" element={<WorkflowStartPage />} />
             <Route path="/instances/:id" element={<InstanceDetail />} />
             <Route path="/verify/:entityId" element={<VerificationPage />} />
+            <Route path="/indicadores" element={<IndicadoresPage />} />
             
             {/* Protected routes */}
             <Route 
@@ -92,6 +96,23 @@ function App() {
               }
             />
             
+            <Route
+              path="/ayuda"
+              element={
+                <ProtectedRoute>
+                  <AyudaPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ayuda/:id"
+              element={
+                <ProtectedRoute>
+                  <SolicitudAtencionPage />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Default redirect to public catalog */}
             <Route path="/" element={<Navigate to="/services" replace />} />
             
