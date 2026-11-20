@@ -146,6 +146,10 @@ class KeycloakService {
       // Build initialization config
       const config: any = {
         pkceMethod: 'S256',
+        // Inside the native app (Capacitor) keycloak-js would switch to its
+        // Cordova adapter and send redirect_uri=http://localhost, which the
+        // realm rejects. The app is the same web portal, so keep the web flow.
+        adapter: 'default',
         checkLoginIframe: false, // Disable iframe check to avoid X-Frame-Options issues
         enableLogging: true,
         // Always check SSO to detect existing sessions in Keycloak
@@ -167,6 +171,14 @@ class KeycloakService {
       } else {
         console.log('[Keycloak] No auth callback or tokens, initializing clean');
         // No tokens and no callback - just initialize
+      }
+
+      // Without signal, check-sso would navigate the whole app to the auth
+      // server and the citizen would get the browser's offline page instead
+      // of the portal. Start without it: a session this tab already had is
+      // kept from the stored tokens and refreshed when the device is online.
+      if (!navigator.onLine) {
+        delete config.onLoad;
       }
 
       // Initialize Keycloak with timeout handling
@@ -266,7 +278,7 @@ class KeycloakService {
 
     // Refresh token when it expires in less than 60 seconds
     setInterval(async () => {
-      if (this.keycloak?.authenticated) {
+      if (this.keycloak?.authenticated && navigator.onLine) {
         try {
           await this.refreshToken(60);
         } catch (error) {
@@ -277,6 +289,13 @@ class KeycloakService {
 
     // Handle token expiry
     this.keycloak.onTokenExpired = async () => {
+      // Without signal the refresh cannot succeed; logging out would take the
+      // citizen to a sign-in page that cannot load and lose the form they are
+      // filling. Retry when the device is back online instead.
+      if (!navigator.onLine) {
+        window.addEventListener('online', () => { void this.refreshToken().catch(() => this.logout()); }, { once: true });
+        return;
+      }
       try {
         await this.refreshToken();
       } catch (error) {
@@ -354,6 +373,11 @@ class KeycloakService {
    */
   async logout(): Promise<void> {
     this.clearTokens();
+    // The service worker keeps API reads for offline use; they are this
+    // citizen's data and must not outlive the session on a shared device.
+    if ('caches' in window) {
+      await caches.delete('api').catch(() => undefined);
+    }
 
     if (this.keycloak?.authenticated) {
       await this.keycloak.logout({

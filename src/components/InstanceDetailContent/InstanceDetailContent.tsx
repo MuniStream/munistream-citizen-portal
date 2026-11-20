@@ -46,6 +46,7 @@ export const InstanceDetailContent: React.FC = () => {
     isSubmitting: isSubmittingData,
     isRewinding,
     submissionSuccess,
+    submissionQueued,
     submissionError,
     submit: handleDataSubmission,
     rewind: handleRewindToTask,
@@ -314,6 +315,7 @@ export const InstanceDetailContent: React.FC = () => {
           isSubmitting={isSubmittingData}
           isRewinding={isRewinding}
           submissionSuccess={submissionSuccess}
+          submissionQueued={submissionQueued}
           profileValues={profileValues}
           onSubmit={handleDataSubmission}
           onRewind={handleRewindToTask}

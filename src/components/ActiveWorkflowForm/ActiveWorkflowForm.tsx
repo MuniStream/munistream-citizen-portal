@@ -34,6 +34,8 @@ export interface ActiveFormCardSlot {
   successTitle: string;
   /** Backend message; when truthy the caller should show the success block instead of the body. */
   successMessage: string | null;
+  /** The success notice is for a capture saved offline, not yet sent. */
+  queued: boolean;
 }
 
 export interface ActiveWorkflowFormProps {
@@ -41,6 +43,8 @@ export interface ActiveWorkflowFormProps {
   isSubmitting: boolean;
   isRewinding: boolean;
   submissionSuccess: string | null;
+  /** Saved on the device without signal; nothing reached the server yet. */
+  submissionQueued?: boolean;
   profileValues?: Record<string, any>;
   onSubmit: (data: Record<string, any>) => void | Promise<void>;
   onRewind: (toTaskId: string) => void | Promise<void>;
@@ -445,7 +449,7 @@ function DefaultCard({
             <div className="success-message">
               <h4>{slot.successTitle}</h4>
               <p>{slot.successMessage || successFallback}</p>
-              <p>Su solicitud continuará procesándose.</p>
+              {!slot.queued && <p>Su solicitud continuará procesándose.</p>}
             </div>
           ) : (
             slot.body
@@ -467,8 +471,9 @@ export const ActiveWorkflowForm: React.FC<ActiveWorkflowFormProps> = (props) => 
     waitingFor: meta.waitingFor,
     title: meta.title,
     accentColor: meta.accentColor,
-    successTitle: meta.successTitle,
+    successTitle: props.submissionQueued ? 'Guardado en este dispositivo' : meta.successTitle,
     successMessage: props.submissionSuccess,
+    queued: !!props.submissionQueued,
   };
 
   if (props.renderCard) {
