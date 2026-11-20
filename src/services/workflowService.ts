@@ -401,6 +401,9 @@ export interface WorkflowInstanceProgress {
   // on demand via getEntityDetail(). Present once the trámite has emitted them.
   emitted_entities?: EmittedEntity[];
   estimated_completion?: string;
+  // Folio oficial de seguimiento (p. ej. "C-T003-2026-0042-B7K"). Presente una
+  // vez que el trámite lo emite; marca el inicio oficial de la atención.
+  folio?: string | null;
   // Por qué murió el trámite, cuando `status` es 'failed'. Sin esto la pantalla
   // solo puede decir "Error" y el ciudadano no sabe si le toca corregir algo.
   error_message?: string | null;
